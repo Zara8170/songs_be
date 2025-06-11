@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 
   servlet:
     encoding:
@@ -31,11 +31,14 @@ spring:
     #    defer-datasource-initialization: true # true일시, DataSource 초기화 지연
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect # Hibernate Dialect 설정
+        dialect: org.hibernate.dialect.PostgreSQLDialect # Hibernate Dialect 설정
         format_sql: true # SQL 포맷팅
         highlight_sql: true # SQL 하이라이트 출력
         use_sql_comments: true # JPQL SQL 주석 사용
         default_batch_fetch_size: 100 # 기본 배치 크기 설정
+        jdbc:
+          lob:
+            non_contextual_creation: true
   #
   #  sql:
   #    init:

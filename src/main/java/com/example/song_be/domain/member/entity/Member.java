@@ -33,7 +33,7 @@ public class Member extends BaseEntity {
     private String phone;
 
     @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "member_role_list", joinColumns = @JoinColumn(name = "email"))
+    @CollectionTable(name = "member_role_list", joinColumns = @JoinColumn(name = "id"))
     @Column(name = "role")
     @Builder.Default
     private List<MemberRole> memberRoleList = new ArrayList<>();
