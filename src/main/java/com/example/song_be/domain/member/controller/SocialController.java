@@ -32,40 +32,41 @@ public class SocialController {
     private final SocialService socialService;
     private final JwtProps jwtProps;
 
-    @Operation(summary = "카카오 액세스 토큰 획득", description = "카카오 인증 코드를 사용하여 카카오 액세스 토큰을 가져옵니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "토큰 획득 성공",
-                    content = {@Content(mediaType = "text/plain",
-                            schema = @Schema(type = "string"))}),
-            @ApiResponse(responseCode = "400", description = "유효하지 않은 인증 코드"),
-            @ApiResponse(responseCode = "500", description = "서버 오류")
-    })
-    @GetMapping("/api/member/kakao/token")
-    public String getKakaoAccessToken(@Parameter(description = "카카오 인증 코드", required = true)
-                                      String code) {
-        log.info("getKakaoAccessToken code: {}", code);
+//    @Operation(summary = "카카오 액세스 토큰 획득", description = "카카오 인증 코드를 사용하여 카카오 액세스 토큰을 가져옵니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "토큰 획득 성공",
+//                    content = {@Content(mediaType = "text/plain",
+//                            schema = @Schema(type = "string"))}),
+//            @ApiResponse(responseCode = "400", description = "유효하지 않은 인증 코드"),
+//            @ApiResponse(responseCode = "500", description = "서버 오류")
+//    })
+//    @GetMapping("/api/member/kakao/token")
+//    public String getKakaoAccessToken(@Parameter(description = "카카오 인증 코드", required = true)
+//                                      String code) {
+//        log.info("getKakaoAccessToken code: {}", code);
+//
+//        return socialService.getKakaoAccessToken(code);
+//    }
+//
+//    @Operation(summary = "카카오 사용자 정보 조회", description = "카카오 액세스 토큰을 사용하여 사용자 정보를 가져오고 로그인 처리합니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "사용자 정보 조회 및 로그인 성공",
+//                    content = { @Content(mediaType = "application/json",
+//                            schema = @Schema(implementation = LoginResponseDTO.class)) }),
+//            @ApiResponse(responseCode = "400", description = "유효하지 않은 액세스 토큰"),
+//            @ApiResponse(responseCode = "404", description = "사용자 정보를 찾을 수 없음"),
+//            @ApiResponse(responseCode = "500", description = "서버 오류")
+//    })
 
-        return socialService.getKakaoAccessToken(code);
-    }
-
-    @Operation(summary = "카카오 사용자 정보 조회", description = "카카오 액세스 토큰을 사용하여 사용자 정보를 가져오고 로그인 처리합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "사용자 정보 조회 및 로그인 성공",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = LoginResponseDTO.class)) }),
-            @ApiResponse(responseCode = "400", description = "유효하지 않은 액세스 토큰"),
-            @ApiResponse(responseCode = "404", description = "사용자 정보를 찾을 수 없음"),
-            @ApiResponse(responseCode = "500", description = "서버 오류")
-    })
-    @GetMapping("/api/member/kakao")
-    public ResponseEntity<?> getMemberFromKakao(String accessToken, HttpServletResponse response) {
-        log.info("getMemberFromKakao accessToken: {}", accessToken);
-
-        MemberDTO memberDTO = socialService.getKakaoMember(accessToken);
-        Map<String, Object> loginClaims = memberService.getSocialClaims(memberDTO);
-
-        return ResponseEntity.ok(this.getSocialLoginResponseDTO(response, loginClaims));
-    }
+//    @GetMapping("/api/member/kakao")
+//    public ResponseEntity<?> getMemberFromKakao(String accessToken, HttpServletResponse response) {
+//        log.info("getMemberFromKakao accessToken: {}", accessToken);
+//
+//        MemberDTO memberDTO = socialService.getKakaoMember(accessToken);
+//        Map<String, Object> loginClaims = memberService.getSocialClaims(memberDTO);
+//
+//        return ResponseEntity.ok(this.getSocialLoginResponseDTO(response, loginClaims));
+//    }
 
 
     // 구글 access token 받기
@@ -88,71 +89,70 @@ public class SocialController {
 
     }
 
-    // 페이스북 access token 받기
-    @GetMapping("/api/member/facebook/token")
-    public String getFacebookAccessToken(String code) {
-        log.info("getFacebookAccessToken code: {}", code);
+//    // 페이스북 access token 받기
+//    @GetMapping("/api/member/facebook/token")
+//    public String getFacebookAccessToken(String code) {
+//        log.info("getFacebookAccessToken code: {}", code);
+//
+//        return socialService.getFacebookAccessToken(code);
+//    }
+//
+//    // 페이스북 로그인 -> 유저정보 받기 + JWT 토큰 발급, cookie에 set
+//    @GetMapping("/api/member/facebook")
+//    public ResponseEntity<?> getMemberFromFacebook(String accessToken, HttpServletResponse response) {
+//        log.info("getMemberFromFacebook accessToken: {}", accessToken);
+//
+//        MemberDTO memberDTO = socialService.getFacebookMember(accessToken);
+//        Map<String, Object> claims = memberService.getSocialClaims(memberDTO);
+//
+//        return ResponseEntity.ok(this.getSocialLoginResponseDTO(response, claims));
+//    }
 
-        return socialService.getFacebookAccessToken(code);
-    }
-
-    // 페이스북 로그인 -> 유저정보 받기 + JWT 토큰 발급, cookie에 set
-    @GetMapping("/api/member/facebook")
-    public ResponseEntity<?> getMemberFromFacebook(String accessToken, HttpServletResponse response) {
-        log.info("getMemberFromFacebook accessToken: {}", accessToken);
-
-        MemberDTO memberDTO = socialService.getFacebookMember(accessToken);
-        Map<String, Object> claims = memberService.getSocialClaims(memberDTO);
-
-        return ResponseEntity.ok(this.getSocialLoginResponseDTO(response, claims));
-
-    }
-
-    // 네이버 access token 받기
-    @GetMapping("/api/member/naver/token")
-    String getNaverAccessToken(String code, String state) {
-        log.info("code: " + code);
-        log.info("state: " + state);
-
-        return socialService.getNaverAccessToken(code, state);
-    }
-
-
-    // 네이버 로그인 -> 유저정보 받기 + JWT 토큰 발급
-    @GetMapping("/api/member/naver")
-    public ResponseEntity<?> getMemberFromNaver(String accessToken, HttpServletResponse response) {
-        log.info("getMemberFromNaver accessToken: {}", accessToken);
-
-        MemberDTO memberDTO = socialService.getNaverMember(accessToken);
-        Map<String, Object> claims = memberService.getSocialClaims(memberDTO);
-
-        return ResponseEntity.ok(this.getSocialLoginResponseDTO(response, claims));
-    }
-
-    // github accesstoken 요청
-    @GetMapping("/api/member/github/token")
-    public String getGithubAccessToken(String code) {
-        log.info("getGithubAccessToken code: {}", code);
-
-        String githubAccessToken = socialService.getGithubAccessToken(code);
-        log.info("githubAccessToken: " + githubAccessToken);
-
-        return githubAccessToken;
-    }
-
-
-    // github 사용자 정보 받기
-    @GetMapping("/api/member/github")
-    public ResponseEntity<?> getMemberFromGithub(String accessToken, HttpServletResponse response) {
-        log.info("getMemberFromGithub accessToken: {}", accessToken);
-
-        MemberDTO memberDTO = socialService.getGithubMember(accessToken);
-        Map<String, Object> claims = memberService.getSocialClaims(memberDTO);
-
-        return ResponseEntity.ok(this.getSocialLoginResponseDTO(response, claims));
-    }
-
-
+//    // 네이버 access token 받기
+//    @GetMapping("/api/member/naver/token")
+//    String getNaverAccessToken(String code, String state) {
+//        log.info("code: " + code);
+//        log.info("state: " + state);
+//
+//        return socialService.getNaverAccessToken(code, state);
+//    }
+//
+//
+//    // 네이버 로그인 -> 유저정보 받기 + JWT 토큰 발급
+//    @GetMapping("/api/member/naver")
+//    public ResponseEntity<?> getMemberFromNaver(String accessToken, HttpServletResponse response) {
+//        log.info("getMemberFromNaver accessToken: {}", accessToken);
+//
+//        MemberDTO memberDTO = socialService.getNaverMember(accessToken);
+//        Map<String, Object> claims = memberService.getSocialClaims(memberDTO);
+//
+//        return ResponseEntity.ok(this.getSocialLoginResponseDTO(response, claims));
+//    }
+//
+//    // github accesstoken 요청
+//    @GetMapping("/api/member/github/token")
+//    public String getGithubAccessToken(String code) {
+//        log.info("getGithubAccessToken code: {}", code);
+//
+//        String githubAccessToken = socialService.getGithubAccessToken(code);
+//        log.info("githubAccessToken: " + githubAccessToken);
+//
+//        return githubAccessToken;
+//    }
+//
+//
+//    // github 사용자 정보 받기
+//    @GetMapping("/api/member/github")
+//    public ResponseEntity<?> getMemberFromGithub(String accessToken, HttpServletResponse response) {
+//        log.info("getMemberFromGithub accessToken: {}", accessToken);
+//
+//        MemberDTO memberDTO = socialService.getGithubMember(accessToken);
+//        Map<String, Object> claims = memberService.getSocialClaims(memberDTO);
+//
+//        return ResponseEntity.ok(this.getSocialLoginResponseDTO(response, claims));
+//    }
+//
+//
     /**
      * 소셜 로그인 성공시, refreshToken(in cookie), accessToken, email, name, roles 반환
      *

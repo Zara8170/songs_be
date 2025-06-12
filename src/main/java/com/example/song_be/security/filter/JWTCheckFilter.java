@@ -53,7 +53,11 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         ) {
             return true;
         }
-        // "/api/product/list" api는 추가하지 말것!
+
+        if(path.startsWith("/api/song/list") || path.startsWith("/api/song/{id}")
+        || path.startsWith("/api/song")) {
+            return true;
+        }
 
         // -----
         // health check

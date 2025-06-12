@@ -31,7 +31,7 @@ spring:
     #    defer-datasource-initialization: true # true일시, DataSource 초기화 지연
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect # Hibernate Dialect 설정
+#        dialect: org.hibernate.dialect.MySQLDialect # Hibernate Dialect 설정
         format_sql: true # SQL 포맷팅
         highlight_sql: true # SQL 하이라이트 출력
         use_sql_comments: true # JPQL SQL 주석 사용
@@ -39,12 +39,6 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
-  #
-  #  sql:
-  #    init:
-  #      platform: mysql # SQL 초기화 플랫폼 (mysql, h2, postgresql, oracle, sqlserver)
-  #      data-locations: classpath:sql/data.sql # ddl-auto가 create, create-drop, update일 경우에만 해당, validate/none일 경우 무시됨
-  #      mode: always # SQL 초기화 모드 (always, never, embedded, embedded-always)
 
 app:
   props:
@@ -69,15 +63,15 @@ spring:
     activate:
       on-profile: local
 
-  data:
-    mongodb:
-      url: ${LOCAL_MONGODB_URL}
+#  data:
+#    mongodb:
+#      url: ${LOCAL_MONGODB_URL}
 
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url: ${LOCAL_POSTSQL_URL}
-    username: ${LOCAL_POSTSQL_USERNAME}
-    password: ${LOCAL_POSTSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${LOCAL_MYSQL_URL}
+    username: ${LOCAL_MYSQL_USERNAME}
+    password: ${LOCAL_MYSQL_PASSWORD}
 
 app:
   props:
@@ -107,9 +101,9 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${PROD_POSTSQL_URL}
-    username: ${PROD_POSTSQL_USERNAME}
-    password: ${PROD_POSTSQL_PASSWORD}
+    url: ${PROD_MYSQL_URL}
+    username: ${PROD_MYSQL_USERNAME}
+    password: ${PROD_MYSQL_PASSWORD}
     hikari:
       max-lifetime: 600000 # 최대 수명 (밀리초)
       idle-timeout: 300000 # 유휴 시간 (밀리초)

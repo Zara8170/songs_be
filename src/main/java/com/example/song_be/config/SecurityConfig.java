@@ -52,45 +52,20 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(
                 authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers(new AntPathRequestMatcher("/api/email/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/phone/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/shop/**")).permitAll()
                         // /api/admin/join, /api/admin/login,logout 모두 접근 가능
                         .requestMatchers(new AntPathRequestMatcher("/api/member/join")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/member/login")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/member/logout")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/member/refresh")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/kakao/token")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/kakao")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/member/google/token")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/member/google")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/naver/token")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/naver")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/github/token")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/github")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/member/me")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/check-email/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/category/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/product/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/content/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/coupon/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/test/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/chat/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/crawl/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/likes/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/community/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/event/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/sales/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/static/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/song/**")).permitAll()
                         // /api/admin/join, /api/admin/login,logout 모두 접근 가능
                         .requestMatchers(new AntPathRequestMatcher("/api/admin/member/join")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/admin/member/login")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/admin/member/logout")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/admin/member/refresh")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/image/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/admin/coupon")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/admin/product/excel/download")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/admin/dashboard/**")).permitAll()
                         // health check
                         .requestMatchers(new AntPathRequestMatcher("/health/**")).permitAll()
                         // api path에 admin 포함되면 ROLE_ADMIN 권한이 있어야 접근 가능,
@@ -160,16 +135,8 @@ public class SecurityConfig {
 
         // 출처 설정 (모든 출처 허용)
 //        configuration.setAllowedOriginPatterns(Arrays.asList("*"));  // localhost:3000 -> 허용
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:3001",
-                "http://15.165.150.61","http://15.165.150.61:3000", "http://15.165.150.61:3001", // EC2 퍼블릭 IP 3000, 3001 포트 허용
-                "https://openapi.map.naver.com",
-                "http://luckydoki.shop:3000", "https://luckydoki.shop:3000",
-                "http://www.luckydoki.shop:3000", "https://www.luckydoki.shop:3000",
-                "http://luckydoki.shop", "https://luckydoki.shop",
-                "http://www.luckydoki.shop", "https://www.luckydoki.shop","https://www.luckydoki.shop/",
-                // admin.luckydoki.shop
-                "http://admin.luckydoki.shop", "https://admin.luckydoki.shop",
-                "http://www.admin.luckydoki.shop", "https://www.admin.luckydoki.shop"
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000", "http://localhost:3001"
         ));
         // 허용할 메서드 설정
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
