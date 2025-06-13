@@ -26,5 +26,6 @@ public class SongDTO {
     private String artist_kr;
 
     private String lyrics_original;
+    private String lyrics_yomi;
     private String lyrics_kr;
 }

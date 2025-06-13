@@ -33,6 +33,12 @@ public class Song extends BaseEntity {
     private String artist;
     private String artist_kr;
 
+    @Lob
     private String lyrics_original;
+
+    @Lob
+    private String lyrics_yomi;
+
+    @Lob
     private String lyrics_kr;
 }

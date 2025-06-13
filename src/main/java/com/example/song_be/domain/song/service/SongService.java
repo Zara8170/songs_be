@@ -31,6 +31,7 @@ public interface SongService {
                 .artist(song.getArtist())
                 .artist_kr(song.getArtist_kr())
                 .lyrics_original(song.getLyrics_original())
+                .lyrics_yomi(song.getLyrics_yomi())
                 .lyrics_kr(song.getLyrics_kr())
                 .build();
     }
@@ -48,6 +49,7 @@ public interface SongService {
                 .artist(dto.getArtist())
                 .artist_kr(dto.getArtist_kr())
                 .lyrics_original(dto.getLyrics_original())
+                .lyrics_yomi(dto.getLyrics_yomi())
                 .lyrics_kr(dto.getLyrics_kr())
                 .build();
     }
