@@ -63,6 +63,9 @@ spring:
     activate:
       on-profile: local
 
+  elasticsearch:
+    uris: ${LOCAL_ELASTICSEARCH_URIS}
+
 #  data:
 #    mongodb:
 #      url: ${LOCAL_MONGODB_URL}
@@ -90,6 +93,8 @@ spring:
   config:
     activate:
       on-profile: prod # 운영 환경
+  elasticsearch:
+    uris: ${PROD_ELASTICSEARCH_URIS}
   jpa:
     hibernate:
       ddl-auto: none # 테이블 생성 및 업데이트 전략 (create, create-drop, update, validate, none)
