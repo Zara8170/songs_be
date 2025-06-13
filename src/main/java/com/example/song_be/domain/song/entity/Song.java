@@ -34,11 +34,14 @@ public class Song extends BaseEntity {
     private String artist_kr;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String lyrics_original;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String lyrics_yomi;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String lyrics_kr;
 }
