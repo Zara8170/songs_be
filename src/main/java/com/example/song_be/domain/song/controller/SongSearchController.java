@@ -20,33 +20,24 @@ public class SongSearchController {
 
     @GetMapping("/list")
     public List<SongDTO> getSongs() {
-        Iterable<SongDocument> docs = songDocumentService.findAll();
-        return StreamSupport.stream(docs.spliterator(), false)
-                .map(this::toDTO)
-                .toList();
+        return songDocumentService.findAllDTO();
     }
 
     @GetMapping("/{id}")
     public SongDTO getSong(@PathVariable Long id) {
-        return songDocumentService.findById(id)
-                .map(this::toDTO)
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 곡이 없습니다: " + id));
+        return songDocumentService.findDTOById(id);
     }
 
-    private SongDTO toDTO(SongDocument document) {
-        return SongDTO.builder()
-                .songId(document.getSongId())
-                .tj_number(document.getTj_number())
-                .ky_number(document.getKy_number())
-                .title_kr(document.getTitle_kr())
-                .title_en(document.getTitle_en())
-                .title_jp(document.getTitle_jp())
-                .title_yomi(document.getTitle_yomi())
-                .lang(document.getLang())
-                .artist(document.getArtist())
-                .artist_kr(document.getArtist_kr())
-                .lyrics_original(document.getLyrics_original())
-                .lyrics_kr(document.getLyrics_kr())
-                .build();
+    @PostMapping
+    public SongDTO saveSong(@RequestBody SongDTO songDTO) {
+        SongDocument document = songDTO.toDocument();
+        SongDocument savedDocument = songDocumentService.save(document);
+        return songDocumentService.toDTO(savedDocument);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteSong(@PathVariable Long id) {
+        songDocumentService.deleteById(id);
     }
 }
+

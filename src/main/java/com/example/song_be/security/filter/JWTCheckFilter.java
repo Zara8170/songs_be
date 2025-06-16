@@ -48,14 +48,21 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 // admin
                 || path.startsWith("/api/admin/member/login") || path.startsWith("/api/admin/member/join")
                 || path.startsWith("/api/admin/member/refresh") || path.startsWith("/api/admin/member/logout")
-                // 회원가입관련 회원 인증
-                || path.startsWith("/api/phone/send") || path.startsWith("/api/phone/verify")
         ) {
             return true;
         }
 
         if(path.startsWith("/api/song/list") || path.startsWith("/api/song/{id}")
         || path.startsWith("/api/song")) {
+            return true;
+        }
+
+        if(path.startsWith("/api/es/song") || path.startsWith("/api/es/song/{id}")
+        || path.startsWith("/api/es/song/list")) {
+            return true;
+        }
+
+        if (path.startsWith("/api/migration/songs")) {
             return true;
         }
 

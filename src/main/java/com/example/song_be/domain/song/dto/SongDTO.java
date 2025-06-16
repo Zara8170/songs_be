@@ -1,6 +1,7 @@
 package com.example.song_be.domain.song.dto;
 
 
+import com.example.song_be.domain.song.document.SongDocument;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,4 +29,21 @@ public class SongDTO {
     private String lyrics_original;
     private String lyrics_yomi;
     private String lyrics_kr;
+
+    public SongDocument toDocument() {
+        return SongDocument.builder()
+                .songId(this.songId)
+                .tj_number(this.tj_number)
+                .ky_number(this.ky_number)
+                .title_kr(this.title_kr)
+                .title_en(this.title_en)
+                .title_jp(this.title_jp)
+                .title_yomi(this.title_yomi)
+                .lang(this.lang)
+                .artist(this.artist)
+                .artist_kr(this.artist_kr)
+                .lyrics_original(this.lyrics_original)
+                .lyrics_kr(this.lyrics_kr)
+                .build();
+    }
 }
