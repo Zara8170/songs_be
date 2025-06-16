@@ -3,6 +3,7 @@ package com.example.song_be.domain.song.service;
 import com.example.song_be.domain.song.document.SongDocument;
 import com.example.song_be.domain.song.dto.SongDTO;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +12,8 @@ public interface SongDocumentService {
     Iterable<SongDocument> findAll();
 
     Optional<SongDocument> findById(Long id);
+
+    List<SongDTO> searchByKeyword(String keyword) throws IOException;
 
     SongDocument save(SongDocument document);
 

@@ -1,15 +1,16 @@
 package com.example.song_be.domain.song.document;
 
 import com.example.song_be.domain.song.entity.Song;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.Document;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(indexName = "songs")
 public class SongDocument {
     @Id
     private Long songId;

@@ -24,8 +24,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("login Swagger")
-                .description("login 테스트 REST API")
+                .title("song Swagger")
+                .description("노래 찾기 REST API")
                 .version("1.0.0");
     }
 }

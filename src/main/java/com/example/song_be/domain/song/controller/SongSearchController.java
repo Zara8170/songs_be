@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
@@ -26,6 +27,11 @@ public class SongSearchController {
     @GetMapping("/{id}")
     public SongDTO getSong(@PathVariable Long id) {
         return songDocumentService.findDTOById(id);
+    }
+
+    @GetMapping("/search")
+    public List<SongDTO> searchSongs(@RequestParam String keyword) throws IOException {
+        return songDocumentService.searchByKeyword(keyword);
     }
 
     @PostMapping
