@@ -209,7 +209,7 @@ public class CustomControllerAdvice {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneralException(Exception e) {
         String msg = e.getMessage();
-        log.error("handleGeneralException: {}", msg);
+        log.error("handleGeneralException: {}", e.getMessage(), e);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(getErrorMessage(e.getMessage()));
     }

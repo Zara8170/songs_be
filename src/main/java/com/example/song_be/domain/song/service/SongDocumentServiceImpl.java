@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -21,7 +20,6 @@ import java.util.stream.StreamSupport;
 public class SongDocumentServiceImpl implements SongDocumentService {
 
     private final ElasticsearchClient elasticsearchClient;
-
     private static final String INDEX_NAME = "songs";
 
     @Override
@@ -39,26 +37,21 @@ public class SongDocumentServiceImpl implements SongDocumentService {
     }
 
     @Override
+    public List<SongDocument> saveAll(List<SongDocument> docs) {
+        return docs.stream().map(this::save).toList();
+    }
+
+    @Override
     public void deleteById(Long id) {
-        try {
-            elasticsearchClient.delete(d -> d
-                    .index(INDEX_NAME)
-                    .id(String.valueOf(id))
-            );
-        } catch (IOException e) {
-            throw new RuntimeException("Elasticsearch 삭제 실패", e);
-        }
+        try { elasticsearchClient.delete(d -> d.index(INDEX_NAME).id(id.toString())); }
+        catch (IOException e) { throw new RuntimeException("Elasticsearch 삭제 실패", e); }
     }
 
     @Override
     public Optional<SongDocument> findById(Long id) {
         try {
-            var response = elasticsearchClient.get(g -> g
-                            .index(INDEX_NAME)
-                            .id(String.valueOf(id)),
-                    SongDocument.class
-            );
-            return Optional.ofNullable(response.source());
+            var res = elasticsearchClient.get(g -> g.index(INDEX_NAME).id(id.toString()), SongDocument.class);
+            return Optional.ofNullable(res.source());
         } catch (IOException e) {
             return Optional.empty();
         }
@@ -67,23 +60,14 @@ public class SongDocumentServiceImpl implements SongDocumentService {
     @Override
     public Iterable<SongDocument> findAll() {
         try {
-            SearchResponse<SongDocument> response = elasticsearchClient.search(s -> s
-                            .index(INDEX_NAME)
-                            .query(q -> q.matchAll(m -> m))
-                            .size(1000), // 최대 개수 제한 필요
-                    SongDocument.class
-            );
-            return response.hits().hits().stream()
-                    .map(Hit::source)
-                    .toList();
+            SearchResponse<SongDocument> res = elasticsearchClient.search(s -> s
+                    .index(INDEX_NAME)
+                    .query(q -> q.matchAll(m -> m))
+                    .size(1000), SongDocument.class);
+            return res.hits().hits().stream().map(Hit::source).toList();
         } catch (IOException e) {
             throw new RuntimeException("Elasticsearch 전체 조회 실패", e);
         }
-    }
-
-    @Override
-    public List<SongDocument> saveAll(List<SongDocument> docs) {
-        return docs.stream().map(this::save).toList();
     }
 
     @Override
@@ -102,36 +86,25 @@ public class SongDocumentServiceImpl implements SongDocumentService {
 
     @Override
     public List<SongDTO> searchByKeyword(String keyword) throws IOException {
-        SearchResponse<SongDocument> response = elasticsearchClient.search(s -> s
+        SearchResponse<SongDocument> res = elasticsearchClient.search(s -> s
                         .index(INDEX_NAME)
                         .query(q -> q.multiMatch(m -> m
                                 .query(keyword)
-                                .fields("title_kr", "artist", "lyrics_kr")
-                        )),
-                SongDocument.class
-        );
-
-        return response.hits().hits().stream()
+                                .fields("title_kr",
+                                        "title_en",
+                                        "title_jp",
+                                        "title_yomi",
+                                        "artist",
+                                        "artist_kr",
+                                        "lyrics_original",
+                                        "lyrics_yomi",
+                                        "lyrics_kr"))),
+                SongDocument.class);
+        return res.hits().hits().stream()
                 .map(Hit::source)
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    @Override
-    public SongDTO toDTO(SongDocument document) {
-        return SongDTO.builder()
-                .songId(document.getSongId())
-                .tj_number(document.getTj_number())
-                .ky_number(document.getKy_number())
-                .title_kr(document.getTitle_kr())
-                .title_en(document.getTitle_en())
-                .title_jp(document.getTitle_jp())
-                .title_yomi(document.getTitle_yomi())
-                .lang(document.getLang())
-                .artist(document.getArtist())
-                .artist_kr(document.getArtist_kr())
-                .lyrics_original(document.getLyrics_original())
-                .lyrics_kr(document.getLyrics_kr())
-                .build();
-    }
+
 }
