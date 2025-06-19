@@ -27,6 +27,7 @@ public class Song extends BaseEntity {
     private String title_en;
     private String title_jp;
     private String title_yomi;
+    private String title_yomi_kr;
 
     private String lang;
 

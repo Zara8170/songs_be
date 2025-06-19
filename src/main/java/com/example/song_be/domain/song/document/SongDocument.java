@@ -20,11 +20,13 @@ public class SongDocument {
     private String title_en;
     private String title_jp;
     private String title_yomi;
+    private String title_yomi_kr;
     private String lang;
     private String artist;
     private String artist_kr;
     private String lyrics_original;
     private String lyrics_kr;
+    private String lyrics_yomi;
 
     public static SongDocument fromEntity(Song song) {
         return SongDocument.builder()
@@ -35,11 +37,13 @@ public class SongDocument {
                 .title_en(song.getTitle_en())
                 .title_jp(song.getTitle_jp())
                 .title_yomi(song.getTitle_yomi())
+                .title_yomi_kr(song.getTitle_yomi_kr())
                 .lang(song.getLang())
                 .artist(song.getArtist())
                 .artist_kr(song.getArtist_kr())
                 .lyrics_original(song.getLyrics_original())
                 .lyrics_kr(song.getLyrics_kr())
+                .lyrics_yomi(song.getLyrics_yomi())
                 .build();
     }
 
@@ -52,11 +56,13 @@ public class SongDocument {
                 .title_en(this.title_en)
                 .title_jp(this.title_jp)
                 .title_yomi(this.title_yomi)
+                .title_yomi_kr(this.title_yomi_kr)
                 .lang(this.lang)
                 .artist(this.artist)
                 .artist_kr(this.artist_kr)
                 .lyrics_original(this.lyrics_original)
                 .lyrics_kr(this.lyrics_kr)
+                .lyrics_yomi(this.lyrics_yomi)
                 .build();
     }
 }

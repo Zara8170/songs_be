@@ -28,6 +28,7 @@ public interface SongService {
                 .title_en(song.getTitle_en())
                 .title_jp(song.getTitle_jp())
                 .title_yomi(song.getTitle_yomi())
+                .title_yomi_kr(song.getTitle_yomi_kr())
                 .lang(song.getLang())
                 .artist(song.getArtist())
                 .artist_kr(song.getArtist_kr())
@@ -46,46 +47,13 @@ public interface SongService {
                 .title_en(dto.getTitle_en())
                 .title_jp(dto.getTitle_jp())
                 .title_yomi(dto.getTitle_yomi())
+                .title_yomi_kr(dto.getTitle_yomi_kr())
                 .lang(dto.getLang())
                 .artist(dto.getArtist())
                 .artist_kr(dto.getArtist_kr())
                 .lyrics_original(dto.getLyrics_original())
                 .lyrics_yomi(dto.getLyrics_yomi())
                 .lyrics_kr(dto.getLyrics_kr())
-                .build();
-    }
-
-    default SongDocument toDocument(Song song) {
-        return SongDocument.builder()
-                .songId(song.getSongId())
-                .tj_number(song.getTj_number())
-                .ky_number(song.getKy_number())
-                .title_kr(song.getTitle_kr())
-                .title_en(song.getTitle_en())
-                .title_jp(song.getTitle_jp())
-                .title_yomi(song.getTitle_yomi())
-                .lang(song.getLang())
-                .artist(song.getArtist())
-                .artist_kr(song.getArtist_kr())
-                .lyrics_original(song.getLyrics_original())
-                .lyrics_kr(song.getLyrics_kr())
-                .build();
-    }
-
-    default SongDTO toDTO(SongDocument document) {
-        return SongDTO.builder()
-                .songId(document.getSongId())
-                .tj_number(document.getTj_number())
-                .ky_number(document.getKy_number())
-                .title_kr(document.getTitle_kr())
-                .title_en(document.getTitle_en())
-                .title_jp(document.getTitle_jp())
-                .title_yomi(document.getTitle_yomi())
-                .lang(document.getLang())
-                .artist(document.getArtist())
-                .artist_kr(document.getArtist_kr())
-                .lyrics_original(document.getLyrics_original())
-                .lyrics_kr(document.getLyrics_kr())
                 .build();
     }
 }

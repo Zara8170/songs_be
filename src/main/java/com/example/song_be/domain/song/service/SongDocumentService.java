@@ -2,6 +2,7 @@ package com.example.song_be.domain.song.service;
 
 import com.example.song_be.domain.song.document.SongDocument;
 import com.example.song_be.domain.song.dto.SongDTO;
+import com.example.song_be.domain.song.enums.SearchTarget;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,7 +14,7 @@ public interface SongDocumentService {
 
     Optional<SongDocument> findById(Long id);
 
-    List<SongDTO> searchByKeyword(String keyword) throws IOException;
+    List<SongDTO> searchByKeyword(String keyword, SearchTarget target) throws IOException;
 
     SongDocument save(SongDocument document);
 
@@ -34,6 +35,7 @@ public interface SongDocumentService {
                 .title_en(document.getTitle_en())
                 .title_jp(document.getTitle_jp())
                 .title_yomi(document.getTitle_yomi())
+                .title_yomi_kr(document.getTitle_yomi_kr())
                 .lang(document.getLang())
                 .artist(document.getArtist())
                 .artist_kr(document.getArtist_kr())

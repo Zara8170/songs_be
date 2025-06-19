@@ -20,6 +20,7 @@ public class SongDTO {
     private String title_en;
     private String title_jp;
     private String title_yomi;
+    private String title_yomi_kr;
 
     private String lang;
 
@@ -39,10 +40,12 @@ public class SongDTO {
                 .title_en(this.title_en)
                 .title_jp(this.title_jp)
                 .title_yomi(this.title_yomi)
+                .title_yomi_kr(this.title_yomi_kr)
                 .lang(this.lang)
                 .artist(this.artist)
                 .artist_kr(this.artist_kr)
                 .lyrics_original(this.lyrics_original)
+                .lyrics_yomi(this.lyrics_yomi)
                 .lyrics_kr(this.lyrics_kr)
                 .build();
     }

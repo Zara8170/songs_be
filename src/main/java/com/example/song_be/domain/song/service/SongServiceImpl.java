@@ -55,6 +55,8 @@ public class SongServiceImpl implements SongService {
         song.setTitle_kr(songDTO.getTitle_kr());
         song.setTitle_en(songDTO.getTitle_en());
         song.setTitle_jp(songDTO.getTitle_jp());
+        song.setTitle_yomi(songDTO.getTitle_yomi());
+        song.setTitle_yomi_kr(songDTO.getTitle_yomi_kr());
         song.setLang(songDTO.getLang());
         song.setArtist(songDTO.getArtist());
         song.setArtist_kr(songDTO.getArtist_kr());

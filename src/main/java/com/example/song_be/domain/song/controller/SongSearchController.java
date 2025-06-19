@@ -2,6 +2,7 @@ package com.example.song_be.domain.song.controller;
 
 import com.example.song_be.domain.song.document.SongDocument;
 import com.example.song_be.domain.song.dto.SongDTO;
+import com.example.song_be.domain.song.enums.SearchTarget;
 import com.example.song_be.domain.song.service.SongDocumentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +31,10 @@ public class SongSearchController {
     }
 
     @GetMapping("/search")
-    public List<SongDTO> searchSongs(@RequestParam String keyword) throws IOException {
-        return songDocumentService.searchByKeyword(keyword);
+    public List<SongDTO> searchSongs(@RequestParam String keyword,
+                                     @RequestParam(defaultValue = "ALL") SearchTarget target)
+            throws IOException {
+        return songDocumentService.searchByKeyword(keyword, target);
     }
 
     @PostMapping
