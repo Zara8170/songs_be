@@ -91,11 +91,13 @@ public class SongDocumentServiceImpl implements SongDocumentService {
                         .query(q -> q.multiMatch(m -> m
                                 .query(keyword)
                                 .fields("title_kr",
+                                        "title_kr.initial",
                                         "title_en",
                                         "title_jp",
                                         "title_yomi",
                                         "artist",
                                         "artist_kr",
+                                        "artist_kr.initial",
                                         "lyrics_original",
                                         "lyrics_yomi",
                                         "lyrics_kr"))),
