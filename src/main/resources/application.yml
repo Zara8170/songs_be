@@ -63,6 +63,18 @@ spring:
 
   elasticsearch:
     uris: ${LOCAL_ELASTICSEARCH_URIS}
+    username: elastic
+    password: ${ELASTIC_PASSWORD}
+    restclient:
+      ssl:
+        bundle: es
+
+  ssl:
+    bundle:
+      pem:
+        es:
+          truststore:
+            certificate: classpath:certs/ca/ca.crt
 
 #  data:
 #    mongodb:

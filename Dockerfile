@@ -1,4 +1,12 @@
 FROM docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-RUN elasticsearch-plugin install --batch analysis-nori     \
- && elasticsearch-plugin install --batch analysis-kuromoji \
- && elasticsearch-plugin install --batch analysis-icu
+
+# 이미 설치돼 있으면 skip, 없으면 설치
+RUN set -eux; \
+    for plugin in analysis-nori analysis-kuromoji analysis-icu; do \
+        if ! bin/elasticsearch-plugin list | grep -q "$plugin"; then \
+            echo "→ Installing $plugin"; \
+            bin/elasticsearch-plugin install --batch "$plugin"; \
+        else \
+            echo "→ $plugin already installed, skipping"; \
+        fi; \
+    done
