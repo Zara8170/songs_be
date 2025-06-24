@@ -17,15 +17,17 @@ import java.util.stream.Collectors;
 @ToString
 public class MemberDTO extends User {
 
+    private Long id;
     private String email;
     private String password;
     private String phone;
     private String nickname;
     private List<String> roleNames = new ArrayList<>();
 
-    public MemberDTO(String email, String password, String phone, String nickname, List<String> roleNames) {
+    public MemberDTO(Long id, String email, String password, String phone, String nickname, List<String> roleNames) {
         // ROLE_ 접두사를 붙여서 권한을 부여
         super(email, password, roleNames.stream().map(str -> new SimpleGrantedAuthority("ROLE_" + str)).collect(Collectors.toList()));
+        this.id = id;
         this.email = email;
         this.password = password;
         this.phone = phone;
@@ -37,6 +39,7 @@ public class MemberDTO extends User {
 
         Map<String, Object> dataMap = new HashMap<>();
 
+        dataMap.put("id", this.id);
         dataMap.put("email", this.email);
         dataMap.put("phone", this.phone);
         dataMap.put("nickname", this.nickname);

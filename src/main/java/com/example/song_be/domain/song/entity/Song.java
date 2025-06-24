@@ -1,10 +1,14 @@
 package com.example.song_be.domain.song.entity;
 
+import com.example.song_be.domain.like.entity.SongLike;
 import com.example.song_be.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @DynamicUpdate
 @Getter
@@ -45,4 +49,13 @@ public class Song extends BaseEntity {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String lyrics_kr;
+
+    @OneToMany(mappedBy = "song", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    @ToString.Exclude
+    private List<SongLike> likes = new ArrayList<>();
+
+    public long getLikeCount() {
+        return likes.size();
+    }
 }

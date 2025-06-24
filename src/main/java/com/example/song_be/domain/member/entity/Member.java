@@ -1,7 +1,9 @@
 package com.example.song_be.domain.member.entity;
 
+import com.example.song_be.domain.like.entity.SongLike;
 import com.example.song_be.domain.member.dto.JoinRequestDTO;
 import com.example.song_be.domain.member.enums.MemberRole;
+import com.example.song_be.domain.song.entity.Song;
 import com.example.song_be.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -79,5 +81,27 @@ public class Member extends BaseEntity {
                 .build();
         member.addRole(MemberRole.USER);
         return member;
+    }
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<SongLike> likedSongs = new ArrayList<>();
+
+    public void likeSong(Song song) {
+        boolean exists = likedSongs.stream()
+                .anyMatch(like -> like.getSong().equals(song));
+
+        if (exists) return;
+
+        SongLike.of(this, song);
+    }
+
+    public void unlikeSong(Song song) {
+        likedSongs.removeIf(like -> {
+            boolean matched = like.getSong().equals(song);
+            if (matched) song.getLikes().remove(like);
+            return matched;
+        });
+
     }
 }

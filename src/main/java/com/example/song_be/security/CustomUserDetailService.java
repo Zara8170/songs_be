@@ -25,6 +25,7 @@ public class CustomUserDetailService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("미존재하는 사용자 email: " + username));
 
         MemberDTO memberDTO = new MemberDTO(
+                member.getId(),
                 member.getEmail(),
                 member.getPassword(),
                 member.getPhone(),

@@ -31,6 +31,9 @@ public class SongDTO {
     private String lyrics_yomi;
     private String lyrics_kr;
 
+    private Long likeCount;
+    private Boolean likedByMe;
+
     public SongDocument toDocument() {
         return SongDocument.builder()
                 .songId(this.songId)
