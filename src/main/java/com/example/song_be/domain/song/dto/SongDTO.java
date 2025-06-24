@@ -2,6 +2,7 @@ package com.example.song_be.domain.song.dto;
 
 
 import com.example.song_be.domain.song.document.SongDocument;
+import com.example.song_be.dto.PageRequestDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class SongDTO {
+public class SongDTO extends PageRequestDTO {
     private Long songId;
     private Long tj_number;
     private Long ky_number;
@@ -33,6 +34,7 @@ public class SongDTO {
 
     private Long likeCount;
     private Boolean likedByMe;
+    private String keyword;
 
     public SongDocument toDocument() {
         return SongDocument.builder()
