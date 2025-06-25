@@ -4,11 +4,11 @@ package com.example.song_be.domain.song.dto;
 import com.example.song_be.domain.song.document.SongDocument;
 import com.example.song_be.dto.PageRequestDTO;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data

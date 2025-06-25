@@ -4,13 +4,13 @@ import com.example.song_be.domain.song.document.SongDocument;
 import com.example.song_be.domain.song.dto.SongDTO;
 import com.example.song_be.domain.song.enums.SearchTarget;
 import com.example.song_be.domain.song.service.SongDocumentService;
+import com.example.song_be.dto.PageRequestDTO;
+import com.example.song_be.dto.PageResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping("/api/es/song")
@@ -21,8 +21,8 @@ public class SongSearchController {
     private final SongDocumentService songDocumentService;
 
     @GetMapping("/list")
-    public List<SongDTO> getSongs() {
-        return songDocumentService.findAllDTO();
+    public PageResponseDTO<SongDTO> getSongs(@ModelAttribute PageRequestDTO pageReq) throws IOException {
+        return songDocumentService.findAllDTO(pageReq);
     }
 
     @GetMapping("/{id}")
@@ -31,10 +31,10 @@ public class SongSearchController {
     }
 
     @GetMapping("/search")
-    public List<SongDTO> searchSongs(@RequestParam String keyword,
-                                     @RequestParam(defaultValue = "ALL") SearchTarget target)
-            throws IOException {
-        return songDocumentService.searchByKeyword(keyword, target);
+    public PageResponseDTO<SongDTO> searchSongs(@RequestParam String keyword,
+                                                @RequestParam(defaultValue = "ALL") SearchTarget target,
+                                                @ModelAttribute PageRequestDTO pageReq) throws IOException {
+        return songDocumentService.searchByKeyword(keyword, target, pageReq);
     }
 
     @PostMapping

@@ -3,13 +3,15 @@ package com.example.song_be.domain.song.service;
 import com.example.song_be.domain.song.dto.SongDTO;
 import com.example.song_be.domain.song.entity.Song;
 import com.example.song_be.domain.song.document.SongDocument;
+import com.example.song_be.dto.PageRequestDTO;
+import com.example.song_be.dto.PageResponseDTO;
 
 import java.util.List;
 
 public interface SongService {
 
 
-    List<SongDTO> getSongList();
+    PageResponseDTO<SongDTO> getSongList(PageRequestDTO requestDTO);
 
     SongDTO getSongById(Long id);
 

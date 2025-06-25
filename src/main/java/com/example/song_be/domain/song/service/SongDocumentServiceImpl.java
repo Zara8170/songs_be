@@ -1,7 +1,6 @@
 package com.example.song_be.domain.song.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
@@ -9,6 +8,8 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.example.song_be.domain.song.document.SongDocument;
 import com.example.song_be.domain.song.dto.SongDTO;
 import com.example.song_be.domain.song.enums.SearchTarget;
+import com.example.song_be.dto.PageRequestDTO;
+import com.example.song_be.dto.PageResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -102,10 +102,30 @@ public class SongDocumentServiceImpl implements SongDocumentService {
     }
 
     @Override
-    public List<SongDTO> findAllDTO() {
-        return StreamSupport.stream(findAll().spliterator(), false)
+    public PageResponseDTO<SongDTO> findAllDTO(PageRequestDTO pageReq) throws IOException {
+
+        int offset = (pageReq.getPage() - 1) * pageReq.getSize();
+
+        SearchResponse<SongDocument> res = elasticsearchClient.search(s -> s
+                        .index(INDEX_NAME)
+                        .from(offset)
+                        .size(pageReq.getSize())
+                        .query(q -> q.matchAll(m -> m)),        // 전체
+                SongDocument.class);
+
+        long total = res.hits().total() == null ? 0
+                : res.hits().total().value();
+
+        List<SongDTO> dtoList = res.hits().hits()
+                .stream().map(Hit::source)
                 .map(this::toDTO)
                 .toList();
+
+        return PageResponseDTO.<SongDTO>withAll()
+                .dtoList(dtoList)
+                .pageRequestDTO(pageReq)
+                .totalCount(total)
+                .build();
     }
 
     @Override
@@ -116,43 +136,50 @@ public class SongDocumentServiceImpl implements SongDocumentService {
     }
 
     @Override
-    public List<SongDTO> searchByKeyword(String keyword, SearchTarget target) throws IOException {
+    public PageResponseDTO<SongDTO> searchByKeyword(String keyword,
+                                                    SearchTarget target,
+                                                    PageRequestDTO pageReq) throws IOException {
 
-        List<String> baseFields =
-                (target == SearchTarget.ALL)
-                ? Stream.of(TITLE_FIELDS, ARTIST_FIELDS, LYRICS_FIELDS)
-                    .flatMap(List::stream)
-                    .toList()
+        int offset = (pageReq.getPage() - 1) * pageReq.getSize();
+
+        List<String> baseFields = (target == SearchTarget.ALL)
+                ? Stream.of(TITLE_FIELDS, ARTIST_FIELDS, LYRICS_FIELDS).flatMap(List::stream).toList()
                 : FIELD_MAP.get(target);
 
         boolean choSeongOnly = keyword.matches("^[\\u3131-\\u314E]+$");
-        boolean shortQuery = keyword.codePointCount(0, keyword.length()) <= 2;
+        boolean shortQuery   = keyword.codePointCount(0, keyword.length()) <= 2;
 
-        final List<String> resolvedFields = choSeongOnly
+        List<String> fields = choSeongOnly
                 ? List.of("title_kr.initial^3", "title_yomi_kr.initial^3", "artist_kr.initial^3")
                 : baseFields;
 
         SearchResponse<SongDocument> res = elasticsearchClient.search(s -> s
-                        .index(INDEX_NAME)
-                        .query(q -> q.multiMatch(m -> {
-                            m.query(keyword)
-                                    .fields(resolvedFields)
-                                    .type(TextQueryType.BestFields)
-                                    .operator(Operator.And)
-                                    .minimumShouldMatch(shortQuery ? "100%" : "2<75%");
-                            if (!shortQuery && !choSeongOnly) {
-                                m.fuzziness("AUTO");
-                            }
-                            return m;
-                        }))
-                        .minScore(choSeongOnly ? null : (shortQuery ? 2d : 0d))
-                , SongDocument.class);
+                .index(INDEX_NAME)
+                .from(offset)
+                .size(pageReq.getSize())
+                .query(q -> q.multiMatch(m -> {
+                    m.query(keyword)
+                            .fields(fields)
+                            .type(TextQueryType.BestFields)
+                            .operator(Operator.And)
+                            .minimumShouldMatch(shortQuery ? "100%" : "2<75%");
+                    if (!shortQuery && !choSeongOnly) m.fuzziness("AUTO");
+                    return m;
+                })), SongDocument.class);
 
-        return res.hits().hits()
-                .stream()
-                .map(Hit::source)
+        long total = res.hits().total() == null ? 0
+                : res.hits().total().value();
+
+        List<SongDTO> dtoList = res.hits().hits()
+                .stream().map(Hit::source)
                 .map(this::toDTO)
                 .toList();
+
+        return PageResponseDTO.<SongDTO>withAll()
+                .dtoList(dtoList)
+                .pageRequestDTO(pageReq)
+                .totalCount(total)
+                .build();
     }
 
 

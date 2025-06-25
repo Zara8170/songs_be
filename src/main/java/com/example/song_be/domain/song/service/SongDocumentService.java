@@ -3,6 +3,8 @@ package com.example.song_be.domain.song.service;
 import com.example.song_be.domain.song.document.SongDocument;
 import com.example.song_be.domain.song.dto.SongDTO;
 import com.example.song_be.domain.song.enums.SearchTarget;
+import com.example.song_be.dto.PageRequestDTO;
+import com.example.song_be.dto.PageResponseDTO;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,7 +16,9 @@ public interface SongDocumentService {
 
     Optional<SongDocument> findById(Long id);
 
-    List<SongDTO> searchByKeyword(String keyword, SearchTarget target) throws IOException;
+    PageResponseDTO<SongDTO> searchByKeyword(String keyword,
+                                             SearchTarget target,
+                                             PageRequestDTO pageReq) throws IOException;
 
     SongDocument save(SongDocument document);
 
@@ -22,7 +26,7 @@ public interface SongDocumentService {
 
     void deleteById(Long id);
 
-    List<SongDTO> findAllDTO();
+    PageResponseDTO<SongDTO> findAllDTO(PageRequestDTO pageReq) throws IOException;
 
     SongDTO findDTOById(Long id);
 
