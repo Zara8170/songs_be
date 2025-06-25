@@ -1,8 +1,11 @@
 package com.example.song_be.domain.song.service;
 
 import com.example.song_be.domain.song.dto.SongDTO;
+import com.example.song_be.domain.song.entity.QSong;
 import com.example.song_be.domain.song.entity.Song;
 import com.example.song_be.domain.song.repository.SongRepository;
+import com.example.song_be.dto.PageRequestDTO;
+import com.example.song_be.dto.PageResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,12 +23,20 @@ public class SongServiceImpl implements SongService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SongDTO> getSongList() {
-        log.info("getSongList start...");
+    public PageResponseDTO<SongDTO> getSongList(PageRequestDTO requestDTO) {
 
-        return songRepository.findAll().stream()
-                .map(this::toDTO)
+        var page = songRepository.findListBy(requestDTO);
+
+        List<SongDTO> dtoList = page.getContent()
+                .stream()
+                .map(this::toDTO)   // 엔티티 → DTO
                 .toList();
+
+        return PageResponseDTO.<SongDTO>withAll()
+                .dtoList(dtoList)
+                .pageRequestDTO(requestDTO)
+                .totalCount(page.getTotalElements())
+                .build();
     }
 
     @Override

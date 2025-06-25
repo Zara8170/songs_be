@@ -2,6 +2,8 @@ package com.example.song_be.domain.song.controller;
 
 import com.example.song_be.domain.song.dto.SongDTO;
 import com.example.song_be.domain.song.service.SongService;
+import com.example.song_be.dto.PageRequestDTO;
+import com.example.song_be.dto.PageResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +19,9 @@ public class SongController {
     private final SongService songService;
 
     @GetMapping("/list")
-    public List<SongDTO> getSongs() {
-        return songService.getSongList();
+    public PageResponseDTO<SongDTO> getSongs( PageRequestDTO pageReq) {
+        log.debug("--- getSongs start ---");
+        return songService.getSongList(pageReq);
     }
 
     @GetMapping("/{id}")
