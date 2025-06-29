@@ -32,7 +32,7 @@ spring:
         format_sql: true # SQL 포맷팅
         highlight_sql: true # SQL 하이라이트 출력
         use_sql_comments: true # JPQL SQL 주석 사용
-        default_batch_fetch_size: 100 # 기본 배치 크기 설정
+        default_batch_fetch_size: 100
         jdbc:
           lob:
             non_contextual_creation: true
