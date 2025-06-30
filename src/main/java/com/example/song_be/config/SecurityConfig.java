@@ -136,9 +136,11 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 출처 설정 (모든 출처 허용)
-//        configuration.setAllowedOriginPatterns(Arrays.asList("*"));  // localhost:3000 -> 허용
+//        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000", "http://localhost:3001"
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://10.0.2.2:3000"
         ));
         // 허용할 메서드 설정
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));

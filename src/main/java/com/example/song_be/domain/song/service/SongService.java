@@ -1,6 +1,7 @@
 package com.example.song_be.domain.song.service;
 
 import com.example.song_be.domain.song.dto.SongDTO;
+import com.example.song_be.domain.song.dto.SongPageDTO;
 import com.example.song_be.domain.song.entity.Song;
 import com.example.song_be.domain.song.document.SongDocument;
 import com.example.song_be.dto.PageRequestDTO;
@@ -11,7 +12,7 @@ import java.util.List;
 public interface SongService {
 
 
-    PageResponseDTO<SongDTO> getSongList(PageRequestDTO requestDTO);
+    PageResponseDTO<SongDTO> getSongList(SongPageDTO requestDTO);
 
     SongDTO getSongById(Long id);
 

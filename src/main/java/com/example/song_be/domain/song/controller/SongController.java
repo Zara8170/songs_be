@@ -1,6 +1,7 @@
 package com.example.song_be.domain.song.controller;
 
 import com.example.song_be.domain.song.dto.SongDTO;
+import com.example.song_be.domain.song.dto.SongPageDTO;
 import com.example.song_be.domain.song.service.SongService;
 import com.example.song_be.dto.PageRequestDTO;
 import com.example.song_be.dto.PageResponseDTO;
@@ -19,7 +20,7 @@ public class SongController {
     private final SongService songService;
 
     @GetMapping("/list")
-    public PageResponseDTO<SongDTO> getSongs( PageRequestDTO pageReq) {
+    public PageResponseDTO<SongDTO> getSongs( SongPageDTO pageReq) {
         log.debug("--- getSongs start ---");
         return songService.getSongList(pageReq);
     }

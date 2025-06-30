@@ -7,6 +7,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.example.song_be.domain.song.document.SongDocument;
 import com.example.song_be.domain.song.dto.SongDTO;
+import com.example.song_be.domain.song.dto.SongPageDTO;
 import com.example.song_be.domain.song.enums.SearchTarget;
 import com.example.song_be.dto.PageRequestDTO;
 import com.example.song_be.dto.PageResponseDTO;
@@ -102,7 +103,7 @@ public class SongDocumentServiceImpl implements SongDocumentService {
     }
 
     @Override
-    public PageResponseDTO<SongDTO> findAllDTO(PageRequestDTO pageReq) throws IOException {
+    public PageResponseDTO<SongDTO> findAllDTO(SongPageDTO pageReq) throws IOException {
 
         int offset = (pageReq.getPage() - 1) * pageReq.getSize();
 
@@ -138,7 +139,7 @@ public class SongDocumentServiceImpl implements SongDocumentService {
     @Override
     public PageResponseDTO<SongDTO> searchByKeyword(String keyword,
                                                     SearchTarget target,
-                                                    PageRequestDTO pageReq) throws IOException {
+                                                    SongPageDTO pageReq) throws IOException {
 
         int offset = (pageReq.getPage() - 1) * pageReq.getSize();
 

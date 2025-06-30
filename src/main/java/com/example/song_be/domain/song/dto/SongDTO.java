@@ -12,7 +12,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class SongDTO extends PageRequestDTO {
+public class SongDTO {
     private Long songId;
     private Long tj_number;
     private Long ky_number;
