@@ -19,6 +19,7 @@ public class SongDTO {
 
     private String title_kr;
     private String title_en;
+    private String title_en_kr;
     private String title_jp;
     private String title_yomi;
     private String title_yomi_kr;
@@ -43,6 +44,7 @@ public class SongDTO {
                 .ky_number(this.ky_number)
                 .title_kr(this.title_kr)
                 .title_en(this.title_en)
+                .title_en_kr(this.title_en_kr)
                 .title_jp(this.title_jp)
                 .title_yomi(this.title_yomi)
                 .title_yomi_kr(this.title_yomi_kr)

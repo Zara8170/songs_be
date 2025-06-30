@@ -38,6 +38,7 @@ public interface SongDocumentService {
                 .ky_number(document.getKy_number())
                 .title_kr(document.getTitle_kr())
                 .title_en(document.getTitle_en())
+                .title_en_kr(document.getTitle_en_kr())
                 .title_jp(document.getTitle_jp())
                 .title_yomi(document.getTitle_yomi())
                 .title_yomi_kr(document.getTitle_yomi_kr())
