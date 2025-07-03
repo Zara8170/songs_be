@@ -1,8 +1,6 @@
 package com.example.song_be.domain.song.service;
 
 import com.example.song_be.domain.song.dto.SongDTO;
-import com.example.song_be.domain.song.dto.SongPageDTO;
-import com.example.song_be.domain.song.entity.QSong;
 import com.example.song_be.domain.song.entity.Song;
 import com.example.song_be.domain.song.repository.SongRepository;
 import com.example.song_be.dto.PageRequestDTO;
@@ -24,7 +22,7 @@ public class SongServiceImpl implements SongService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponseDTO<SongDTO> getSongList(SongPageDTO requestDTO) {
+    public PageResponseDTO<SongDTO> getSongList(PageRequestDTO requestDTO) {
 
         var page = songRepository.findListBy(requestDTO);
 

@@ -7,7 +7,6 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.example.song_be.domain.song.document.SongDocument;
 import com.example.song_be.domain.song.dto.SongDTO;
-import com.example.song_be.domain.song.dto.SongPageDTO;
 import com.example.song_be.domain.song.enums.SearchTarget;
 import com.example.song_be.dto.PageRequestDTO;
 import com.example.song_be.dto.PageResponseDTO;
@@ -103,7 +102,7 @@ public class SongDocumentServiceImpl implements SongDocumentService {
     }
 
     @Override
-    public PageResponseDTO<SongDTO> findAllDTO(SongPageDTO pageReq) throws IOException {
+    public PageResponseDTO<SongDTO> findAllDTO(PageRequestDTO pageReq) throws IOException {
 
         int offset = (pageReq.getPage() - 1) * pageReq.getSize();
 
@@ -139,7 +138,7 @@ public class SongDocumentServiceImpl implements SongDocumentService {
     @Override
     public PageResponseDTO<SongDTO> searchByKeyword(String keyword,
                                                     SearchTarget target,
-                                                    SongPageDTO pageReq) throws IOException {
+                                                    PageRequestDTO pageReq) throws IOException {
 
         int offset = (pageReq.getPage() - 1) * pageReq.getSize();
 
@@ -150,9 +149,21 @@ public class SongDocumentServiceImpl implements SongDocumentService {
         boolean choSeongOnly = keyword.matches("^[\\u3131-\\u314E]+$");
         boolean shortQuery   = keyword.codePointCount(0, keyword.length()) <= 2;
 
-        List<String> fields = choSeongOnly
-                ? List.of("title_kr.initial^3", "title_yomi_kr.initial^3", "artist_kr.initial^3")
-                : baseFields;
+        // 초성 필드 추가 (초성만 검색할 때가 아니라 항상 포함)
+        List<String> initialFields = List.of(
+                "title_kr.initial^2",
+                "title_yomi_kr.initial^2",
+                "artist_kr.initial^2"
+        );
+
+        List<String> fields;
+        if (choSeongOnly) {
+            // 순수 초성 검색일 때는 초성 필드만 사용
+            fields = initialFields;
+        } else {
+            // 일반 검색일 때는 기본 필드 + 초성 필드 모두 사용
+            fields = Stream.concat(baseFields.stream(), initialFields.stream()).toList();
+        }
 
         SearchResponse<SongDocument> res = elasticsearchClient.search(s -> s
                 .index(INDEX_NAME)

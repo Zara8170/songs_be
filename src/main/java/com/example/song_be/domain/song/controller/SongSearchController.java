@@ -2,7 +2,6 @@ package com.example.song_be.domain.song.controller;
 
 import com.example.song_be.domain.song.document.SongDocument;
 import com.example.song_be.domain.song.dto.SongDTO;
-import com.example.song_be.domain.song.dto.SongPageDTO;
 import com.example.song_be.domain.song.enums.SearchTarget;
 import com.example.song_be.domain.song.service.SongDocumentService;
 import com.example.song_be.dto.PageRequestDTO;
@@ -22,7 +21,7 @@ public class SongSearchController {
     private final SongDocumentService songDocumentService;
 
     @GetMapping("/list")
-    public PageResponseDTO<SongDTO> getSongs(@ModelAttribute SongPageDTO pageReq) throws IOException {
+    public PageResponseDTO<SongDTO> getSongs(@ModelAttribute PageRequestDTO pageReq) throws IOException {
         return songDocumentService.findAllDTO(pageReq);
     }
 
@@ -34,7 +33,7 @@ public class SongSearchController {
     @GetMapping("/search")
     public PageResponseDTO<SongDTO> searchSongs(@RequestParam String keyword,
                                                 @RequestParam(defaultValue = "ALL") SearchTarget target,
-                                                @ModelAttribute SongPageDTO pageReq) throws IOException {
+                                                @ModelAttribute PageRequestDTO pageReq) throws IOException {
         return songDocumentService.searchByKeyword(keyword, target, pageReq);
     }
 
