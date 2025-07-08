@@ -2,6 +2,7 @@ package com.example.song_be.domain.song.dto;
 
 
 import com.example.song_be.domain.song.document.SongDocument;
+import com.example.song_be.domain.song.entity.Song;
 import com.example.song_be.dto.PageRequestDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -55,5 +56,21 @@ public class SongDTO {
                 .lyrics_yomi(this.lyrics_yomi)
                 .lyrics_kr(this.lyrics_kr)
                 .build();
+    }
+
+    public static SongDTO fromEntity(Song song) {
+        SongDTO dto = new SongDTO();
+        dto.songId = song.getSongId();
+        dto.tj_number = song.getTj_number();
+        dto.ky_number = song.getKy_number();
+        dto.title_kr = song.getTitle_kr();
+        dto.title_en = song.getTitle_en();
+        dto.title_en_kr = song.getTitle_en_kr();
+        dto.title_jp = song.getTitle_jp();
+        dto.title_yomi = song.getTitle_yomi();
+        dto.title_yomi_kr = song.getTitle_yomi_kr();
+        dto.artist_kr = song.getArtist_kr();
+        dto.artist = song.getArtist();
+        return dto;
     }
 }

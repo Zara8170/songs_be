@@ -39,6 +39,7 @@ spring:
 
 app:
   props:
+    python-server-url: ${PYTHON_SERVER_URL}
     social:
       google:
         client-id: ${GOOGLE_CLIENT_ID}

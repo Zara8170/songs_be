@@ -63,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/api/song/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/es/song/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/migration/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/recommendation/**")).permitAll()
                         // /api/admin/join, /api/admin/login,logout 모두 접근 가능
                         .requestMatchers(new AntPathRequestMatcher("/api/admin/member/join")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/admin/member/login")).permitAll()

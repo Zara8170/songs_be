@@ -5,12 +5,16 @@ import com.example.song_be.domain.song.entity.Song;
 import com.example.song_be.dto.PageRequestDTO;
 import com.example.song_be.dto.PageResponseDTO;
 
+import java.util.List;
+
 public interface SongService {
 
 
     PageResponseDTO<SongDTO> getSongList(PageRequestDTO requestDTO);
 
     SongDTO getSongById(Long id);
+
+    List<SongDTO> findSongsByIds(List<Long> songIds);
 
     SongDTO createSong(SongDTO songDTO);
 

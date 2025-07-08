@@ -50,7 +50,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         }
 
         if(path.startsWith("/api/song/list") || path.startsWith("/api/song/{id}")
-        || path.startsWith("/api/song")) {
+        || path.startsWith("/api/song") || path.startsWith("/api/song/batch")) {
             return true;
         }
 
@@ -60,6 +60,10 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         }
 
         if (path.startsWith("/api/migration/songs")) {
+            return true;
+        }
+
+        if (path.startsWith("/api/recommendation/request")) {
             return true;
         }
 

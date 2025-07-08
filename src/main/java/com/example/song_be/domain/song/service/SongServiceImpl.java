@@ -10,7 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Transactional
@@ -46,6 +48,18 @@ public class SongServiceImpl implements SongService {
         return songRepository.findById(id)
                 .map(this::toDTO)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 곡이 없습니다: " + id));
+    }
+
+    @Override
+    public List<SongDTO> findSongsByIds(List<Long> songIds) {
+        if (songIds == null || songIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Song> songs = songRepository.findAllById(songIds);
+        return songs.stream()
+                .map(SongDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Override

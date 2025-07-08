@@ -6,7 +6,10 @@ import com.example.song_be.dto.PageRequestDTO;
 import com.example.song_be.dto.PageResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/song")
@@ -25,6 +28,12 @@ public class SongController {
     @GetMapping("/{id}")
     public SongDTO getSong(@PathVariable Long id) {
         return songService.getSongById(id);
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<List<SongDTO>> getSongsByIds(@RequestBody List<Long> songIds) {
+        List<SongDTO> songs = songService.findSongsByIds(songIds);
+        return ResponseEntity.ok(songs);
     }
 
     @PostMapping
