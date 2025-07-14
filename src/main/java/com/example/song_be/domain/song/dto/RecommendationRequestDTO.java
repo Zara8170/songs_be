@@ -1,10 +1,12 @@
 package com.example.song_be.domain.song.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -12,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class RecommendationRequestDTO {
-    private String message;
-    private List<Long> liked_songs;
+    private String text;
+    @JsonProperty("favorite_song_ids")
+    private List<Long> favoriteSongIds;
 }

@@ -13,5 +13,5 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class RecommendationResponseFromPythonDTO {
-    private List<Map<String, String>> recommendations;
+    private String message;
 }
