@@ -35,6 +35,8 @@ public class Song extends BaseEntity {
     private String title_yomi_kr;
 
     private String lang;
+    private String genre;
+    private String mood;
 
     private String artist;
     private String artist_kr;
