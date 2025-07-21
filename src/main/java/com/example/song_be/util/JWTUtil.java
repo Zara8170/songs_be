@@ -1,67 +1,51 @@
 package com.example.song_be.util;
 
-import com.example.song_be.exception.CustomJWTException;
-import com.example.song_be.props.JwtProps;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.time.ZonedDateTime;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 
-@Log4j2
 @Component
-@RequiredArgsConstructor
 public class JWTUtil {
 
-    private final JwtProps jwtProps;
+    @Value("${app.props.jwt.secret-key}")
+    private String secret;
 
-    // 토큰 생성
-    public String generateToken(Map<String, Object> valueMap, int min) {
-        SecretKey key = null;
-        try {
-            key = Keys.hmacShaKeyFor(jwtProps.getSecretKey().getBytes("UTF-8"));
-        } catch (Exception e) {
-            log.error(e);
-            throw new RuntimeException(e.getMessage());
-        }
+    private SecretKey key;
 
+    @PostConstruct
+    void init() {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /** payload + subject + 만료(분) → 토큰 생성 */
+    public String generate(Map<String, Object> claims,
+                           String subject,
+                           long expiresMinutes) {
+
+        Instant now = Instant.now();
         return Jwts.builder()
-                .setHeader(Map.of("typ", "JWT"))
-                .setClaims(valueMap)
-                .setIssuedAt(Date.from(ZonedDateTime.now().toInstant()))
-                .setExpiration(Date.from(ZonedDateTime.now().plusMinutes(min).toInstant()))
-                .signWith(key)
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(now.plusSeconds(expiresMinutes * 60)))
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public Map<String, Object> validateToken(String token) {
-
-        Map<String, Object> claim = null;
-        try {
-            SecretKey key = Keys.hmacShaKeyFor(jwtProps.getSecretKey().getBytes("UTF-8"));
-            claim = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token) // 파싱 및 검증, 실패시 에러
-                    .getBody();
-
-        } catch (MalformedJwtException malformedJwtException) {
-            throw new CustomJWTException("MalFormed");
-        } catch (ExpiredJwtException expiredJwtException) {
-            throw new CustomJWTException("Expired");
-        } catch (InvalidClaimException invalidClaimException) {
-            throw new CustomJWTException("Invalid");
-        } catch (JwtException jwtException) {
-            throw new CustomJWTException("JWTError");
-        } catch (Exception e) {
-            throw new CustomJWTException("Error");
-        }
-        return claim;
+    /** signature / 만료 검증 후 claims 반환 */
+    public Claims validate(String token) throws JwtException {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
-
 }

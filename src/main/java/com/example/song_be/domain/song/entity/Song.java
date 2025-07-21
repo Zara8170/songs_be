@@ -1,6 +1,6 @@
 package com.example.song_be.domain.song.entity;
 
-import com.example.song_be.domain.like.entity.SongLike;
+//import com.example.song_be.domain.like.entity.SongLike;
 import com.example.song_be.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -53,12 +53,12 @@ public class Song extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String lyrics_kr;
 
-    @OneToMany(mappedBy = "song", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    @ToString.Exclude
-    private List<SongLike> likes = new ArrayList<>();
+//    @OneToMany(mappedBy = "song", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @Builder.Default
+//    @ToString.Exclude
+//    private List<SongLike> likes = new ArrayList<>();
 
-    public long getLikeCount() {
-        return likes.size();
-    }
+//    public long getLikeCount() {
+//        return likes.size();
+//    }
 }

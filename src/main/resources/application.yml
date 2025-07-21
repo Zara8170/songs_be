@@ -36,6 +36,13 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+  task:
+    scheduling:
+      pool:
+        size: 5
+    execution:
+      pool:
+        core-size: 10
 
 app:
   props:
