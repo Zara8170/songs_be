@@ -27,10 +27,12 @@ public class Member extends BaseEntity {
 
     @Setter
     @Column(name = "last_active_at")
+    @Builder.Default
     private LocalDateTime lastActiveAt = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private MemberRole role = MemberRole.ACTIVE;
 
     public void setRole(MemberRole memberRole) {

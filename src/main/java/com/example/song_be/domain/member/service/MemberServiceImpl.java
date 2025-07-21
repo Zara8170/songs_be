@@ -27,7 +27,11 @@ public class MemberServiceImpl implements MemberService{
     public Member upsertAndTouch(String tempId) {
         Member member = memberRepository.findByTempId(tempId)
                 .orElseGet(() -> memberRepository.save(
-                        Member.builder().tempId(tempId).build()));
+                        Member.builder()
+                                .tempId(tempId)
+                                .role(MemberRole.ACTIVE)
+                                .lastActiveAt(LocalDateTime.now())
+                                .build()));
 
         member.setLastActiveAt(LocalDateTime.now());
         member.setRole(MemberRole.ACTIVE);
