@@ -494,7 +494,7 @@
 //            return memberService.entityToDTO(member);
 //        }
 //
-//        // 새로운 회원 가입 (active = Y 설정)
+//
 //        Member member = this.makeSocialMember(email);
 //        memberRepository.save(member);
 //        return memberService.entityToDTO(member);

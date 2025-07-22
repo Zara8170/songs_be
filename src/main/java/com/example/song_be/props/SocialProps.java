@@ -26,8 +26,6 @@ public class SocialProps {
         private String redirectUri;
         private String authorizationUri;
         private String tokenUri;
-        private String userInfoUri;
-        private String userInfoNameAttributeKey;
         private String clientName;
     }
 
