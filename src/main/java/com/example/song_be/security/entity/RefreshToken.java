@@ -1,5 +1,6 @@
 package com.example.song_be.security.entity;
 
+import com.example.song_be.crypto.EncryptedStringConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,6 +26,7 @@ public class RefreshToken {
     private String accessToken;
 
     @Column(nullable = false, length = 512)
+    @Convert(converter = EncryptedStringConverter.class)
     private String refreshToken;
 
     @Column(nullable = false)

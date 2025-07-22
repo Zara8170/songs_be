@@ -1,39 +1,37 @@
-//package com.example.song_be.domain.like.controller;
-//
-//import com.example.song_be.domain.like.dto.SongLikeDTO;
-//import com.example.song_be.domain.like.service.SongLikeService;
-//import com.example.song_be.security.MemberDTO;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.security.core.annotation.AuthenticationPrincipal;
-//import org.springframework.web.bind.annotation.*;
-//
-//@RestController
-//@RequestMapping("/api/like")
-//@RequiredArgsConstructor
-//public class SongLikeController {
-//
-//    private final SongLikeService songLikeService;
-//
-//    @PostMapping("/songs/{songId}/likes")
-//    public ResponseEntity<SongLikeDTO> like(
-//            @PathVariable Long songId,
-//            @AuthenticationPrincipal MemberDTO memberDTO
-//    ) {
-//        Long memberId = memberDTO.getId();
-//        SongLikeDTO dto = songLikeService.addLike(memberId, songId);
-//        return ResponseEntity.ok(dto);
-//    }
-//
-//    @DeleteMapping("/songs/{songId}/likes")
-//    public ResponseEntity<Void> unlike(
-//            @PathVariable Long songId,
-//            @AuthenticationPrincipal MemberDTO memberDTO
-//    ) {
-//        Long memberId = memberDTO.getId();
-//        songLikeService.removeLike(memberId, songId);
-//        return ResponseEntity.noContent().build();
-//    }
-//
-//
-//}
+package com.example.song_be.domain.like.controller;
+
+import com.example.song_be.domain.like.dto.SongLikeDTO;
+import com.example.song_be.domain.like.service.SongLikeService;
+import com.example.song_be.security.AnonymousUserDetails;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/likes")
+@RequiredArgsConstructor
+public class SongLikeController {
+
+    private final SongLikeService songLikeService;
+
+    /** 추가·삭제를 한 곳에서 처리 */
+    @PostMapping("/songs/{songId}")
+    public ResponseEntity<SongLikeDTO> toggleLike(
+            @PathVariable Long songId,
+            @AuthenticationPrincipal AnonymousUserDetails user
+    ) {
+        SongLikeDTO dto = songLikeService.toggleLike(user.getTempId(), songId);
+        return ResponseEntity.ok(dto);
+    }
+
+    /** 내 즐겨찾기 목록 조회 */
+    @GetMapping
+    public ResponseEntity<List<Long>> myLikes(
+            @AuthenticationPrincipal AnonymousUserDetails user
+    ) {
+        return ResponseEntity.ok(songLikeService.getLikedSongIds(user.getTempId()));
+    }
+}

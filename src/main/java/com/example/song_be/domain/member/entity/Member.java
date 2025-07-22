@@ -1,5 +1,6 @@
 package com.example.song_be.domain.member.entity;
 
+import com.example.song_be.domain.like.entity.SongLike;
 import com.example.song_be.domain.member.enums.MemberRole;
 import com.example.song_be.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -8,6 +9,8 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @DynamicUpdate
 @SuperBuilder
@@ -44,4 +47,7 @@ public class Member extends BaseEntity {
             this.role = memberRole;
         }
     }
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SongLike> likes = new ArrayList<>();
 }
