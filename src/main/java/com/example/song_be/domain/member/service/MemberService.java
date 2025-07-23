@@ -42,5 +42,7 @@ public interface MemberService {
 
     void deleteMember(String email);
 
-    Boolean checkEmail(String email);
+    boolean checkEmail(String email);
+
+    Map<String, Object> refreshTokens(String accessToken);
 }

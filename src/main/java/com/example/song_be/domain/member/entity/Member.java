@@ -17,19 +17,23 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@ToString
+@ToString(exclude = "memberRoleList")
 @Entity
 @Table(name = "member")
 public class Member extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
 
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Column(nullable = false)
     private String password;
+
+    @Column(nullable = true)
     private String phone;
 
     @ElementCollection(fetch = FetchType.LAZY)
@@ -42,20 +46,12 @@ public class Member extends BaseEntity {
         memberRoleList.add(memberRole);
     }
 
-    /**
-     * 소셜 맴버 엔티티 정적 팩토리 메서드
-     *
-     * @param email
-     * @param encodedPw
-     * @return 소셜 맴버 엔티티
-     */
-    public static Member fromSocialMember(String email, String encodedPw) {
-        Member m = Member.builder()
-                .email(email)
-                .password(encodedPw)
-                .build();
-        m.addRole(MemberRole.USER);
-        return m;
+    public static Member fromSocialMember(String email, String password) {
+        Member member = new Member();
+        member.email = email;
+        member.password = password;
+        member.addRole(MemberRole.USER);
+        return member;
     }
 
 //    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -44,10 +44,6 @@ spring:
       pool:
         core-size: 10
 
-refresh:
-  crypto:
-    key: ${REFRESH_CRYPTO_KEY}
-
 app:
   props:
     python-server-url: ${PYTHON_SERVER_URL}

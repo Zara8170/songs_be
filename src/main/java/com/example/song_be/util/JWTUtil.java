@@ -58,12 +58,30 @@ public class JWTUtil {
     /** 토큰 만료까지 남은 시간이 특정 분 이하인지 체크. */
     public boolean willExpireWithin(String token, long minutes) {
         try {
-            Date exp = (Date) validate(token).get("exp");
-            long remainMillis = exp.getTime() * 1000L - System.currentTimeMillis();
-            return remainMillis <= minutes * 60_000L;
+            long remainingMillis = getExpiryMillis(token) - System.currentTimeMillis();
+            return remainingMillis <= minutes * 60 * 1000;
         } catch (Exception e) {
+            // 토큰이 유효하지 않거나 만료된 경우
             return true;
         }
     }
 
+    /** 만료 무시 파싱 옵션 */
+    public Map<String,Object> parseIgnoreExpiration(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public Long getExpiryMillis(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration()
+                .getTime();
+    }
 }

@@ -18,7 +18,6 @@ import java.util.List;
 public class LoginResponseDTO {
 
     private String email;
-    private String nickname;
     private String phone;
     private List<String> roles;
     private String accessToken;
