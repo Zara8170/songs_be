@@ -68,11 +68,16 @@ public class JWTUtil {
 
     /** 만료 무시 파싱 옵션 */
     public Map<String,Object> parseIgnoreExpiration(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(secretKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            log.info("Token has expired, but parsing claims.");
+            return e.getClaims();
+        }
     }
 
     public Long getExpiryMillis(String token) {

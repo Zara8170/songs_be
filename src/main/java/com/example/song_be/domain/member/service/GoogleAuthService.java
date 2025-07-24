@@ -1,5 +1,14 @@
 package com.example.song_be.domain.member.service;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.song_be.domain.member.dto.LoginResponseDTO;
 import com.example.song_be.domain.member.entity.Member;
 import com.example.song_be.domain.member.enums.MemberRole;
@@ -14,17 +23,9 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

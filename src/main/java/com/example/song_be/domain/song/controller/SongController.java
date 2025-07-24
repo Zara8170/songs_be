@@ -4,9 +4,12 @@ import com.example.song_be.domain.song.dto.SongDTO;
 import com.example.song_be.domain.song.service.SongService;
 import com.example.song_be.dto.PageRequestDTO;
 import com.example.song_be.dto.PageResponseDTO;
+import com.example.song_be.security.MemberDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +23,18 @@ public class SongController {
     private final SongService songService;
 
     @GetMapping("/list")
-    public PageResponseDTO<SongDTO> getSongs( PageRequestDTO pageReq) {
+    public PageResponseDTO<SongDTO> getSongs(PageRequestDTO pageReq, Authentication authentication) {
         log.debug("--- getSongs start ---");
-        return songService.getSongList(pageReq);
+        Long memberId = null;
+        if (authentication != null && authentication.getPrincipal() instanceof MemberDTO) {
+            memberId = ((MemberDTO) authentication.getPrincipal()).getId();
+        }
+        log.info("Request for /api/song/list with memberId: {}", memberId);
+        PageResponseDTO<SongDTO> response = songService.getSongList(pageReq, memberId);
+
+        log.info("Response for /api/song/list: {}", response);
+
+        return response;
     }
 
     @GetMapping("/{id}")

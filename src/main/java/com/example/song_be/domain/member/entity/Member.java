@@ -1,16 +1,15 @@
 package com.example.song_be.domain.member.entity;
 
+import com.example.song_be.domain.like.entity.SongLike;
 import com.example.song_be.domain.member.enums.MemberRole;
 import com.example.song_be.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @DynamicUpdate
 @SuperBuilder
@@ -54,7 +53,7 @@ public class Member extends BaseEntity {
         return member;
     }
 
-//    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @Builder.Default
-//    private List<SongLike> likedSongs = new ArrayList<>();
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<SongLike> likedSongs = new ArrayList<>();
 }
