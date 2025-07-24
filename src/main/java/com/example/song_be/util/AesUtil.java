@@ -14,7 +14,7 @@ import java.util.Base64;
 @RequiredArgsConstructor
 public class AesUtil {
 
-    @Value("${app.props.jwt.secret-key}")
+    @Value("${app.props.aes.secret-key}")
     private String secret;
 
     private SecretKey key() {

@@ -34,10 +34,13 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         log.info("check uri: " + path);
 
-        // Pre-flight 요청은 필터를 타지 않도록 설정
         if (request.getMethod().equals("OPTIONS")) {
             return true;
         }
+        if(path.startsWith("/api/auth/google")) {
+            return true;
+        }
+
         // /api/member/로 시작하는 요청은 필터를 타지 않도록 설정
         if (    path.startsWith("/api/member/check-email")
                 || path.startsWith("/api/member/refresh")

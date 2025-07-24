@@ -52,7 +52,7 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(
                 authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers(new AntPathRequestMatcher("/api/auth/anon")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/auth/google")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/member/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/song/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/es/song/**")).permitAll()

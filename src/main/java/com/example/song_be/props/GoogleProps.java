@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties("app.props.google")
+@ConfigurationProperties("app.props.social.google")
 public class GoogleProps {
     private String clientId;
     private String tokenUri;

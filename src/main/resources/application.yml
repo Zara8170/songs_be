@@ -28,7 +28,7 @@ spring:
       ddl-auto: update # 테이블 생성 및 업데이트 전략 (create, create-drop, update, validate, none)
     properties:
       hibernate:
-#        dialect: org.hibernate.dialect.MySQLDialect # Hibernate Dialect 설정
+        #dialect: org.hibernate.dialect.MySQLDialect # Hibernate Dialect 설정
         format_sql: true # SQL 포맷팅
         highlight_sql: true # SQL 하이라이트 출력
         use_sql_comments: true # JPQL SQL 주석 사용
@@ -56,6 +56,8 @@ app:
       secret-key: ${JWT_SECRET_KEY}
       access-token-expiration-period: 150
       refresh-token-expiration-period: 1440
+    aes:
+      secret-key: ${AES_SECRET_KEY}
 
 ---
 spring:
@@ -78,9 +80,9 @@ spring:
           truststore:
             certificate: classpath:certs/ca/ca.crt
 
-#  data:
-#    mongodb:
-#      url: ${LOCAL_MONGODB_URL}
+  #  data:
+  #    mongodb:
+  #      url: ${LOCAL_MONGODB_URL}
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -135,5 +137,4 @@ app:
 logging:
   level:
     org.hibernate.SQL: error # Hibernate SQL 로그 레벨
-
 
