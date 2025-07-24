@@ -9,6 +9,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
@@ -20,48 +21,67 @@ public class JWTUtil {
 
     private final JwtProps jwtProps;
 
-    // 토큰 생성
-    public String generateToken(Map<String, Object> valueMap, int min) {
-        SecretKey key = null;
-        try {
-            key = Keys.hmacShaKeyFor(jwtProps.getSecretKey().getBytes("UTF-8"));
-        } catch (Exception e) {
-            log.error(e);
-            throw new RuntimeException(e.getMessage());
-        }
+    /** 공통 키 */
+    private SecretKey secretKey() {
+        return Keys.hmacShaKeyFor(jwtProps.getSecretKey().getBytes(StandardCharsets.UTF_8));
+    }
 
+    /** Access Token (minutes = accessTokenExpirationPeriod) */
+    public String generateAccessToken(Map<String, Object> claims) {
+        return build(claims, jwtProps.getAccessTokenExpirationPeriod());
+    }
+
+    /** Refresh Token (minutes = refreshTokenExpirationPeriod) */
+    public String generateRefreshToken(Map<String, Object> claims) {
+        return build(claims, jwtProps.getRefreshTokenExpirationPeriod());
+    }
+
+    /** 토큰 생성 공통 로직 */
+    private String build(Map<String, Object> claims, long minutes) {
         return Jwts.builder()
-                .setHeader(Map.of("typ", "JWT"))
-                .setClaims(valueMap)
-                .setIssuedAt(Date.from(ZonedDateTime.now().toInstant()))
-                .setExpiration(Date.from(ZonedDateTime.now().plusMinutes(min).toInstant()))
-                .signWith(key)
+                .setClaims(claims)
+                .setIssuedAt(new Date())
+                .setExpiration(Date.from(ZonedDateTime.now().plusMinutes(minutes).toInstant()))
+                .signWith(secretKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public Map<String, Object> validateToken(String token) {
-
-        Map<String, Object> claim = null;
-        try {
-            SecretKey key = Keys.hmacShaKeyFor(jwtProps.getSecretKey().getBytes("UTF-8"));
-            claim = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token) // 파싱 및 검증, 실패시 에러
-                    .getBody();
-
-        } catch (MalformedJwtException malformedJwtException) {
-            throw new CustomJWTException("MalFormed");
-        } catch (ExpiredJwtException expiredJwtException) {
-            throw new CustomJWTException("Expired");
-        } catch (InvalidClaimException invalidClaimException) {
-            throw new CustomJWTException("Invalid");
-        } catch (JwtException jwtException) {
-            throw new CustomJWTException("JWTError");
-        } catch (Exception e) {
-            throw new CustomJWTException("Error");
-        }
-        return claim;
+    /** 검증 & Claims 반환 */
+    public Map<String, Object> validate(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
+    /** 토큰 만료까지 남은 시간이 특정 분 이하인지 체크. */
+    public boolean willExpireWithin(String token, long minutes) {
+        try {
+            long remainingMillis = getExpiryMillis(token) - System.currentTimeMillis();
+            return remainingMillis <= minutes * 60 * 1000;
+        } catch (Exception e) {
+            // 토큰이 유효하지 않거나 만료된 경우
+            return true;
+        }
+    }
+
+    /** 만료 무시 파싱 옵션 */
+    public Map<String,Object> parseIgnoreExpiration(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public Long getExpiryMillis(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration()
+                .getTime();
+    }
 }

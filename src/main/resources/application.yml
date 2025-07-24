@@ -28,7 +28,7 @@ spring:
       ddl-auto: update # 테이블 생성 및 업데이트 전략 (create, create-drop, update, validate, none)
     properties:
       hibernate:
-#        dialect: org.hibernate.dialect.MySQLDialect # Hibernate Dialect 설정
+        #dialect: org.hibernate.dialect.MySQLDialect # Hibernate Dialect 설정
         format_sql: true # SQL 포맷팅
         highlight_sql: true # SQL 하이라이트 출력
         use_sql_comments: true # JPQL SQL 주석 사용
@@ -36,6 +36,13 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+  task:
+    scheduling:
+      pool:
+        size: 5
+    execution:
+      pool:
+        core-size: 10
 
 app:
   props:
@@ -43,17 +50,14 @@ app:
     social:
       google:
         client-id: ${GOOGLE_CLIENT_ID}
-        client-secret: ${GOOGLE_CLIENT_SECRET}
-        redirect-uri: ${GOOGLE_REDIRECT_URI}
-        authorization-uri: https://accounts.google.com/o/oauth2/auth
         token-uri: https://oauth2.googleapis.com/token
         user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
-        user-info-name-attribute-key: sub
-        client-name: Google
     jwt:
       secret-key: ${JWT_SECRET_KEY}
       access-token-expiration-period: 150
       refresh-token-expiration-period: 1440
+    aes:
+      secret-key: ${AES_SECRET_KEY}
 
 ---
 spring:
@@ -76,9 +80,9 @@ spring:
           truststore:
             certificate: classpath:certs/ca/ca.crt
 
-#  data:
-#    mongodb:
-#      url: ${LOCAL_MONGODB_URL}
+  #  data:
+  #    mongodb:
+  #      url: ${LOCAL_MONGODB_URL}
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -133,5 +137,4 @@ app:
 logging:
   level:
     org.hibernate.SQL: error # Hibernate SQL 로그 레벨
-
 

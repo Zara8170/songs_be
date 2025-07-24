@@ -34,28 +34,30 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         log.info("check uri: " + path);
 
-        // Pre-flight 요청은 필터를 타지 않도록 설정
         if (request.getMethod().equals("OPTIONS")) {
             return true;
         }
+        if(path.startsWith("/api/auth/google")) {
+            return true;
+        }
+
         // /api/member/로 시작하는 요청은 필터를 타지 않도록 설정
-        if (path.startsWith("/api/member/login") || path.startsWith("/api/member/join")
-                || path.startsWith("/api/member/check-email")
-                || path.startsWith("/api/member/refresh") || path.startsWith("/api/member/logout")
-                || path.startsWith("/api/member/kakao") || path.startsWith("/api/member/google")
-                || path.startsWith("/api/member/naver") || path.startsWith("/api/member/github")
-                || path.startsWith("/api/member/facebook") || path.startsWith("/api/member/social")
+        if (    path.startsWith("/api/member/check-email")
+                || path.startsWith("/api/member/refresh")
+                || path.startsWith("/api/member/logout")
+                || path.startsWith("/api/member/google")
+                || path.startsWith("/api/member/social")
         ) {
             return true;
         }
 
         if(path.startsWith("/api/song/list") || path.startsWith("/api/song/{id}")
-        || path.startsWith("/api/song") || path.startsWith("/api/song/batch")) {
+                || path.startsWith("/api/song") || path.startsWith("/api/song/batch")) {
             return true;
         }
 
         if(path.startsWith("/api/es/song") || path.startsWith("/api/es/song/{id}")
-        || path.startsWith("/api/es/song/list")) {
+                || path.startsWith("/api/es/song/list")) {
             return true;
         }
 
@@ -119,7 +121,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             // 쿠키로 가져와
             log.info("JWTCheckFilter accessToken: {}", accessToken);
 
-            Map<String, Object> claims = jwtUtil.validateToken(accessToken);
+            Map<String, Object> claims = jwtUtil.validate(accessToken);
 
             log.info("JWT claims: {}", claims);
 

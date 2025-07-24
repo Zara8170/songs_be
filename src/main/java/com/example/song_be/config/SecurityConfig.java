@@ -28,7 +28,7 @@ import java.util.Arrays;
 @Configuration
 @Log4j2
 @RequiredArgsConstructor
-@EnableMethodSecurity  // @PreAuthorize, @Secured, @RolesAllowed 어노테이션을 사용하기 위해 필요
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JWTCheckFilter jwtCheckFilter;
@@ -52,31 +52,14 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(
                 authorizeHttpRequests -> authorizeHttpRequests
-                        // /api/admin/join, /api/admin/login,logout 모두 접근 가능
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/join")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/login")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/logout")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/refresh")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/google/token")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/google")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/member/me")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/auth/google")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/member/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/song/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/es/song/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/migration/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/recommendation/**")).permitAll()
-                        // /api/admin/join, /api/admin/login,logout 모두 접근 가능
-                        .requestMatchers(new AntPathRequestMatcher("/api/admin/member/join")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/admin/member/login")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/admin/member/logout")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/admin/member/refresh")).permitAll()
                         // health check
                         .requestMatchers(new AntPathRequestMatcher("/health/**")).permitAll()
-                        // api path에 admin 포함되면 ROLE_ADMIN 권한이 있어야 접근 가능,
-                        .requestMatchers(new AntPathRequestMatcher("/api/admin/**")).hasRole("ADMIN")
-                        //review product 별 list 보기 허용
-                        .requestMatchers("/api/review/list/*").permitAll()
-                        // WebSocket handshake만 허용 ,초기 http 연결이 필요하므로 권한 허용을 해주어야 함( 자세히 보면 엔드포인트가 다릅니다)
-                        .requestMatchers("/wss-stomp/**").permitAll()
                         // 정적 리소스에 대한 접근 허용
                         .requestMatchers(new AntPathRequestMatcher("/favicon.ico")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/v2/api-docs")).permitAll()

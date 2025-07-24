@@ -1,18 +1,11 @@
 package com.example.song_be.domain.member.service;
 
-import com.example.song_be.domain.member.dto.JoinRequestDTO;
 import com.example.song_be.domain.member.entity.Member;
 import com.example.song_be.security.MemberDTO;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 
 import java.util.Map;
 
 public interface MemberService {
-
-    Map<String, Object> login(@NotBlank(message = "이메일을 입력해주세요") String email, @NotBlank(message = "패스워드를  입력해주세요") String password);
-
-    void join(@Valid JoinRequestDTO joinRequestDTO);
 
     /**
      * 회원 임시 비밀번호 발급
@@ -41,7 +34,6 @@ public interface MemberService {
                 member.getId(),
                 member.getEmail(),
                 member.getPassword(),
-                member.getNickname(),
                 member.getPhone(),
                 member.getMemberRoleList().stream()
                         .map(Enum::name).toList()
@@ -50,5 +42,7 @@ public interface MemberService {
 
     void deleteMember(String email);
 
-    Boolean checkEmail(String email);
+    boolean checkEmail(String email);
+
+    Map<String, Object> refreshTokens(String accessToken);
 }
