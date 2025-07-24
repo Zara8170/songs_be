@@ -1,5 +1,8 @@
 package com.example.song_be.domain.song.service;
 
+import com.example.song_be.domain.like.repository.SongLikeRepository;
+import com.example.song_be.domain.member.entity.Member;
+import com.example.song_be.domain.member.repository.MemberRepository;
 import com.example.song_be.domain.song.dto.SongDTO;
 import com.example.song_be.domain.song.entity.Song;
 import com.example.song_be.domain.song.repository.SongRepository;
@@ -21,17 +24,40 @@ import java.util.stream.Collectors;
 public class SongServiceImpl implements SongService {
 
     private final SongRepository songRepository;
+    private final MemberRepository memberRepository;
+    private final SongLikeRepository songLikeRepository;
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponseDTO<SongDTO> getSongList(PageRequestDTO requestDTO) {
+    public PageResponseDTO<SongDTO> getSongList(PageRequestDTO requestDTO, Long memberId) {
+        log.info("getSongList start...");
+        // 1. 사용자 정보 확인 및 좋아요 목록 조회
+        List<Long> likedSongIds = Collections.emptyList();
+        log.info("memberId: {}", memberId);
+        if (memberId != null) {
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+            log.info("member: {}", member);
+            likedSongIds = songLikeRepository.findByMember(member).stream()
+                    .map(like -> like.getSong().getSongId())
+                    .toList();
+            log.info("likedSongIds: {}", likedSongIds);
+        }
 
+        // 2. 노래 목록 조회
         var page = songRepository.findListBy(requestDTO);
 
+        // 3. DTO 변환 (좋아요 상태 포함)
+        final List<Long> finalLikedSongIds = likedSongIds;
         List<SongDTO> dtoList = page.getContent()
                 .stream()
-                .map(this::toDTO)   // 엔티티 → DTO
+                .map(song -> {
+                    SongDTO dto = toDTO(song);
+                    dto.setLikedByMe(finalLikedSongIds.contains(song.getSongId()));
+                    return dto;
+                })
                 .toList();
+        log.info("dtoList: {}", dtoList);
 
         return PageResponseDTO.<SongDTO>withAll()
                 .dtoList(dtoList)
@@ -58,7 +84,7 @@ public class SongServiceImpl implements SongService {
 
         List<Song> songs = songRepository.findAllById(songIds);
         return songs.stream()
-                .map(SongDTO::fromEntity)
+                .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 

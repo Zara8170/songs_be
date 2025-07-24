@@ -51,8 +51,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
-        if(path.startsWith("/api/song/list") || path.startsWith("/api/song/{id}")
-                || path.startsWith("/api/song") || path.startsWith("/api/song/batch")) {
+        if(path.startsWith("/api/song/{id}") || path.startsWith("/api/song/batch")) {
             return true;
         }
 
@@ -107,10 +106,17 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         String autHeaderStr = request.getHeader("Authorization");
         log.info("autHeaderStr Authorization: {}", autHeaderStr);
 
-        if ((Objects.equals(autHeaderStr, "Bearer null") || (autHeaderStr == null)) && (
-                request.getServletPath().startsWith("/api/product/")
-
-        )) {
+        // 토큰이 없는 비로그인 사용자의 경우
+        if (autHeaderStr == null || !autHeaderStr.startsWith("Bearer ")) {
+            log.info("Token is null, chain.doFilter");
+            // /api/song/list는 비로그인 사용자도 접근 가능해야 하므로 그냥 통과
+            if (request.getRequestURI().startsWith("/api/song/list")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            // 그 외의 경우는 에러 처리 (기존 로직과 유사하게)
+            // 또는 SecurityConfig에서 처리하도록 그냥 통과시키고 컨트롤러에서 @AuthenticationPrincipal로 처리해도 됨
+            // 여기서는 명시적으로 에러를 발생시키지 않고, 다음 필터로 넘겨서 Security 단에서 처리하도록 함
             filterChain.doFilter(request, response);
             return;
         }

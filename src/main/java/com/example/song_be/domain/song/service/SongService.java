@@ -10,7 +10,7 @@ import java.util.List;
 public interface SongService {
 
 
-    PageResponseDTO<SongDTO> getSongList(PageRequestDTO requestDTO);
+    PageResponseDTO<SongDTO> getSongList(PageRequestDTO pageRequestDTO, Long memberId);
 
     SongDTO getSongById(Long id);
 
@@ -31,16 +31,8 @@ public interface SongService {
                 .title_en(song.getTitle_en())
                 .title_en_kr(song.getTitle_en_kr())
                 .title_jp(song.getTitle_jp())
-                .title_yomi(song.getTitle_yomi())
-                .title_yomi_kr(song.getTitle_yomi_kr())
-                .lang(song.getLang())
-                .genre(song.getGenre())
-                .mood(song.getMood())
                 .artist(song.getArtist())
                 .artist_kr(song.getArtist_kr())
-                .lyrics_original(song.getLyrics_original())
-                .lyrics_yomi(song.getLyrics_yomi())
-                .lyrics_kr(song.getLyrics_kr())
                 .build();
     }
 
