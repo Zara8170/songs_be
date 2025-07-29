@@ -13,22 +13,30 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 
-@Slf4j
 @Component
+@Slf4j
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        log.info("Authentication error...... start...");
+    public void commence(HttpServletRequest request,
+                        HttpServletResponse response,
+                        AuthenticationException authException) throws IOException, ServletException {
+
+        String method = request.getMethod();
+        String requestURI = request.getRequestURI();
+        String authHeader = request.getHeader("Authorization");
 
         ObjectMapper objectMapper = new ObjectMapper();
-        String jsonStr = objectMapper.writeValueAsString(Map.of("error", "ERROR_LOGIN"));
+        String msg = objectMapper.writeValueAsString(Map.of(
+                "error", "ERROR_ACCESS_TOKEN",
+                "message", "유효하지 않은 토큰입니다",
+                "path", requestURI
+        ));
 
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
         PrintWriter printWriter = response.getWriter();
-        printWriter.println(jsonStr);
+        printWriter.println(msg);
         printWriter.close();
     }
 }

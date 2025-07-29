@@ -38,6 +38,7 @@ public class Member extends BaseEntity {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "member_role_list", joinColumns = @JoinColumn(name = "id"))
     @Column(name = "role")
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     private List<MemberRole> memberRoleList = new ArrayList<>();
 

@@ -106,6 +106,7 @@ public class GoogleAuthService {
                 });
 
         LoginResponseDTO responseDTO = LoginResponseDTO.builder()
+                .memberId(member.getId())
                 .accessToken(accessToken)
                 .email(email)
                 .roles(List.of(MemberRole.USER.name()))

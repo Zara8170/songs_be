@@ -64,10 +64,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             return true;
         }
 
-        if (path.startsWith("/api/recommendation/request")) {
-            return true;
-        }
-
         // -----
         // health check
         if (path.startsWith("/com/example/login_project/health")) {
@@ -114,9 +110,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
-            // 그 외의 경우는 에러 처리 (기존 로직과 유사하게)
-            // 또는 SecurityConfig에서 처리하도록 그냥 통과시키고 컨트롤러에서 @AuthenticationPrincipal로 처리해도 됨
-            // 여기서는 명시적으로 에러를 발생시키지 않고, 다음 필터로 넘겨서 Security 단에서 처리하도록 함
+
             filterChain.doFilter(request, response);
             return;
         }
@@ -145,11 +139,19 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             // 다음 필터로 이동
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            log.error("JWT Check Error...........");
-            log.error("e.getMessage(): {}", e.getMessage());
+            log.error("JWT Check Error occurred:");
+            log.error("  -> Request: {} {}", request.getMethod(), request.getRequestURI());
+            log.error("  -> Token: {}", autHeaderStr != null ? autHeaderStr.substring(0, Math.min(30, autHeaderStr.length())) + "..." : "null");
+            log.error("  -> Exception Type: {}", e.getClass().getSimpleName());
+            log.error("  -> Exception Message: {}", e.getMessage());
+            log.error("  -> Stack Trace: ", e);
 
             ObjectMapper objectMapper = new ObjectMapper();
-            String msg = objectMapper.writeValueAsString(Map.of("error", "ERROR_ACCESS_TOKEN"));
+            String msg = objectMapper.writeValueAsString(Map.of(
+                    "error", "ERROR_ACCESS_TOKEN",
+                    "message", "유효하지 않은 토큰입니다",
+                    "path", request.getRequestURI()
+            ));
 
             response.setContentType("application/json;charset=UTF-8");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
