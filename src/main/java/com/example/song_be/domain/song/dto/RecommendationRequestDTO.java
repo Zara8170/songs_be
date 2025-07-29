@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class RecommendationRequestDTO {
-    private String text;
+    private String memberId;
     @JsonProperty("favorite_song_ids")
     private List<Long> favoriteSongIds;
 }

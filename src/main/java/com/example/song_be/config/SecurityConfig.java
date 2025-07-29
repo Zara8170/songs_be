@@ -56,9 +56,9 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/api/member/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/migration/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/song/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/likes/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/es/song/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/recommendation/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/recommendation/**")).hasRole("USER")
+                        .requestMatchers(new AntPathRequestMatcher("/api/likes/**")).hasRole("USER")
                         // health check
                         .requestMatchers(new AntPathRequestMatcher("/health/**")).permitAll()
                         // 정적 리소스에 대한 접근 허용
