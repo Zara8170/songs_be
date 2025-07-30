@@ -74,4 +74,12 @@ public class SongLikeServiceImpl implements SongLikeService {
                 .map(p -> new SongLikeCountDTO(p.getSongId(), p.getLikeCnt()))
                 .toList();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SongLikeCountDTO> getAllSongsWithLikes() {
+        return likeRepo.findAllSongsWithLikes().stream()
+                .map(p -> new SongLikeCountDTO(p.getSongId(), p.getLikeCnt()))
+                .toList();
+    }
 }

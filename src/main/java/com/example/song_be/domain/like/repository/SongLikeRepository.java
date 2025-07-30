@@ -33,6 +33,17 @@ public interface SongLikeRepository extends JpaRepository<SongLike, Long> {
            """)
     List<SongLikeCount> countBySongIds(@Param("songIds") List<Long> songIds);
 
+    /* 3) 좋아요가 있는 모든 노래들의 카운트 조회 */
+    @Query("""
+           select l.song.songId as songId,
+                  count(l)       as likeCnt
+             from SongLike l
+            group by l.song.songId
+            having count(l) > 0
+            order by count(l) desc
+           """)
+    List<SongLikeCount> findAllSongsWithLikes();
+
     interface SongLikeCount {
         Long getSongId();
         Long getLikeCnt();
