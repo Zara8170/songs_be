@@ -16,7 +16,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@ToString(exclude = "memberRoleList")
 @Entity
 @Table(name = "member")
 public class Member extends BaseEntity {
@@ -55,6 +54,7 @@ public class Member extends BaseEntity {
     }
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     @Builder.Default
     private List<SongLike> likedSongs = new ArrayList<>();
 }

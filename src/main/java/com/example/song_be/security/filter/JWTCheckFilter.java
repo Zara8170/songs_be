@@ -18,7 +18,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 @Component
@@ -52,6 +51,10 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         }
 
         if(path.startsWith("/api/song/{id}") || path.startsWith("/api/song/batch")) {
+            return true;
+        }
+
+        if(path.startsWith("/api/likes/songs/{songId}/count") || path.startsWith("/api/likes/songs/counts")) {
             return true;
         }
 

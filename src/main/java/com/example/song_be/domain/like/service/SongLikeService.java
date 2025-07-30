@@ -21,4 +21,9 @@ public interface SongLikeService {
     long getLikeCount(Long songId);
 
     List<SongLikeCountDTO> getLikeCounts(List<Long> ids);
+
+    /**
+     * 좋아요가 있는 모든 노래들의 좋아요 카운트 조회 (좋아요 많은 순으로 정렬)
+     */
+    List<SongLikeCountDTO> getAllSongsWithLikes();
 }
