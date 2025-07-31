@@ -2,12 +2,7 @@ package com.example.song_be.domain.member.service;
 
 import com.example.song_be.domain.member.entity.Member;
 import com.example.song_be.domain.member.repository.MemberRepository;
-import com.example.song_be.props.JwtProps;
-import com.example.song_be.security.CustomUserDetailService;
 import com.example.song_be.security.MemberDTO;
-import com.example.song_be.security.entity.RefreshToken;
-import com.example.song_be.security.repository.RefreshTokenRepository;
-import com.example.song_be.util.AesUtil;
 import com.example.song_be.util.JWTUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +21,8 @@ import com.example.song_be.exception.CustomJWTException;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenService refreshTokenService;
     private final JWTUtil jwtUtil;
-    private final AesUtil aesUtil;
 
     @Override
     public String makeTempPassword() {
@@ -69,37 +63,29 @@ public class MemberServiceImpl implements MemberService {
         Long memberId = ((Integer) claims.get("id")).longValue();
         log.info("  -> Parsed Member ID from expired Access Token: {}", memberId);
 
-        // 2. DB에서 Refresh Token 조회
-        RefreshToken refreshToken = refreshTokenRepository.findByMemberId(memberId)
-                .orElseThrow(() -> {
-                    log.error("[MemberService] Refresh Token not found for member ID: {}", memberId);
-                    return new CustomJWTException("Refresh Token not found for member " + memberId);
-                });
-        log.info("  -> Found Refresh Token in DB for member ID: {}", memberId);
+        // 2. Redis/DB에서 Refresh Token 조회
+        String refreshToken = refreshTokenService.getRefreshToken(memberId);
+        log.info("  -> Found Refresh Token for member ID: {}", memberId);
 
-        // 3. Refresh Token 복호화 및 유효성 검증
-        String decryptedToken = aesUtil.decrypt(refreshToken.getEncryptedToken());
-        log.info("  -> Refresh Token decrypted successfully.");
-        
-        jwtUtil.validate(decryptedToken); // 만료 or 위조 시 예외 발생
+        // 3. Refresh Token 유효성 검증
+        if (!refreshTokenService.validateRefreshToken(refreshToken)) {
+            log.error("[MemberService] Refresh Token validation failed for member ID: {}", memberId);
+            throw new CustomJWTException("Invalid Refresh Token for member " + memberId);
+        }
         log.info("  -> Refresh Token validated successfully (not expired, not tampered).");
 
         // 4. 새로운 Access Token 발급
         String newAccessToken = jwtUtil.generateAccessToken(claims);
         log.info("[MemberService] Generated new Access Token (first 10 chars): {}", newAccessToken.substring(0, 10) + "...");
 
-        // (선택) Refresh Token 만료 임박 시, 재발급 (예: 7일 이내)
-        String newRefreshToken = decryptedToken;
-        if (jwtUtil.willExpireWithin(decryptedToken, 7 * 24 * 60)) {
+        // 5. Refresh Token 만료 임박 시, 재발급 (예: 7일 이내)
+        if (refreshTokenService.willExpireSoon(refreshToken, 7 * 24 * 60)) {
             log.info("  -> Refresh Token will expire soon. Renewing...");
-            newRefreshToken = jwtUtil.generateRefreshToken(claims);
-            String encryptedNewToken = aesUtil.encrypt(newRefreshToken);
+            String newRefreshToken = jwtUtil.generateRefreshToken(claims);
             long newExpiry = jwtUtil.getExpiryMillis(newRefreshToken);
-
-            refreshToken.setEncryptedToken(encryptedNewToken);
-            refreshToken.setExpiry(newExpiry);
-            refreshTokenRepository.save(refreshToken);
-            log.info("  -> New Refresh Token saved to DB.");
+            
+            refreshTokenService.saveRefreshToken(memberId, newRefreshToken, newExpiry);
+            log.info("  -> New Refresh Token saved to Redis and DB.");
         }
 
         Map<String, Object> responseMap = Map.of("accessToken", newAccessToken);

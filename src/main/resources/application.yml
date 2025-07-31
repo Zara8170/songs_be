@@ -41,6 +41,17 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    password: ${REDIS_PASSWORD}
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
   task:
     scheduling:
       pool:

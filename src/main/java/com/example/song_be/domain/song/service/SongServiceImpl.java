@@ -30,34 +30,26 @@ public class SongServiceImpl implements SongService {
     @Override
     @Transactional(readOnly = true)
     public PageResponseDTO<SongDTO> getSongList(PageRequestDTO requestDTO, Long memberId) {
-        log.info("getSongList start...");
-        // 1. 사용자 정보 확인 및 좋아요 목록 조회
         List<Long> likedSongIds = Collections.emptyList();
-        log.info("memberId: {}", memberId);
         if (memberId != null) {
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-            log.info("member: {}", member);
             likedSongIds = songLikeRepository.findByMember(member).stream()
                     .map(like -> like.getSong().getSongId())
                     .toList();
-            log.info("likedSongIds: {}", likedSongIds);
         }
 
-        // 2. 노래 목록 조회
         var page = songRepository.findListBy(requestDTO);
 
-        // 3. DTO 변환 (좋아요 상태 포함)
         final List<Long> finalLikedSongIds = likedSongIds;
         List<SongDTO> dtoList = page.getContent()
                 .stream()
                 .map(song -> {
-                    SongDTO dto = toDTO(song);
+                    SongDTO dto = SongDTO.from(song);
                     dto.setLikedByMe(finalLikedSongIds.contains(song.getSongId()));
                     return dto;
                 })
                 .toList();
-        log.info("dtoList: {}", dtoList);
 
         return PageResponseDTO.<SongDTO>withAll()
                 .dtoList(dtoList)
@@ -72,7 +64,7 @@ public class SongServiceImpl implements SongService {
         log.info("getSongById start...");
 
         return songRepository.findById(id)
-                .map(this::toDTO)
+                .map(SongDTO::from)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 곡이 없습니다: " + id));
     }
 
@@ -84,7 +76,7 @@ public class SongServiceImpl implements SongService {
 
         List<Song> songs = songRepository.findAllById(songIds);
         return songs.stream()
-                .map(this::toDTO)
+                .map(SongDTO::from)
                 .collect(Collectors.toList());
     }
 
@@ -92,8 +84,22 @@ public class SongServiceImpl implements SongService {
     public SongDTO createSong(SongDTO songDTO) {
         log.info("createSong start...");
 
-        Song saved = songRepository.save(toEntity(songDTO));
-        return toDTO(saved);
+        if (songDTO.getTj_number() != null) {
+            songRepository.findByTjNumber(songDTO.getTj_number())
+                    .ifPresent(existingSong -> {
+                        throw new IllegalArgumentException("이미 등록된 곡입니다. (TJ 번호: " + songDTO.getTj_number() + ")");
+                    });
+        }
+
+        if (songDTO.getKy_number() != null) {
+            songRepository.findByKyNumber(songDTO.getKy_number())
+                    .ifPresent(existingSong -> {
+                        throw new IllegalArgumentException("이미 등록된 곡입니다. (KY 번호: " + songDTO.getKy_number() + ")");
+                    });
+        }
+
+        Song saved = songRepository.save(songDTO.toEntity());
+        return SongDTO.from(saved);
     }
 
     @Override
@@ -113,7 +119,7 @@ public class SongServiceImpl implements SongService {
         song.setLyrics_original(songDTO.getLyrics_original());
         song.setLyrics_kr(songDTO.getLyrics_kr());
         songRepository.save(song);
-        return toDTO(song);
+        return SongDTO.from(song);
     }
 
     @Override
