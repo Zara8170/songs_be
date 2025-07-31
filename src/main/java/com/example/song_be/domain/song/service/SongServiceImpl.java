@@ -85,14 +85,14 @@ public class SongServiceImpl implements SongService {
         log.info("createSong start...");
 
         if (songDTO.getTj_number() != null) {
-            songRepository.findByTjNumber(songDTO.getTj_number())
+            songRepository.findByTj_number(songDTO.getTj_number())
                     .ifPresent(existingSong -> {
                         throw new IllegalArgumentException("이미 등록된 곡입니다. (TJ 번호: " + songDTO.getTj_number() + ")");
                     });
         }
 
         if (songDTO.getKy_number() != null) {
-            songRepository.findByKyNumber(songDTO.getKy_number())
+            songRepository.findByKy_number(songDTO.getKy_number())
                     .ifPresent(existingSong -> {
                         throw new IllegalArgumentException("이미 등록된 곡입니다. (KY 번호: " + songDTO.getKy_number() + ")");
                     });
