@@ -15,9 +15,7 @@ import com.example.song_be.domain.member.enums.MemberRole;
 import com.example.song_be.domain.member.repository.MemberRepository;
 import com.example.song_be.props.GoogleProps;
 import com.example.song_be.security.MemberDTO;
-import com.example.song_be.security.entity.RefreshToken;
-import com.example.song_be.security.repository.RefreshTokenRepository;
-import com.example.song_be.util.AesUtil;
+
 import com.example.song_be.util.JWTUtil;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -37,8 +35,7 @@ public class GoogleAuthService {
     private final MemberService memberService;
     private final PasswordEncoder passwordEncoder;
     private final JWTUtil jwtUtil;
-    private final AesUtil aes;
-    private final RefreshTokenRepository refreshRepo;
+    private final RefreshTokenService refreshTokenService;
 
     /** 로그인 + JWT 2종 발급 */
     @Transactional
@@ -89,21 +86,10 @@ public class GoogleAuthService {
         log.info("[GoogleAuthService] Generated Access Token (first 10 chars): {}", accessToken.substring(0, 10) + "...");
         log.info("[GoogleAuthService] Generated Refresh Token (first 10 chars): {}", refreshToken.substring(0, 10) + "...");
 
-        /* 3) RefreshToken 암호화 후 upsert */
-        String enc = aes.encrypt(refreshToken);
+        /* 3) RefreshToken 저장 (Redis + DB 암호화) */
         long expMs = jwtUtil.getExpiryMillis(refreshToken);
-
-        refreshRepo.findByMemberId(member.getId())
-                .ifPresentOrElse(rt -> {
-                    log.info("  -> Updating existing RefreshToken for member ID: {}", member.getId());
-                    rt.setEncryptedToken(enc);
-                    rt.setExpiry(expMs);
-                }, () -> {
-                    log.info("  -> Saving new RefreshToken for member ID: {}", member.getId());
-                    refreshRepo.save(
-                        RefreshToken.builder()
-                                .member(member).encryptedToken(enc).expiry(expMs).build());
-                });
+        refreshTokenService.saveRefreshToken(member.getId(), refreshToken, expMs);
+        log.info("  -> Saved RefreshToken to Redis and DB for member ID: {}", member.getId());
 
         LoginResponseDTO responseDTO = LoginResponseDTO.builder()
                 .memberId(member.getId())

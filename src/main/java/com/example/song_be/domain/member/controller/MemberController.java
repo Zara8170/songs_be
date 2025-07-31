@@ -50,12 +50,24 @@ public class MemberController {
     public ResponseEntity<Map<String,Object>> refresh(
             @RequestHeader("Authorization") String authorizationHeader) {
 
+        log.info("=== 🔄 TOKEN REFRESH REQUEST START ===");
+        log.info("Authorization header received: {}", authorizationHeader != null ? "YES" : "NO");
+        
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            log.error("❌ Invalid or missing Authorization header: {}", authorizationHeader);
             throw new CustomJWTException("Invalid or missing Authorization header");
         }
         
         String accessToken = authorizationHeader.substring(7);
+        log.info("Extracted access token (first 20 chars): {}...", accessToken.substring(0, Math.min(20, accessToken.length())));
+        log.info("Calling memberService.refreshTokens()...");
+        
+        long startTime = System.currentTimeMillis();
         Map<String, Object> newTokens = memberService.refreshTokens(accessToken);
+        long endTime = System.currentTimeMillis();
+        
+        log.info("✅ Token refresh completed successfully in {}ms", endTime - startTime);
+        log.info("=== 🔄 TOKEN REFRESH REQUEST END ===");
 
         return ResponseEntity.ok(newTokens);
     }
