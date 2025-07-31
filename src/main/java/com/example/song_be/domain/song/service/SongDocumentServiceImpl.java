@@ -1,6 +1,9 @@
 package com.example.song_be.domain.song.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
@@ -15,9 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -45,6 +46,12 @@ public class SongDocumentServiceImpl implements SongDocumentService {
             "lyrics_yomi",
             "lyrics_yomi_kr",
             "lyrics_kr"
+    );
+
+    private static final List<String> INITIAL_FIELDS = List.of(
+            "title_kr.initial^6",
+            "artist_kr.initial^4",
+            "title_yomi_kr.initial^4"
     );
 
     private static final Map<SearchTarget, List<String>> FIELD_MAP = Map.of(
@@ -110,7 +117,7 @@ public class SongDocumentServiceImpl implements SongDocumentService {
                         .index(INDEX_NAME)
                         .from(offset)
                         .size(pageReq.getSize())
-                        .query(q -> q.matchAll(m -> m)),        // 전체
+                        .query(q -> q.matchAll(m -> m)),
                 SongDocument.class);
 
         long total = res.hits().total() == null ? 0
@@ -142,48 +149,70 @@ public class SongDocumentServiceImpl implements SongDocumentService {
 
         int offset = (pageReq.getPage() - 1) * pageReq.getSize();
 
-        List<String> baseFields = (target == SearchTarget.ALL)
-                ? Stream.of(TITLE_FIELDS, ARTIST_FIELDS, LYRICS_FIELDS).flatMap(List::stream).toList()
-                : FIELD_MAP.get(target);
+        List<String> baseFields = switch (target) {
+            case TITLE  -> TITLE_FIELDS;
+            case ARTIST -> ARTIST_FIELDS;
+            case LYRICS -> LYRICS_FIELDS;
+            default     -> Stream.of(TITLE_FIELDS, ARTIST_FIELDS, LYRICS_FIELDS)
+                    .flatMap(Collection::stream)
+                    .toList();
+        };
 
         boolean choSeongOnly = keyword.matches("^[\\u3131-\\u314E]+$");
-        boolean shortQuery   = keyword.codePointCount(0, keyword.length()) <= 2;
+        int codePoints       = keyword.codePointCount(0, keyword.length());
+        boolean useFuzzy     = codePoints >= 4 && !choSeongOnly;
 
-        // 초성 필드 추가 (초성만 검색할 때가 아니라 항상 포함)
-        List<String> initialFields = List.of(
-                "title_kr.initial^2",
-                "title_yomi_kr.initial^2",
-                "artist_kr.initial^2"
-        );
+        BoolQuery boolQuery = BoolQuery.of(b -> {
 
-        List<String> fields;
-        if (choSeongOnly) {
-            // 순수 초성 검색일 때는 초성 필드만 사용
-            fields = initialFields;
-        } else {
-            // 일반 검색일 때는 기본 필드 + 초성 필드 모두 사용
-            fields = Stream.concat(baseFields.stream(), initialFields.stream()).toList();
-        }
+            b.should(q -> q.multiMatch(mm -> mm
+                    .query(keyword)
+                    .fields(baseFields)
+                    .type(TextQueryType.PhrasePrefix)
+                    .operator(Operator.And)
+                    .slop(0)
+                    .boost(4.0f)
+            ));
+
+            if (useFuzzy) {
+                b.should(q -> q.multiMatch(mm -> mm
+                        .query(keyword)
+                        .fields(baseFields)
+                        .fuzziness("1")
+                        .prefixLength(1)
+                        .maxExpansions(50)
+                        .boost(1.0f)
+                ));
+            }
+
+            b.should(q -> q.multiMatch(mm -> mm
+                    .query(keyword)
+                    .fields(INITIAL_FIELDS)
+                    .type(TextQueryType.BoolPrefix)
+                    .fuzziness("0")
+                    .boost(choSeongOnly ? 4.0f : 2.0f)
+            ));
+
+            b.minimumShouldMatch("1");
+            return b;
+        });
 
         SearchResponse<SongDocument> res = elasticsearchClient.search(s -> s
-                .index(INDEX_NAME)
-                .from(offset)
-                .size(pageReq.getSize())
-                .query(q -> q.multiMatch(m -> {
-                    m.query(keyword)
-                            .fields(fields)
-                            .type(TextQueryType.BestFields)
-                            .operator(Operator.And)
-                            .minimumShouldMatch(shortQuery ? "100%" : "2<75%");
-                    if (!shortQuery && !choSeongOnly) m.fuzziness("AUTO");
-                    return m;
-                })), SongDocument.class);
+                        .index(INDEX_NAME)
+                        .from(offset)
+                        .size(pageReq.getSize())
+                        .query(q -> q.bool(boolQuery))
+                        .minScore(0.8)
+                        .sort(SortOptions.of(so -> so
+                                .score(_s -> _s.order(SortOrder.Desc))))
+                , SongDocument.class);
 
-        long total = res.hits().total() == null ? 0
-                : res.hits().total().value();
+        long total = Optional.ofNullable(res.hits().total())
+                .map(t -> t.value())
+                .orElse(0L);
 
         List<SongDTO> dtoList = res.hits().hits()
                 .stream().map(Hit::source)
+                .filter(Objects::nonNull)
                 .map(this::toDTO)
                 .toList();
 
@@ -193,6 +222,7 @@ public class SongDocumentServiceImpl implements SongDocumentService {
                 .totalCount(total)
                 .build();
     }
+
 
 
 }
