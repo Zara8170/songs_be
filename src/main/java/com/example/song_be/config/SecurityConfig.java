@@ -24,7 +24,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-@EnableWebSecurity  // Spring Security 설정을 활성화
+@EnableWebSecurity
 @Configuration
 @Log4j2
 @RequiredArgsConstructor
@@ -52,6 +52,7 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(
                 authorizeHttpRequests -> authorizeHttpRequests
+                        // 전체 허용
                         .requestMatchers(new AntPathRequestMatcher("/api/auth/google")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/member/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/migration/**")).permitAll()
@@ -59,9 +60,11 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/api/es/song/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/likes/songs/{songId}/count")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/likes/songs/counts")).permitAll()
+                        // 사용 유저 허용
                         .requestMatchers(new AntPathRequestMatcher("/api/recommendation/**")).hasRole("USER")
                         .requestMatchers(new AntPathRequestMatcher("/api/likes/songs/{songId}")).hasRole("USER")
                         .requestMatchers(new AntPathRequestMatcher("/api/likes")).hasRole("USER")
+                        .requestMatchers(new AntPathRequestMatcher("/api/playlist/**")).hasRole("USER")
                         // health check
                         .requestMatchers(new AntPathRequestMatcher("/health/**")).permitAll()
                         // 정적 리소스에 대한 접근 허용
