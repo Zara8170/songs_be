@@ -2,6 +2,7 @@ package com.example.song_be.domain.member.entity;
 
 import com.example.song_be.domain.like.entity.SongLike;
 import com.example.song_be.domain.member.enums.MemberRole;
+import com.example.song_be.domain.playlist.entity.Playlist;
 import com.example.song_be.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -57,4 +58,9 @@ public class Member extends BaseEntity {
     @ToString.Exclude
     @Builder.Default
     private List<SongLike> likedSongs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
+    private List<Playlist> playlists = new ArrayList<>();
 }

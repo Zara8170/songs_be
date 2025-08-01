@@ -29,19 +29,16 @@ public class SongRepositoryImpl implements SongRepositoryCustom {
     @Override
     public Page<Song> findListBy(PageRequestDTO requestDTO) {
 
-        /* 1) Pageable 생성 */
         Pageable pageable = PageRequest.of(
-                requestDTO.getPage() - 1,                // 0-based
+                requestDTO.getPage() - 1,
                 requestDTO.getSize(),
                 "asc".equalsIgnoreCase(requestDTO.getSort())
                         ? Sort.by("songId").ascending()
                         : Sort.by("songId").descending()
         );
 
-        /* 2) Sort → OrderSpecifier 변환 */
         OrderSpecifier<?>[] orderSpecifiers = createOrderSpecifiers(pageable.getSort());
 
-        /* 3) 실제 목록 조회 */
         List<Song> list = queryFactory
                 .selectFrom(song)
                 .orderBy(orderSpecifiers)
@@ -49,16 +46,13 @@ public class SongRepositoryImpl implements SongRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        /* 4) 카운트 쿼리 (필요할 때만 실행) */
         JPAQuery<Long> countQuery = queryFactory
                 .select(song.count())
                 .from(song);
 
-        /* 5) Page 리턴 */
         return PageableExecutionUtils.getPage(list, pageable, countQuery::fetchOne);
     }
 
-    /** Sort → OrderSpecifier[] 변환 */
     private OrderSpecifier<?>[] createOrderSpecifiers(Sort sort) {
 
         PathBuilder<Song> path = new PathBuilder<>(Song.class, "song");
