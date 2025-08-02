@@ -18,6 +18,11 @@ public interface SongLikeService {
      */
     List<SongDTO> getLikedSongs(Long memberId);
 
+    /**
+     * 로그인 사용자가 좋아요한 노래 ID 목록만 반환 (추천 시스템용)
+     */
+    List<Long> getLikedSongIds(Long memberId);
+
     long getLikeCount(Long songId);
 
     List<SongLikeCountDTO> getLikeCounts(List<Long> ids);

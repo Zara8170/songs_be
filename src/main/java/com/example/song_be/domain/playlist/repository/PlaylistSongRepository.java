@@ -29,4 +29,8 @@ public interface PlaylistSongRepository extends JpaRepository<PlaylistSong, Long
     // 특정 순서 이후의 모든 곡들 조회 (순서 재정렬용)
     @Query("SELECT ps FROM PlaylistSong ps WHERE ps.playlist.playlistId = :playlistId AND ps.order > :order ORDER BY ps.order ASC")
     List<PlaylistSong> findByPlaylistIdAndOrderGreaterThan(@Param("playlistId") Long playlistId, @Param("order") Integer order);
+
+    // 특정 사용자의 모든 플레이리스트에 있는 곡 ID들 조회 (추천 시스템용)
+    @Query("SELECT DISTINCT ps.song.songId FROM PlaylistSong ps WHERE ps.playlist.member.id = :memberId")
+    List<Long> findSongIdsByMemberId(@Param("memberId") Long memberId);
 }

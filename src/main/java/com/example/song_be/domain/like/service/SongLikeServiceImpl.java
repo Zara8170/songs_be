@@ -64,6 +64,21 @@ public class SongLikeServiceImpl implements SongLikeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Long> getLikedSongIds(Long memberId) {
+        Member member = memberRepo.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
+        List<Long> songIds = likeRepo.findByMemberWithSong(member).stream()
+                .map(like -> like.getSong().getSongId())
+                .toList();
+
+        log.info("getLikedSongIds for member {}: {}", memberId, songIds);
+
+        return songIds;
+    }
+
+    @Override
     public long getLikeCount(Long songId) {
         return likeRepo.countBySongId(songId);
     }
