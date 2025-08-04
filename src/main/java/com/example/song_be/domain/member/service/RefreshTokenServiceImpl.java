@@ -49,9 +49,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             String retrievedValue = redisTemplate.opsForValue().get(testKey);
             if (testValue.equals(retrievedValue)) {
                 log.info("[RefreshTokenService] Redis TEST READ successful: retrieved={}", retrievedValue);
-                log.info("[RefreshTokenService] ✅ Redis connection is working properly!");
+                log.info("[RefreshTokenService] Redis connection is working properly!");
             } else {
-                log.error("[RefreshTokenService] ❌ Redis TEST FAILED: expected={}, got={}", testValue, retrievedValue);
+                log.error("[RefreshTokenService] Redis TEST FAILED: expected={}, got={}", testValue, retrievedValue);
             }
             
             // 테스트 키 삭제
@@ -59,7 +59,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             log.info("[RefreshTokenService] Redis test cleanup completed");
             
         } catch (Exception e) {
-            log.error("[RefreshTokenService] ❌ Redis connection test FAILED: {}", e.getMessage(), e);
+            log.error("[RefreshTokenService] Redis connection test FAILED: {}", e.getMessage(), e);
         }
     }
 
@@ -77,7 +77,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             String encryptedTokenFromRedis = redisTemplate.opsForValue().get(redisKey);
             
             if (encryptedTokenFromRedis != null) {
-                log.info("[RefreshTokenService] ✅ REDIS HIT - Found encrypted refresh token in Redis for member ID: {}", memberId);
+                log.info("[RefreshTokenService] REDIS HIT - Found encrypted refresh token in Redis for member ID: {}", memberId);
                 log.info("[RefreshTokenService] Encrypted token from Redis (first 20 chars): {}...", encryptedTokenFromRedis.substring(0, Math.min(20, encryptedTokenFromRedis.length())));
                 
                 String decryptedToken = aesUtil.decrypt(encryptedTokenFromRedis);
@@ -85,20 +85,20 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 return decryptedToken;
             }
             
-            log.info("[RefreshTokenService] ❌ REDIS MISS - Token not found in Redis, checking DB for member ID: {}", memberId);
+            log.info("[RefreshTokenService] REDIS MISS - Token not found in Redis, checking DB for member ID: {}", memberId);
         } catch (Exception e) {
-            log.error("[RefreshTokenService] ❌ Redis operation failed: {}, falling back to DB", e.getMessage());
+            log.error("[RefreshTokenService] Redis operation failed: {}, falling back to DB", e.getMessage());
         }
         
         // 2. Redis에 없으면 DB에서 조회
         log.info("[RefreshTokenService] Querying database for refresh token...");
         RefreshToken refreshTokenFromDB = refreshTokenRepository.findByMemberId(memberId)
                 .orElseThrow(() -> {
-                    log.error("[RefreshTokenService] ❌ Refresh Token not found in DB for member ID: {}", memberId);
+                    log.error("[RefreshTokenService] Refresh Token not found in DB for member ID: {}", memberId);
                     return new CustomJWTException("Refresh Token not found for member " + memberId);
                 });
         
-        log.info("[RefreshTokenService] ✅ Found refresh token in DB for member ID: {}", memberId);
+        log.info("[RefreshTokenService] Found refresh token in DB for member ID: {}", memberId);
         
         // 3. DB에서 찾은 토큰을 Redis에 캐싱 (암호화된 상태로)
         String encryptedToken = refreshTokenFromDB.getEncryptedToken();
@@ -109,12 +109,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         if (ttl > 0) {
             try {
                 redisTemplate.opsForValue().set(redisKey, encryptedToken, ttl, TimeUnit.MILLISECONDS);
-                log.info("[RefreshTokenService] ✅ Successfully cached encrypted refresh token in Redis for member ID: {}", memberId);
+                log.info("[RefreshTokenService] Successfully cached encrypted refresh token in Redis for member ID: {}", memberId);
             } catch (Exception e) {
-                log.error("[RefreshTokenService] ❌ Failed to cache token in Redis: {}", e.getMessage());
+                log.error("[RefreshTokenService] Failed to cache token in Redis: {}", e.getMessage());
             }
         } else {
-            log.warn("[RefreshTokenService] ⚠️ Token already expired, not caching to Redis. TTL: {}", ttl);
+            log.warn("[RefreshTokenService] Token already expired, not caching to Redis. TTL: {}", ttl);
         }
         
         String decryptedToken = aesUtil.decrypt(encryptedToken);
@@ -142,20 +142,20 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         if (ttl > 0) {
             try {
                 redisTemplate.opsForValue().set(redisKey, encryptedToken, ttl, TimeUnit.MILLISECONDS);
-                log.info("[RefreshTokenService] ✅ SUCCESS - Saved encrypted refresh token to Redis for member ID: {}", memberId);
+                log.info("[RefreshTokenService] SUCCESS - Saved encrypted refresh token to Redis for member ID: {}", memberId);
                 
                 // Redis 저장 확인
                 String verifyValue = redisTemplate.opsForValue().get(redisKey);
                 if (verifyValue != null && verifyValue.equals(encryptedToken)) {
-                    log.info("[RefreshTokenService] ✅ VERIFIED - Redis save verification successful");
+                    log.info("[RefreshTokenService] VERIFIED - Redis save verification successful");
                 } else {
-                    log.error("[RefreshTokenService] ❌ VERIFICATION FAILED - Redis save verification failed");
+                    log.error("[RefreshTokenService] VERIFICATION FAILED - Redis save verification failed");
                 }
             } catch (Exception e) {
-                log.error("[RefreshTokenService] ❌ FAILED to save to Redis: {}", e.getMessage(), e);
+                log.error("[RefreshTokenService] FAILED to save to Redis: {}", e.getMessage(), e);
             }
         } else {
-            log.warn("[RefreshTokenService] ⚠️ TTL is negative ({}), skipping Redis save", ttl);
+            log.warn("[RefreshTokenService] TTL is negative ({}), skipping Redis save", ttl);
         }
         
         // 2. DB에 저장 (암호화된 상태로)
@@ -167,7 +167,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                             token.setEncryptedToken(encryptedToken);
                             token.setExpiry(expiry);
                             refreshTokenRepository.save(token);
-                            log.info("[RefreshTokenService] ✅ Successfully updated existing token in DB");
+                            log.info("[RefreshTokenService] Successfully updated existing token in DB");
                         },
                         () -> {
                             log.info("[RefreshTokenService] Creating new refresh token in DB for member ID: {}", memberId);
@@ -180,10 +180,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                                     .expiry(expiry)
                                     .build();
                             refreshTokenRepository.save(newRefreshToken);
-                            log.info("[RefreshTokenService] ✅ Successfully created new token in DB");
+                            log.info("[RefreshTokenService] Successfully created new token in DB");
                         }
                 );
-        log.info("[RefreshTokenService] ✅ Successfully saved encrypted refresh token for member ID: {}", memberId);
+        log.info("[RefreshTokenService] Successfully saved encrypted refresh token for member ID: {}", memberId);
         log.info("[RefreshTokenService] ================================");
     }
 
@@ -225,7 +225,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             return willExpire;
         } catch (Exception e) {
             log.error("[RefreshTokenService] Error checking token expiry: {}", e.getMessage());
-            return true; // 오류 시 만료 임박으로 처리
+            return true;
         }
     }
 } 

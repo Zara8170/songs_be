@@ -29,6 +29,7 @@ public class SongDocumentServiceImpl implements SongDocumentService {
     private final ElasticsearchClient elasticsearchClient;
     private static final String INDEX_NAME = "songs";
 
+
     // 검색 필드 매핑
     private static final List<String> TITLE_FIELDS = List.of(
             "title_kr^5",
@@ -48,10 +49,16 @@ public class SongDocumentServiceImpl implements SongDocumentService {
             "lyrics_kr"
     );
 
-    private static final List<String> INITIAL_FIELDS = List.of(
+    private static final List<String> INITIALS_WORD_FIELDS = List.of(
             "title_kr.initial^6",
-            "artist_kr.initial^4",
-            "title_yomi_kr.initial^4"
+            "title_yomi_kr.initial^6",
+            "artist_kr.initial^6"
+    );
+
+    private static final List<String> INITIALS_JOINED_FIELDS = List.of(
+        "title_kr.initial_joined^6",
+        "title_yomi_kr.initial_joined^6",
+        "artist_kr.initial_joined^6"
     );
 
     private static final Map<SearchTarget, List<String>> FIELD_MAP = Map.of(
@@ -158,14 +165,20 @@ public class SongDocumentServiceImpl implements SongDocumentService {
                     .toList();
         };
 
-        boolean choSeongOnly = keyword.matches("^[\\u3131-\\u314E]+$");
-        int codePoints       = keyword.codePointCount(0, keyword.length());
-        boolean useFuzzy     = codePoints >= 4 && !choSeongOnly;
+        String q = (keyword == null) ? "" : keyword.trim();
+        String qNoSpace = q.replaceAll("\\s+", "");
+
+        boolean initialsOnly       = q.matches("^[\\u3131-\\u314E]+$");
+        boolean initialsWithSpace  = q.matches("^[\\u3131-\\u314E]+(\\s+[\\u3131-\\u314E]+)+$");
+        boolean isChoseongInput    = initialsOnly || initialsWithSpace;
+
+        int codePoints = qNoSpace.codePointCount(0, qNoSpace.length());
+        boolean useFuzzy = codePoints >= 4 && !isChoseongInput;
 
         BoolQuery boolQuery = BoolQuery.of(b -> {
 
-            b.should(q -> q.multiMatch(mm -> mm
-                    .query(keyword)
+            b.should(qb -> qb.multiMatch(mm -> mm
+                    .query(q)
                     .fields(baseFields)
                     .type(TextQueryType.PhrasePrefix)
                     .operator(Operator.And)
@@ -174,8 +187,8 @@ public class SongDocumentServiceImpl implements SongDocumentService {
             ));
 
             if (useFuzzy) {
-                b.should(q -> q.multiMatch(mm -> mm
-                        .query(keyword)
+                b.should(qb -> qb.multiMatch(mm -> mm
+                        .query(q)
                         .fields(baseFields)
                         .fuzziness("1")
                         .prefixLength(1)
@@ -184,13 +197,25 @@ public class SongDocumentServiceImpl implements SongDocumentService {
                 ));
             }
 
-            b.should(q -> q.multiMatch(mm -> mm
-                    .query(keyword)
-                    .fields(INITIAL_FIELDS)
-                    .type(TextQueryType.BoolPrefix)
-                    .fuzziness("0")
-                    .boost(choSeongOnly ? 4.0f : 2.0f)
-            ));
+            if (initialsOnly) {
+                b.should(qb -> qb.multiMatch(mm -> mm
+                        .query(q)
+                        .fields(INITIALS_JOINED_FIELDS)
+                        .type(TextQueryType.BestFields)
+                        .operator(Operator.And)
+                        .boost(4.0f)
+                ));
+            }
+
+            if (initialsWithSpace) {
+                b.should(qb -> qb.multiMatch(mm -> mm
+                        .query(q)
+                        .fields(INITIALS_WORD_FIELDS)
+                        .type(TextQueryType.BestFields)
+                        .operator(Operator.And)
+                        .boost(4.0f)
+                ));
+            }
 
             b.minimumShouldMatch("1");
             return b;
@@ -200,7 +225,7 @@ public class SongDocumentServiceImpl implements SongDocumentService {
                         .index(INDEX_NAME)
                         .from(offset)
                         .size(pageReq.getSize())
-                        .query(q -> q.bool(boolQuery))
+                        .query(qb -> qb.bool(boolQuery))
                         .minScore(0.8)
                         .sort(SortOptions.of(so -> so
                                 .score(_s -> _s.order(SortOrder.Desc))))
