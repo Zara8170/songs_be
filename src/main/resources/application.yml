@@ -1,5 +1,6 @@
 server:
   port: 8082
+  address: ${SERVER_ADDRESS}
   max-http-header-size: 8KB
   max-http-post-size: 10MB
   tomcat:
