@@ -32,15 +32,16 @@ public class SongDocumentServiceImpl implements SongDocumentService {
 
     // 검색 필드 매핑
     private static final List<String> TITLE_FIELDS = List.of(
-            "title_kr^5",
-            "title_en^4",
-            "title_jp^4",
+            "title_kr^6",
+            "title_en_kr^4",
+            "title_en^2",
+            "title_jp^3",
             "title_yomi^3",
-            "title_yomi_kr^3"
+            "title_yomi_kr^4"
     );
     private static final List<String> ARTIST_FIELDS = List.of(
-            "artist^4",
-            "artist_kr^4"
+            "artist^3",
+            "artist_kr^5"
     );
     private static final List<String> LYRICS_FIELDS = List.of(
             "lyrics_original",
@@ -52,12 +53,14 @@ public class SongDocumentServiceImpl implements SongDocumentService {
     private static final List<String> INITIALS_WORD_FIELDS = List.of(
             "title_kr.initial^6",
             "title_yomi_kr.initial^6",
+            "title_en_kr.initial^6",
             "artist_kr.initial^6"
     );
 
     private static final List<String> INITIALS_JOINED_FIELDS = List.of(
         "title_kr.initial_joined^6",
         "title_yomi_kr.initial_joined^6",
+        "title_en_kr.initial_joined^6",
         "artist_kr.initial_joined^6"
     );
 
@@ -180,10 +183,29 @@ public class SongDocumentServiceImpl implements SongDocumentService {
             b.should(qb -> qb.multiMatch(mm -> mm
                     .query(q)
                     .fields(baseFields)
-                    .type(TextQueryType.PhrasePrefix)
-                    .operator(Operator.And)
-                    .slop(0)
+                    .type(TextQueryType.BestFields)
+                    .minimumShouldMatch("70%")
+                    .operator(Operator.Or)
+                    .tieBreaker(0.2)
                     .boost(4.0f)
+            ));
+
+            b.should(qb -> qb.match(m -> m
+                    .field("title_kr.joined")
+                    .query(qNoSpace)
+                    .boost(3.0f)
+            ));
+
+            b.should(qb -> qb.match(m -> m
+                    .field("title_en_kr.joined")
+                    .query(qNoSpace)
+                    .boost(3.0f)
+            ));
+
+            b.should(qb -> qb.match(m -> m
+                    .field("artist_kr.joined")
+                    .query(qNoSpace)
+                    .boost(3.0f)
             ));
 
             if (useFuzzy) {
@@ -191,8 +213,12 @@ public class SongDocumentServiceImpl implements SongDocumentService {
                         .query(q)
                         .fields(baseFields)
                         .fuzziness("1")
+                        .type(TextQueryType.BestFields)
+                        .operator(Operator.Or)
+                        .minimumShouldMatch("70%")
                         .prefixLength(1)
                         .maxExpansions(50)
+                        .tieBreaker(0.2)
                         .boost(1.0f)
                 ));
             }
@@ -226,7 +252,6 @@ public class SongDocumentServiceImpl implements SongDocumentService {
                         .from(offset)
                         .size(pageReq.getSize())
                         .query(qb -> qb.bool(boolQuery))
-                        .minScore(0.8)
                         .sort(SortOptions.of(so -> so
                                 .score(_s -> _s.order(SortOrder.Desc))))
                 , SongDocument.class);
