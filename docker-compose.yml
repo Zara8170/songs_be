@@ -12,9 +12,9 @@ services:
 
       # ── HTTP TLS ────────────────────────────────────────────
       - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.certificate_authorities=config/certs/fullchain.pem
-      - xpack.security.http.ssl.certificate=config/certs/fullchain.pem
-      - xpack.security.http.ssl.key=config/certs/privkey.pem
+      - xpack.security.http.ssl.certificate_authorities=${ES_CERTS_DIR}/fullchain.pem
+      - xpack.security.http.ssl.certificate=${ES_CERTS_DIR}/fullchain.pem
+      - xpack.security.http.ssl.key=${ES_CERTS_DIR}/privkey.pem
       - xpack.security.transport.ssl.enabled=true
       - xpack.security.transport.ssl.verification_mode=certificate
       - xpack.security.transport.ssl.certificate=config/certs/fullchain.pem
