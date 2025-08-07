@@ -12,18 +12,18 @@ services:
 
       # ── HTTP TLS ────────────────────────────────────────────
       - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.certificate=/etc/es-certs/fullchain.pem
-      - xpack.security.http.ssl.key=/etc/es-certs/privkey.pem
-
+      - xpack.security.http.ssl.certificate_authorities=config/certs/fullchain.pem
+      - xpack.security.http.ssl.certificate=config/certs/fullchain.pem
+      - xpack.security.http.ssl.key=config/certs/privkey.pem
       - xpack.security.transport.ssl.enabled=true
       - xpack.security.transport.ssl.verification_mode=certificate
-      - xpack.security.transport.ssl.certificate=/etc/es-certs/fullchain.pem
-      - xpack.security.transport.ssl.key=/etc/es-certs/privkey.pem
-      - xpack.security.transport.ssl.certificate_authorities=/etc/es-certs/fullchain.pem
+      - xpack.security.transport.ssl.certificate=config/certs/fullchain.pem
+      - xpack.security.transport.ssl.key=config/certs/privkey.pem
+      - xpack.security.transport.ssl.certificate_authorities=config/certs/fullchain.pem
     ports:
       - "9200:9200"
     volumes:
-      - /opt/es-certs:/etc/es-certs:ro
+      - /opt/es-certs:/usr/share/elasticsearch/config/certs:ro
       - esdata:/usr/share/elasticsearch/data
     healthcheck:
       test: ["CMD-SHELL", "curl -s -f https://localhost:9200/_cluster/health --cacert /etc/es-certs/fullchain.pem || exit 1"]
