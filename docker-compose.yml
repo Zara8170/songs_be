@@ -48,12 +48,12 @@ services:
 
 
       - SERVER_SSL_ENABLED=true
-      - SERVER_SSL_CERTIFICATE=${KB_CERTS_DIR}/kibana/kibana.crt
-      - SERVER_SSL_KEY=${KB_CERTS_DIR}/kibana/kibana.key
+      - SERVER_SSL_CERTIFICATE=/etc/kibana-certs/fullchain.pem
+      - SERVER_SSL_KEY=/etc/kibana-certs/privkey.pem
     ports:
       - "5601:5601"
     volumes:
-      - ./src/main/resources/certs:${KB_CERTS_DIR}:ro
+      - /opt/kibana-certs:/etc/kibana-certs:ro
 
 volumes:
   esdata:
