@@ -11,6 +11,7 @@ services:
       - xpack.security.enabled=true
 
       # ── HTTP TLS ────────────────────────────────────────────
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
       - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/fullchain.pem
       - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/privkey.pem
