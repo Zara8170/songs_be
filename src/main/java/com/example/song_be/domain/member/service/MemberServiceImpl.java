@@ -4,10 +4,11 @@ import com.example.song_be.domain.member.entity.Member;
 import com.example.song_be.domain.member.repository.MemberRepository;
 import com.example.song_be.security.MemberDTO;
 import com.example.song_be.util.JWTUtil;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final RefreshTokenService refreshTokenService;
     private final JWTUtil jwtUtil;
+    private final EntityManager entityManager;
 
     @Override
     public String makeTempPassword() {
@@ -43,10 +45,24 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
     public void deleteMember(String email) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("회원이 존재하지 않습니다."));
+        
+        Long memberId = member.getId();
+        log.info("회원 탈퇴 시작 - Email: {}, ID: {}", email, memberId);
+        
+        // 1. RefreshToken 삭제
+        refreshTokenService.deleteRefreshToken(memberId);
+        
+        // 2. 현재까지의 변경사항을 DB에 반영
+        entityManager.flush();
+        
+        // 3. 회원 삭제 (연관된 Playlist와 SongLike는 cascade로 자동 삭제됨)
         memberRepository.delete(member);
+        
+        log.info("회원 탈퇴 완료 - Email: {}, ID: {}", email, memberId);
     }
 
     @Override

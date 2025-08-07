@@ -64,11 +64,7 @@ public class SongDocumentServiceImpl implements SongDocumentService {
         "artist_kr.initial_joined^6"
     );
 
-    private static final Map<SearchTarget, List<String>> FIELD_MAP = Map.of(
-            SearchTarget.TITLE,  TITLE_FIELDS,
-            SearchTarget.ARTIST, ARTIST_FIELDS,
-            SearchTarget.LYRICS, LYRICS_FIELDS
-    );
+
 
     @Override
     public SongDocument save(SongDocument document) {
@@ -190,23 +186,46 @@ public class SongDocumentServiceImpl implements SongDocumentService {
                     .boost(4.0f)
             ));
 
-            b.should(qb -> qb.match(m -> m
-                    .field("title_kr.joined")
-                    .query(qNoSpace)
-                    .boost(3.0f)
-            ));
-
-            b.should(qb -> qb.match(m -> m
-                    .field("title_en_kr.joined")
-                    .query(qNoSpace)
-                    .boost(3.0f)
-            ));
-
-            b.should(qb -> qb.match(m -> m
-                    .field("artist_kr.joined")
-                    .query(qNoSpace)
-                    .boost(3.0f)
-            ));
+            switch (target) {
+                case TITLE -> {
+                    b.should(qb -> qb.match(m -> m
+                            .field("title_kr.joined")
+                            .query(qNoSpace)
+                            .boost(3.0f)
+                    ));
+                    b.should(qb -> qb.match(m -> m
+                            .field("title_en_kr.joined")
+                            .query(qNoSpace)
+                            .boost(3.0f)
+                    ));
+                }
+                case ARTIST -> {
+                    b.should(qb -> qb.match(m -> m
+                            .field("artist_kr.joined")
+                            .query(qNoSpace)
+                            .boost(3.0f)
+                    ));
+                }
+                case LYRICS -> {
+                }
+                default -> {
+                    b.should(qb -> qb.match(m -> m
+                            .field("title_kr.joined")
+                            .query(qNoSpace)
+                            .boost(3.0f)
+                    ));
+                    b.should(qb -> qb.match(m -> m
+                            .field("title_en_kr.joined")
+                            .query(qNoSpace)
+                            .boost(3.0f)
+                    ));
+                    b.should(qb -> qb.match(m -> m
+                            .field("artist_kr.joined")
+                            .query(qNoSpace)
+                            .boost(3.0f)
+                    ));
+                }
+            }
 
             if (useFuzzy) {
                 b.should(qb -> qb.multiMatch(mm -> mm
@@ -224,23 +243,53 @@ public class SongDocumentServiceImpl implements SongDocumentService {
             }
 
             if (initialsOnly) {
-                b.should(qb -> qb.multiMatch(mm -> mm
-                        .query(q)
-                        .fields(INITIALS_JOINED_FIELDS)
-                        .type(TextQueryType.BestFields)
-                        .operator(Operator.And)
-                        .boost(4.0f)
-                ));
+                List<String> initialsFields = switch (target) {
+                    case TITLE -> List.of(
+                            "title_kr.initial_joined^6",
+                            "title_yomi_kr.initial_joined^6",
+                            "title_en_kr.initial_joined^6"
+                    );
+                    case ARTIST -> List.of(
+                            "artist_kr.initial_joined^6"
+                    );
+                    case LYRICS -> List.of();
+                    default -> INITIALS_JOINED_FIELDS;
+                };
+                
+                if (!initialsFields.isEmpty()) {
+                    b.should(qb -> qb.multiMatch(mm -> mm
+                            .query(q)
+                            .fields(initialsFields)
+                            .type(TextQueryType.BestFields)
+                            .operator(Operator.And)
+                            .boost(4.0f)
+                    ));
+                }
             }
 
             if (initialsWithSpace) {
-                b.should(qb -> qb.multiMatch(mm -> mm
-                        .query(q)
-                        .fields(INITIALS_WORD_FIELDS)
-                        .type(TextQueryType.BestFields)
-                        .operator(Operator.And)
-                        .boost(4.0f)
-                ));
+                List<String> initialsWordFields = switch (target) {
+                    case TITLE -> List.of(
+                            "title_kr.initial^6",
+                            "title_yomi_kr.initial^6",
+                            "title_en_kr.initial^6"
+                    );
+                    case ARTIST -> List.of(
+                            "artist_kr.initial^6"
+                    );
+                    case LYRICS -> List.of();
+                    default -> INITIALS_WORD_FIELDS;
+                };
+                
+                if (!initialsWordFields.isEmpty()) {
+                    b.should(qb -> qb.multiMatch(mm -> mm
+                            .query(q)
+                            .fields(initialsWordFields)
+                            .type(TextQueryType.BestFields)
+                            .operator(Operator.And)
+                            .boost(4.0f)
+                    ));
+                }
             }
 
             b.minimumShouldMatch("1");

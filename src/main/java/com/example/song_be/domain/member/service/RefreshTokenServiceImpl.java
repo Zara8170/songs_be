@@ -197,12 +197,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         redisTemplate.delete(redisKey);
         log.info("[RefreshTokenService] Deleted refresh token from Redis for member ID: {}", memberId);
         
-        // 2. DB에서 삭제
-        refreshTokenRepository.findByMemberId(memberId)
-                .ifPresent(token -> {
-                    refreshTokenRepository.delete(token);
-                    log.info("[RefreshTokenService] Deleted refresh token from DB for member ID: {}", memberId);
-                });
+        // 2. DB에서 삭제 (직접 삭제 쿼리 사용)
+        try {
+            refreshTokenRepository.deleteByMemberId(memberId);
+            log.info("[RefreshTokenService] Deleted refresh token from DB for member ID: {}", memberId);
+        } catch (Exception e) {
+            log.warn("[RefreshTokenService] No refresh token found in DB for member ID: {} - {}", memberId, e.getMessage());
+        }
     }
 
     @Override
