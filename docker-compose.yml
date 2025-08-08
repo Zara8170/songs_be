@@ -4,60 +4,29 @@ services:
       context: .
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
     container_name: elasticsearch
-    env_file: ./elasticsearch.env
     environment:
       - discovery.type=single-node
+      - ELASTIC_PASSWORD=968924155753850
       - xpack.security.enabled=true
-      - ES_JAVA_OPTS=-Xms2g -Xmx2g
-      - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/fullchain.pem
-      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/privkey.pem
-      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/fullchain.pem
-      - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.verification_mode=certificate
-      - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certs/fullchain.pem
-      - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certs/privkey.pem
-      - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/fullchain.pem
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
     ports:
       - "9200:9200"
     volumes:
-      - /opt/es-certs:/usr/share/elasticsearch/config/certs:ro
       - esdata:/usr/share/elasticsearch/data
-    healthcheck:
-      test: ["CMD-SHELL", "curl -s -k -f https://localhost:9200/_cluster/health --user elastic:${ELASTIC_PASSWORD} || exit 1"]
-      interval: 30s
-      timeout: 10s
-      start_period: 120s
-      retries: 6
     networks:
-      elastic-net:
-        ipv4_address: 172.20.0.10
+      - elastic-net
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.13.4
     container_name: kibana
     depends_on:
-      elasticsearch:
-        condition: service_healthy
-    env_file: ./kibana.env
+      - elasticsearch
     environment:
-      - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}
-      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
-      - xpack.security.encryptionKey=${KIBANA_SECURITY_KEY}
-      - xpack.encryptedSavedObjects.encryptionKey=${KIBANA_SAVEDOBJECTS_KEY}
-      - xpack.reporting.encryptionKey=${KIBANA_REPORTING_KEY}
-
-      - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
-      - ELASTICSEARCH_SSL_VERIFICATIONMODE=none
-      - NODE_OPTIONS=--no-openssl-legacy-provider
-      - SERVER_SSL_ENABLED=true
-      - SERVER_SSL_CERTIFICATE=/etc/kibana-certs/fullchain.pem
-      - SERVER_SSL_KEY=/etc/kibana-certs/privkey.pem
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=968924155753850
     ports:
       - "5601:5601"
-    volumes:
-      - /opt/kibana-certs:/etc/kibana-certs:ro
-      - /opt/es-certs:/usr/share/elasticsearch/config/certs:ro
     networks:
       - elastic-net
 
@@ -66,7 +35,3 @@ volumes:
 
 networks:
   elastic-net:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
