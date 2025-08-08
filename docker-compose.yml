@@ -1,7 +1,8 @@
 services:
   debug:
     image: alpine:latest
-    command: sh -c "echo '--- Container Environment Variables ---'; printenv | grep ELASTIC; printenv | grep KIBANA; echo '--- End of Test ---'"
+    env_file: ./.env
+    command: sh -c "echo '--- Container Environment Variables ---'; printenv | grep -E 'ELASTIC|KIBANA' | sort; echo '--- End of Test ---'"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
