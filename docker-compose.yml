@@ -1,4 +1,8 @@
 services:
+  debug:
+    image: alpine:latest
+    command: sh -c "echo '--- Container Environment Variables ---'; printenv | grep ELASTIC; printenv | grep KIBANA; echo '--- End of Test ---'"
+    
   elasticsearch:
     build:
       context: .
@@ -46,6 +50,7 @@ services:
     extra_hosts:
       - "utabox.shop:172.20.0.10"
     environment:
+      - NODE_OPTIONS=--no-openssl-legacy-provider
       - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
       - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}
       - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
