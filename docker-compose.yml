@@ -28,7 +28,7 @@ services:
       - /opt/es-certs:/usr/share/elasticsearch/config/certs:ro
       - esdata:/usr/share/elasticsearch/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -s -f https://utabox.shop:9200/_cluster/health --cacert /usr/share/elasticsearch/config/certs/fullchain.pem --user elastic:${ELASTIC_PASSWORD} || exit 1"]
+      test: ["CMD-SHELL", "curl -s -k -f https://localhost:9200/_cluster/health --user elastic:${ELASTIC_PASSWORD} || exit 1"]
       interval: 30s
       timeout: 10s
       start_period: 120s
@@ -49,6 +49,7 @@ services:
       - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
       - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}
       - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTICSEARCH_SSL_VERIFICATIONMODE=none
 
       - SERVER_SSL_ENABLED=true
       - SERVER_SSL_CERTIFICATE=/etc/kibana-certs/fullchain.pem
@@ -61,7 +62,6 @@ services:
       - "5601:5601"
     volumes:
       - /opt/kibana-certs:/etc/kibana-certs:ro
-      - /opt/es-certs:/usr/share/elasticsearch/config/certs:ro
     networks:
       - elastic-net
 
