@@ -4,7 +4,7 @@ services:
       context: .
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
     container_name: elasticsearch
-    env_file: ./.env
+    env_file: ./elasticsearch.env
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=true
@@ -39,7 +39,7 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-    env_file: ./.env
+    env_file: ./kibana.env
     environment:
       - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
       - ELASTICSEARCH_SSL_VERIFICATIONMODE=none
