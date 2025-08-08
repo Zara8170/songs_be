@@ -2,7 +2,7 @@ services:
   debug:
     image: alpine:latest
     command: sh -c "echo '--- Container Environment Variables ---'; printenv | grep ELASTIC; printenv | grep KIBANA; echo '--- End of Test ---'"
-    
+
   elasticsearch:
     build:
       context: .
