@@ -1,13 +1,12 @@
 services:
   debug:
     image: alpine:latest
-    env_file: ./.env
-    command: sh -c "echo '--- Container Environment Variables ---'; printenv | grep -E 'ELASTIC|KIBANA' | sort; echo '--- End of Test ---'"
+    command: sh -c "echo '--- Container Environment Variables ---'; printenv | grep ELASTIC; printenv | grep KIBANA; echo '--- End of Test ---'"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
     container_name: elasticsearch
-    env_file: ./.env
+    env_file: ./elasticsearch.env
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=true
@@ -46,7 +45,7 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-    env_file: ./.env
+    env_file: ./kibana.env
     environment:
       - NODE_OPTIONS=--no-openssl-legacy-provider
       

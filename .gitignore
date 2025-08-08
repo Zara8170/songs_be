@@ -39,6 +39,17 @@ out/
 ### env ###
 .env
 .env/
+elasticsearch.env
+kibana.env
+app.env
+*.env
+
+#Docker volumes and data
+esdata/
 
 ### certs ###
 src/main/resources/certs/**
+certs/
+*.pem
+*.crt
+*.key
