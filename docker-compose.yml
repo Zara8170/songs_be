@@ -1,6 +1,7 @@
 services:
   debug:
     image: alpine:latest
+    env_file: ./.env
     command: sh -c "echo '--- Container Environment Variables ---'; printenv | grep ELASTIC; printenv | grep KIBANA; echo '--- End of Test ---'"
 
   elasticsearch:
