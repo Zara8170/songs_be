@@ -28,7 +28,7 @@ services:
       - /opt/es-certs:/usr/share/elasticsearch/config/certs:ro
       - esdata:/usr/share/elasticsearch/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -s -f https://localhost:9200/_cluster/health --cacert /usr/share/elasticsearch/config/certs/fullchain.pem --user elastic:${ELASTIC_PASSWORD} || exit 1"]
+      test: ["CMD-SHELL", "curl -s -f https://utabox.shop:9200/_cluster/health --cacert /usr/share/elasticsearch/config/certs/fullchain.pem --user elastic:${ELASTIC_PASSWORD} || exit 1"]
       interval: 30s
       timeout: 10s
       start_period: 120s
