@@ -42,7 +42,7 @@ services:
     container_name: kibana
     depends_on:
       elasticsearch:
-        condition: service_started
+        condition: service_healthy
     extra_hosts:
       - "utabox.shop:172.20.0.10"
     environment:
@@ -52,6 +52,7 @@ services:
 
       - SERVER_SSL_ENABLED=true
       - SERVER_SSL_CERTIFICATE=/etc/kibana-certs/fullchain.pem
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/elasticsearch/config/certs/fullchain.pem
       - SERVER_SSL_KEY=/etc/kibana-certs/privkey.pem
       - xpack.security.encryptionKey=${KIBANA_SECURITY_KEY}
       - xpack.encryptedSavedObjects.encryptionKey=${KIBANA_SAVEDOBJECTS_KEY}
@@ -60,6 +61,7 @@ services:
       - "5601:5601"
     volumes:
       - /opt/kibana-certs:/etc/kibana-certs:ro
+      - /opt/es-certs:/usr/share/elasticsearch/config/certs:ro
     networks:
       - elastic-net
 
