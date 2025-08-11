@@ -22,12 +22,11 @@ services:
     ports:
       - "9200:9200"
     volumes:
-      # certs 폴더 read-only 마운트
-      - ./src/main/resources/certs:${ES_CERTS_DIR}:ro
-      # 데이터 볼륨
+      - ./src/main/resources/certs:${ES_CERTS_DIR:-/usr/share/elasticsearch/config/certs}:ro
       - esdata:/usr/share/elasticsearch/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -s -f https://localhost:9200/_cluster/health --cacert ${ES_CERTS_DIR}/ca/ca.crt || exit 1"]
+      test:
+        ["CMD-SHELL", "curl -s -f https://localhost:9200/_cluster/health --cacert ${ES_CERTS_DIR}/ca/ca.crt || exit 1"]
       interval: 30s
       timeout: 10s
       start_period: 120s
@@ -46,14 +45,23 @@ services:
       - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
       - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=${KB_CERTS_DIR}/ca/ca.crt
 
-
       - SERVER_SSL_ENABLED=true
       - SERVER_SSL_CERTIFICATE=${KB_CERTS_DIR}/kibana/kibana.crt
       - SERVER_SSL_KEY=${KB_CERTS_DIR}/kibana/kibana.key
     ports:
       - "5601:5601"
     volumes:
-      - ./src/main/resources/certs:${KB_CERTS_DIR}:ro
+      - ./src/main/resources/certs:${KB_CERTS_DIR:-/usr/share/kibana/config/certs}:ro
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
 
 volumes:
   esdata:

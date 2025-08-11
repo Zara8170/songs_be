@@ -60,6 +60,11 @@ spring:
     execution:
       pool:
         core-size: 10
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 
 app:
   props:
@@ -75,6 +80,8 @@ app:
       refresh-token-expiration-period: 1440
     aes:
       secret-key: ${AES_SECRET_KEY}
+  rabbitmq:
+    prefetch: ${RABBITMQ_PREFETCH:16}
 
 ---
 spring:
@@ -118,6 +125,14 @@ logging:
     org.hibernate.SQL: debug # Hibernate SQL 로그 레벨
     org.hibernate.orm.jdbc.bind: trace # Hibernate SQL 바인딩 로그 레벨
     org.springframework.transaction.interceptor: trace # Spring 트랜잭션 인터셉터 로그 레벨
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
 
 ---
 spring:
@@ -126,9 +141,11 @@ spring:
       on-profile: prod # 운영 환경
   elasticsearch:
     uris: ${PROD_ELASTICSEARCH_URIS}
+    username: elastic
+    password: ${ELASTIC_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
   sql:
     init:
       platform: mysql # SQL 초기화 플랫폼 (mysql, h2, postgresql, oracle, sqlserver)
