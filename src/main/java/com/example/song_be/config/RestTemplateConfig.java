@@ -15,17 +15,17 @@ public class RestTemplateConfig {
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder
-                .setConnectTimeout(Duration.ofSeconds(30))  // 연결 타임아웃 30초
-                .setReadTimeout(Duration.ofSeconds(60))     // 읽기 타임아웃 60초
+                .setConnectTimeout(Duration.ofSeconds(30))
+                .setReadTimeout(Duration.ofSeconds(60))
                 .requestFactory(this::clientHttpRequestFactory)
                 .build();
     }
     
     private ClientHttpRequestFactory clientHttpRequestFactory() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(30000);  // 30초
-        factory.setReadTimeout(60000);     // 60초
-        factory.setBufferRequestBody(false); // 대용량 응답 처리를 위해 스트리밍 모드 사용
+        factory.setConnectTimeout(30000);
+        factory.setReadTimeout(60000);
+        factory.setBufferRequestBody(false);
         return factory;
     }
 }

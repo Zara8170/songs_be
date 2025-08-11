@@ -77,6 +77,16 @@ dependencies {
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+    // rabbitmq
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
+    // actuator + prometheus
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+    // structured logging (JSON)
+    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+
     // aws s3
 //    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.0.4'
 

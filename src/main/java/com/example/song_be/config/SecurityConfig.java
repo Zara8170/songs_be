@@ -35,6 +35,7 @@ public class SecurityConfig {
     private final JWTCheckFilter jwtCheckFilter;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final MdcFilter mdcFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -104,6 +105,9 @@ public class SecurityConfig {
 
                 });
 
+        // MDC filter for trace/memberId
+        http.addFilterBefore(mdcFilter, UsernamePasswordAuthenticationFilter.class);
+
         // JWT Check Filter 추가
         http.addFilterBefore(jwtCheckFilter,
                 UsernamePasswordAuthenticationFilter.class);
@@ -138,11 +142,11 @@ public class SecurityConfig {
         // 허용할 메서드 설정
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         // 허용할 헤더 설정
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Idempotency-Key", "If-None-Match"));
         // 자격 증명 허용 설정 (쿠키 등)
         configuration.setAllowCredentials(true);
         // content-disposition 허용 설정 -> excel 파일 다운로드시, 제목노출을 위해 필요!
-        configuration.setExposedHeaders(Arrays.asList("Content-Disposition"));
+        configuration.setExposedHeaders(Arrays.asList("Content-Disposition", "ETag", "Last-Modified"));
         // CORS 설정을 특정 경로에 적용
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
