@@ -53,15 +53,5 @@ services:
     volumes:
       - ./src/main/resources/certs:${KB_CERTS_DIR:-/usr/share/kibana/config/certs}:ro
 
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-
 volumes:
   esdata:
