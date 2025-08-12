@@ -8,7 +8,6 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.3.0'
     id 'io.spring.dependency-management' version '1.1.4'
-    id 'org.flywaydb.flyway' version '8.5.0'
 }
 
 group = 'com.example'
@@ -93,7 +92,8 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
     // flyway
-//    implementation 'org.flywaydb:flyway-core:10.23.0'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
 }
 
 tasks.named('test') {

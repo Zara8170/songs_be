@@ -89,5 +89,8 @@ public class RecommendationResponseFromPythonDTO {
         
         @JsonProperty("matched_criteria")
         private List<String> matchedCriteria;
+
+        @JsonProperty("match_score")
+        private Double matchScore;
     }
 }
