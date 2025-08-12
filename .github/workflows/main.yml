@@ -51,6 +51,9 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKER_IMAGE_NAME }}:latest
+        provenance: false
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
   deploy:
     name: Deploy to GCP VM
