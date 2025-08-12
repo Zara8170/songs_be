@@ -37,8 +37,11 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
+    # DOCKER_IMAGE_NAME에서 Artifact Registry 주소만 추출하여 다음 스텝에서 사용
     - name: Configure Docker to use Google Cloud credentials
-      run: gcloud auth configure-docker ${{ secrets.DOCKER_IMAGE_NAME | cut -d'/' -f1 }}
+      run: |
+        REGISTRY_LOCATION=$(echo "${{ secrets.DOCKER_IMAGE_NAME }}" | cut -d'/' -f1)
+        gcloud auth configure-docker "$REGISTRY_LOCATION"
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
@@ -67,21 +70,24 @@ jobs:
           script: |
             # 환경 변수 설정
             export DOCKER_IMAGE_NAME=${{ secrets.DOCKER_IMAGE_NAME }}
-            
+
             # 작업 디렉토리로 이동 (프로젝트가 있는 경로)
-            cd ~/songs_be 
-            
+            cd ~/songs_be
+
             # 최신 docker-compose.yml 파일을 git에서 받아옵니다.
             git pull origin main
+
+            # DOCKER_IMAGE_NAME에서 Artifact Registry 주소만 추출
+            REGISTRY_LOCATION=$(echo "$DOCKER_IMAGE_NAME" | cut -d'/' -f1)
             
             # Google Cloud에 로그인하여 private registry에 접근
-            gcloud auth configure-docker ${{ secrets.DOCKER_IMAGE_NAME | cut -d'/' -f1 }}
-            
+            gcloud auth configure-docker "$REGISTRY_LOCATION"
+
             # 최신 이미지를 받아옵니다.
             docker-compose pull
-            
+
             # docker-compose로 애플리케이션을 재시작합니다.
             docker-compose up -d --force-recreate --remove-orphans
-            
+
             # 불필요한 이전 이미지들을 삭제합니다.
             docker image prune -f
