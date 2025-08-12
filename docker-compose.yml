@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     environment:
-      SERVER_ADDRESS: ${SERVER_ADDRESS:-0.0.0.0}
+      SERVER_ADDRESS: ${SERVER_ADDRESS}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
 
       PROD_MYSQL_URL: ${PROD_MYSQL_URL}
@@ -17,14 +17,17 @@ services:
       PROD_MYSQL_PASSWORD: ${PROD_MYSQL_PASSWORD}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
-      RABBITMQ_HOST: ${RABBITMQ_HOST:-rabbitmq}
+
+      RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-guest}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
       PROD_ELASTICSEARCH_URIS: ${PROD_ELASTICSEARCH_URIS}
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   rabbitmq:
     image: rabbitmq:3.13-management
@@ -37,6 +40,13 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running", "-q"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
 volumes:
   rabbitmq_data:
