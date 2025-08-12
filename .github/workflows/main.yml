@@ -51,8 +51,6 @@ jobs:
         context: .
         push: true
         tags: ${{ secrets.DOCKER_IMAGE_NAME }}:latest
-        cache-from: type=inline
-        cache-to: type=inline
 
   deploy:
     name: Deploy to GCP VM
