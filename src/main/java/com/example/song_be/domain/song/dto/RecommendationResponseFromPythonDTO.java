@@ -41,8 +41,12 @@ public class RecommendationResponseFromPythonDTO {
 
         @JsonProperty("title_en")
         private String titleEn;
+
+        @JsonProperty("title_yomi")
+        private String titleYomi;
         
         private String artist;
+
         
         @JsonProperty("artist_kr")
         private String artistKr;
@@ -65,6 +69,9 @@ public class RecommendationResponseFromPythonDTO {
         
         @JsonProperty("title_jp")
         private String titleJp;
+
+        @JsonProperty("title_yomi")
+        private String titleYomi;
         
         @JsonProperty("title_kr")
         private String titleKr;
