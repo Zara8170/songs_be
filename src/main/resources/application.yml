@@ -85,8 +85,8 @@ app:
         user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
     jwt:
       secret-key: ${JWT_SECRET_KEY}
-      access-token-expiration-period: 150
-      refresh-token-expiration-period: 1440
+      access-token-expiration-period: 60
+      refresh-token-expiration-period: 43200
     aes:
       secret-key: ${AES_SECRET_KEY}
   rabbitmq:

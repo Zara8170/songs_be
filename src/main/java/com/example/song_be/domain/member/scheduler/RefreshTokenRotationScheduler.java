@@ -25,21 +25,21 @@ public class RefreshTokenRotationScheduler {
     private final RefreshTokenService refreshTokenService;
     private final JWTUtil jwtUtil;
 
-    // 매 10분마다, 앞으로 30분 내 만료되는 리프레시 토큰을 자동 회전
+    // 매 10분마다, 앞으로 7일 내 만료되는 리프레시 토큰을 자동 회전
     @Async
     @Scheduled(cron = "0 */10 * * * *", zone = "Asia/Seoul")
     public void rotateExpiringRefreshTokens() {
         long now = System.currentTimeMillis();
-        long windowMs = Duration.ofMinutes(30).toMillis();
+        long windowMs = Duration.ofDays(7).toMillis(); // 30분 -> 7일로 변경
         long until = now + windowMs;
 
         List<RefreshToken> expiring = refreshTokenRepository.findExpiringBetween(now, until);
         if (expiring.isEmpty()) {
-            log.debug("[Scheduler] No expiring refresh tokens in next {} minutes", windowMs / 60000);
+            log.debug("[Scheduler] No expiring refresh tokens in next {} days", windowMs / (24 * 60 * 60 * 1000));
             return;
         }
 
-        log.info("[Scheduler] Found {} refresh tokens expiring within {} minutes", expiring.size(), windowMs / 60000);
+        log.info("[Scheduler] Found {} refresh tokens expiring within {} days", expiring.size(), windowMs / (24 * 60 * 60 * 1000));
 
         // 회전은 저장 시 쓰기 트랜잭션이 필요하므로 개별 저장 단계에서 트랜잭션을 시작한다
         for (RefreshToken tokenEntity : expiring) {
