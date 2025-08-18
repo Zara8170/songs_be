@@ -76,14 +76,13 @@ jobs:
             gcloud auth configure-docker "$REGISTRY_LOCATION"
 
             # 1. 새로운 이미지를 명시적으로 받아옵니다.
-            docker-compose pull app
+            docker-compose pull
 
-            # 2. 기존 컨테이너를 중지하고 삭제합니다. (오류가 나도 계속 진행)
-            docker-compose stop app || true
-            docker-compose rm -f app || true
+            # 2. 기존 컨테이너를 중지하고 삭제하여 확실하게 교체합니다.
+            docker-compose down
 
             # 3. 새로운 이미지로 컨테이너를 다시 시작합니다.
-            docker-compose up -d --remove-orphans
+            docker-compose up -d
 
             # 4. 불필요한 이전 이미지들을 삭제합니다.
             docker image prune -f
