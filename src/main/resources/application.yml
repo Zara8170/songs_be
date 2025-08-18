@@ -71,7 +71,7 @@ spring:
     password: ${RABBITMQ_PASSWORD:guest}
 
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
     check-location: true
 
