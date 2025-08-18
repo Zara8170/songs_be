@@ -70,10 +70,10 @@ spring:
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
 
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-    check-location: true
+#  flyway:
+#    enabled: true
+#    locations: classpath:db/migration
+#    check-location: true
 
 app:
   props:
@@ -154,7 +154,7 @@ spring:
     password: ${ELASTIC_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
   flyway:
     enabled: true
     locations: classpath:db/migration
