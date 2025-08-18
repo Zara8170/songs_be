@@ -32,7 +32,7 @@ spring:
   jpa:
     open-in-view: false # open in view 설정
     hibernate:
-      ddl-auto: validate # 테이블 자동 생성 대신 스키마 검증으로 전환
+      ddl-auto: update # 테이블 자동 생성 대신 스키마 검증으로 전환
     properties:
       hibernate:
         #dialect: org.hibernate.dialect.MySQLDialect # Hibernate Dialect 설정
@@ -71,7 +71,7 @@ spring:
     password: ${RABBITMQ_PASSWORD:guest}
 
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
     check-location: true
 
@@ -154,9 +154,9 @@ spring:
     password: ${ELASTIC_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
     baseline-on-migrate: true
     baseline-version: 1
