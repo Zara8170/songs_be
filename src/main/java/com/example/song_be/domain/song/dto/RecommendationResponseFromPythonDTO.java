@@ -1,5 +1,6 @@
 package com.example.song_be.domain.song.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,8 +41,12 @@ public class RecommendationResponseFromPythonDTO {
 
         @JsonProperty("title_en")
         private String titleEn;
+
+        @JsonProperty("title_yomi")
+        private String titleYomi;
         
         private String artist;
+
         
         @JsonProperty("artist_kr")
         private String artistKr;
@@ -57,12 +62,16 @@ public class RecommendationResponseFromPythonDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class CandidateSong {
         @JsonProperty("song_id")
         private Integer songId;
         
         @JsonProperty("title_jp")
         private String titleJp;
+
+        @JsonProperty("title_yomi")
+        private String titleYomi;
         
         @JsonProperty("title_kr")
         private String titleKr;
@@ -71,6 +80,7 @@ public class RecommendationResponseFromPythonDTO {
         private String titleEn;
         
         private String artist;
+        private String reason;
         
         @JsonProperty("artist_kr")
         private String artistKr;
@@ -89,5 +99,8 @@ public class RecommendationResponseFromPythonDTO {
         
         @JsonProperty("matched_criteria")
         private List<String> matchedCriteria;
+
+        @JsonProperty("match_score")
+        private Double matchScore;
     }
 }

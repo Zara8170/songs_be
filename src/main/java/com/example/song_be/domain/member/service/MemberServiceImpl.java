@@ -85,10 +85,23 @@ public class MemberServiceImpl implements MemberService {
 
         // 3. Refresh Token 유효성 검증
         if (!refreshTokenService.validateRefreshToken(refreshToken)) {
-            log.error("[MemberService] Refresh Token validation failed for member ID: {}", memberId);
-            throw new CustomJWTException("Invalid Refresh Token for member " + memberId);
+            log.warn("[MemberService] Refresh Token expired for member ID: {}", memberId);
+            
+            // 만료된 토큰 삭제
+            refreshTokenService.deleteRefreshToken(memberId);
+            
+            // 새로운 Refresh Token 자동 생성 (사용자 정보는 Access Token에서 추출)
+            String newRefreshToken = jwtUtil.generateRefreshToken(claims);
+            long newExpiry = jwtUtil.getExpiryMillis(newRefreshToken);
+            refreshTokenService.saveRefreshToken(memberId, newRefreshToken, newExpiry);
+            
+            log.info("[MemberService] Generated new Refresh Token for expired token");
+            
+            // 새로 생성된 토큰으로 계속 진행
+            refreshToken = newRefreshToken;
+        } else {
+            log.info("  -> Refresh Token validated successfully (not expired, not tampered).");
         }
-        log.info("  -> Refresh Token validated successfully (not expired, not tampered).");
 
         // 4. 새로운 Access Token 발급
         String newAccessToken = jwtUtil.generateAccessToken(claims);

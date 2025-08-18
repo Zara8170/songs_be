@@ -33,15 +33,19 @@ public class SongDocumentServiceImpl implements SongDocumentService {
     // 검색 필드 매핑
     private static final List<String> TITLE_FIELDS = List.of(
             "title_kr^6",
+            "title_kr.nospace^5",
             "title_en_kr^4",
             "title_en^2",
             "title_jp^3",
             "title_yomi^3",
-            "title_yomi_kr^4"
+            "title_yomi_kr^4",
+            "title_en.keyword^1"
     );
     private static final List<String> ARTIST_FIELDS = List.of(
             "artist^3",
-            "artist_kr^5"
+            "artist.nospace^4",
+            "artist_kr^5",
+            "artist.keyword^1"
     );
     private static final List<String> LYRICS_FIELDS = List.of(
             "lyrics_original",

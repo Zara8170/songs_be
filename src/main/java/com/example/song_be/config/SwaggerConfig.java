@@ -13,7 +13,7 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI openAPI() {
-        return new OpenAPI().openapi("3.0.0") // openAPI 버전 명시
+        return new OpenAPI().openapi("3.0.0")
                 .components(new Components()
                         .addSecuritySchemes("jwt-token",
                                 new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")

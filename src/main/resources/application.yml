@@ -1,6 +1,7 @@
 server:
   port: 8082
   address: ${SERVER_ADDRESS}
+  forward-headers-strategy: native
   max-http-header-size: 8KB
   max-http-post-size: 10MB
   tomcat:
@@ -31,7 +32,7 @@ spring:
   jpa:
     open-in-view: false # open in view 설정
     hibernate:
-      ddl-auto: update # 테이블 생성 및 업데이트 전략 (create, create-drop, update, validate, none)
+      ddl-auto: validate # 테이블 자동 생성 대신 스키마 검증으로 전환
     properties:
       hibernate:
         #dialect: org.hibernate.dialect.MySQLDialect # Hibernate Dialect 설정
@@ -42,6 +43,9 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
   redis:
     host: ${REDIS_HOST}
     port: ${REDIS_PORT}
@@ -66,6 +70,11 @@ spring:
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
 
+#  flyway:
+#    enabled: true
+#    locations: classpath:db/migration
+#    check-location: true
+
 app:
   props:
     python-server-url: ${PYTHON_SERVER_URL}
@@ -76,8 +85,8 @@ app:
         user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
     jwt:
       secret-key: ${JWT_SECRET_KEY}
-      access-token-expiration-period: 150
-      refresh-token-expiration-period: 1440
+      access-token-expiration-period: 60
+      refresh-token-expiration-period: 43200
     aes:
       secret-key: ${AES_SECRET_KEY}
   rabbitmq:
@@ -146,6 +155,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 1
   sql:
     init:
       platform: mysql # SQL 초기화 플랫폼 (mysql, h2, postgresql, oracle, sqlserver)
