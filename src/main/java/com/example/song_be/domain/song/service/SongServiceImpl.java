@@ -1,5 +1,7 @@
 package com.example.song_be.domain.song.service;
 
+import com.example.song_be.domain.anime.entity.Anime;
+import com.example.song_be.domain.anime.repository.AnimeRepository;
 import com.example.song_be.domain.like.repository.SongLikeRepository;
 import com.example.song_be.domain.member.entity.Member;
 import com.example.song_be.domain.member.repository.MemberRepository;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,6 +29,7 @@ public class SongServiceImpl implements SongService {
     private final SongRepository songRepository;
     private final MemberRepository memberRepository;
     private final SongLikeRepository songLikeRepository;
+    private final AnimeRepository animeRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -98,7 +102,27 @@ public class SongServiceImpl implements SongService {
                     });
         }
 
-        Song saved = songRepository.save(songDTO.toEntity());
+        // 애니메이션 처리
+        Anime anime = null;
+        if (songDTO.getAnimeTitle() != null && !songDTO.getAnimeTitle().trim().isEmpty()) {
+            anime = animeRepository.findAllOrderByTitle().stream()
+                    .filter(a -> a.getTitle().equals(songDTO.getAnimeTitle()))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        // 새로운 애니메이션 생성
+                        Anime newAnime = Anime.builder()
+                                .title(songDTO.getAnimeTitle())
+                                .build();
+                        return animeRepository.save(newAnime);
+                    });
+        }
+
+        // Song 엔티티 생성
+        Song song = songDTO.toEntity();
+        song.setAnime(anime);
+        song.setAnimeType(songDTO.getAnimeType());
+
+        Song saved = songRepository.save(song);
         return SongDTO.from(saved);
     }
 

@@ -1,6 +1,7 @@
 package com.example.song_be.domain.song.entity;
 
 //import com.example.song_be.domain.like.entity.SongLike;
+import com.example.song_be.domain.anime.entity.Anime;
 import com.example.song_be.domain.like.entity.SongLike;
 import com.example.song_be.domain.song.enums.AnimeType;
 import com.example.song_be.entity.BaseEntity;
@@ -43,9 +44,9 @@ public class Song extends BaseEntity {
     private String artist;
     private String artist_kr;
 
-    private Boolean isAnime;
-
-    private String animeTitle;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "anime_id")
+    private Anime anime;
 
     @Enumerated(EnumType.STRING)
     private AnimeType animeType;
