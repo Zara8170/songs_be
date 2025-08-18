@@ -63,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/api/es/song/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/likes/songs/{songId}/count")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/likes/songs/counts")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/anime/**")).permitAll()
                         // 사용 유저 허용
                         .requestMatchers(new AntPathRequestMatcher("/api/recommendation/**")).hasRole("USER")
                         .requestMatchers(new AntPathRequestMatcher("/api/likes/songs/{songId}")).hasRole("USER")

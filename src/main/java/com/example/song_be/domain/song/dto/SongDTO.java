@@ -2,6 +2,7 @@ package com.example.song_be.domain.song.dto;
 
 import com.example.song_be.domain.song.document.SongDocument;
 import com.example.song_be.domain.song.entity.Song;
+import com.example.song_be.domain.song.enums.AnimeType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,6 +32,10 @@ public class SongDTO {
     private String lyrics_kr;
     private Long likeCount;
     private Boolean likedByMe;
+    
+    // 애니메이션 관련 필드
+    private String animeTitle;
+    private AnimeType animeType;
 
     public static SongDTO from(Song song) {
         return SongDTO.builder()
@@ -51,6 +56,8 @@ public class SongDTO {
                 .lyrics_original(song.getLyrics_original())
                 .lyrics_yomi(song.getLyrics_yomi())
                 .lyrics_kr(song.getLyrics_kr())
+                .animeTitle(song.getAnime() != null ? song.getAnime().getTitle() : null)
+                .animeType(song.getAnimeType())
                 .build();
     }
 
