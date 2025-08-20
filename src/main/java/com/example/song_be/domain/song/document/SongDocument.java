@@ -28,6 +28,7 @@ public class SongDocument {
     private String lyrics_original;
     private String lyrics_kr;
     private String lyrics_yomi;
+    private String anime_name;
 
     public static SongDocument fromEntity(Song song) {
         return SongDocument.builder()
@@ -46,6 +47,7 @@ public class SongDocument {
                 .lyrics_original(song.getLyrics_original())
                 .lyrics_kr(song.getLyrics_kr())
                 .lyrics_yomi(song.getLyrics_yomi())
+                .anime_name(song.getAnime() != null ? song.getAnime().getTitle() : null)
                 .build();
     }
 
