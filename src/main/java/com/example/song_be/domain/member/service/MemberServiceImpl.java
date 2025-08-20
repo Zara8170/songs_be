@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
-import com.example.song_be.exception.CustomJWTException;
 
 @Slf4j
 @Service
@@ -62,7 +61,57 @@ public class MemberServiceImpl implements MemberService {
         // 3. 회원 삭제 (연관된 Playlist와 SongLike는 cascade로 자동 삭제됨)
         memberRepository.delete(member);
         
+        // 4. 모든 변경사항을 DB에 반영
+        entityManager.flush();
+        
+        // 5. 실제 삭제 완료 검증
+        verifyMemberDeletion(memberId, email);
+        
         log.info("회원 탈퇴 완료 - Email: {}, ID: {}", email, memberId);
+    }
+    
+    private void verifyMemberDeletion(Long memberId, String email) {
+        log.info("회원 삭제 검증 시작 - ID: {}, Email: {}", memberId, email);
+        
+        // 회원 삭제 확인
+        if (memberRepository.existsById(memberId)) {
+            throw new RuntimeException("회원 삭제가 완료되지 않았습니다.");
+        }
+        
+        // Playlist 삭제 확인 (네이티브 쿼리 사용)
+        Number playlistCountResult = (Number) entityManager.createNativeQuery(
+                "SELECT COUNT(*) FROM playlist WHERE member_id = :memberId")
+                .setParameter("memberId", memberId)
+                .getSingleResult();
+        long playlistCount = playlistCountResult.longValue();
+        
+        if (playlistCount > 0) {
+            throw new RuntimeException("플레이리스트 삭제가 완료되지 않았습니다. 남은 개수: " + playlistCount);
+        }
+        
+        // SongLike 삭제 확인
+        Number songLikeCountResult = (Number) entityManager.createNativeQuery(
+                "SELECT COUNT(*) FROM song_like WHERE member_id = :memberId")
+                .setParameter("memberId", memberId)
+                .getSingleResult();
+        long songLikeCount = songLikeCountResult.longValue();
+        
+        if (songLikeCount > 0) {
+            throw new RuntimeException("좋아요 데이터 삭제가 완료되지 않았습니다. 남은 개수: " + songLikeCount);
+        }
+        
+        // MemberRole 삭제 확인
+        Number memberRoleCountResult = (Number) entityManager.createNativeQuery(
+                "SELECT COUNT(*) FROM member_role_list WHERE id = :memberId")
+                .setParameter("memberId", memberId)
+                .getSingleResult();
+        long memberRoleCount = memberRoleCountResult.longValue();
+        
+        if (memberRoleCount > 0) {
+            throw new RuntimeException("회원 권한 데이터 삭제가 완료되지 않았습니다. 남은 개수: " + memberRoleCount);
+        }
+        
+        log.info("회원 삭제 검증 완료 - 모든 관련 데이터가 정상적으로 삭제되었습니다. ID: {}", memberId);
     }
 
     @Override

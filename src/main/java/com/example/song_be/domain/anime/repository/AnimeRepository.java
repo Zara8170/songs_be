@@ -21,7 +21,10 @@ public interface AnimeRepository extends JpaRepository<Anime, Long> {
     @Query("SELECT a FROM Anime a LEFT JOIN FETCH a.songs WHERE a.animeId = :animeId")
     Optional<Anime> findByIdWithSongs(@Param("animeId") Long animeId);
 
-    @Query("SELECT COUNT(s) FROM Song s WHERE s.anime.animeId = :animeId")
+    @Query("SELECT s FROM Song s WHERE s.anime.animeId = :animeId AND s.animeType IN ('OP', 'ED', 'INSERT', 'OST') ORDER BY CASE WHEN s.animeType = 'OP' THEN 1 WHEN s.animeType = 'ED' THEN 2 WHEN s.animeType = 'INSERT' THEN 3 WHEN s.animeType = 'OST' THEN 4 END, s.songId")
+    List<Song> findOpEdSongsByAnimeId(@Param("animeId") Long animeId);
+
+    @Query("SELECT COUNT(s) FROM Song s WHERE s.anime.animeId = :animeId AND s.animeType IN ('OP', 'ED', 'INSERT', 'OST')")
     Long countSongsByAnimeId(@Param("animeId") Long animeId);
 
     // 애니송 쿼리 (Song 엔티티 대상)

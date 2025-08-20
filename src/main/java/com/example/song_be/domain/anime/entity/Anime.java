@@ -27,7 +27,7 @@ public class Anime extends BaseEntity {
 
     @Column(nullable = false, length = 200)
     private String title;
-
+    
     @Column(nullable = false)
 
     @OneToMany(mappedBy = "anime", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

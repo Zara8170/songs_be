@@ -50,10 +50,10 @@ public class AnimeServiceImpl implements AnimeService {
 
     @Override
     public List<AniSongResponseDTO> getSongsByAnimeId(Long animeId) {
-        Anime anime = animeRepository.findByIdWithSongs(animeId)
-                .orElseThrow(() -> new RuntimeException("Anime not found with id: " + animeId));
+        // OP, ED만 가져오기
+        List<Song> songs = animeRepository.findOpEdSongsByAnimeId(animeId);
         
-        return anime.getSongs().stream()
+        return songs.stream()
                 .map(AniSongResponseDTO::fromEntity)
                 .collect(Collectors.toList());
     }
