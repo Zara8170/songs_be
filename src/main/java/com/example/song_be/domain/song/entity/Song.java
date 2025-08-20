@@ -1,6 +1,5 @@
 package com.example.song_be.domain.song.entity;
 
-//import com.example.song_be.domain.like.entity.SongLike;
 import com.example.song_be.domain.anime.entity.Anime;
 import com.example.song_be.domain.like.entity.SongLike;
 import com.example.song_be.domain.song.enums.AnimeType;
