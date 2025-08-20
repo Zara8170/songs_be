@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"password", "phone"})
 public class MemberDTO extends User {
 
     private Long id;
