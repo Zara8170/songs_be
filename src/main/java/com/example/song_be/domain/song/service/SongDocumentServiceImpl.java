@@ -3,7 +3,9 @@ package com.example.song_be.domain.song.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch._types.query_dsl.*;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
+import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.example.song_be.domain.song.document.SongDocument;
@@ -17,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -28,148 +29,57 @@ public class SongDocumentServiceImpl implements SongDocumentService {
     private final ElasticsearchClient elasticsearchClient;
     private static final String INDEX_NAME = "songs";
 
-    // ===== 검색 필드 정의 (가중치 없는 순수 필드명) =====
-    private static final List<String> KR_TITLE_FIELDS = List.of("title_kr", "anime_name");
-    private static final List<String> KR_ARTIST_FIELDS = List.of("artist_kr");
-    private static final List<String> OTHER_TITLE_FIELDS = List.of("title_jp", "title_en");
-    private static final List<String> OTHER_ARTIST_FIELDS = List.of("artist");
-    private static final List<String> LYRICS_FIELDS = List.of("lyrics_kr");
+    // ===== 검색 필드 매핑 =====
 
+    private static final List<String> TITLE_FIELDS = List.of(
+            "title_kr^6",
+            "title_kr.nospace^5",
+            "title_en_kr^4",
+            "title_en^2",
+            "title_jp^3",
+            "title_yomi^3",
+            "title_yomi_kr^4",
+            "anime_name^5",
+            "anime_name.keyword^2",
+            "anime_name.nospace^4",
+            "title_en.keyword^1"
+    );
 
-    @Override
-    public PageResponseDTO<SongDTO> searchByKeyword(String keyword,
-                                                    SearchTarget target,
-                                                    PageRequestDTO pageReq) throws IOException {
+    private static final List<String> ARTIST_FIELDS = List.of(
+            "artist^3",
+            "artist_kr^5",
+            "artist_kr.nospace^4",
+            "artist.keyword^1"
+    );
 
-        int offset = (pageReq.getPage() - 1) * pageReq.getSize();
-        String q = (keyword == null) ? "" : keyword.trim();
+    private static final List<String> LYRICS_FIELDS = List.of(
+            "lyrics_original",
+            "lyrics_yomi",
+            "lyrics_yomi_kr",
+            "lyrics_kr"
+    );
 
-        // 1. 사용자 입력 분석
-        boolean quoted = q.length() > 1 && q.startsWith("\"") && q.endsWith("\"");
-        String qStripped = quoted ? q.substring(1, q.length() - 1) : q;
+    private static final List<String> ANIME_FIELDS = List.of(
+            "anime_name^5",
+            "anime_name.keyword^2",
+            "anime_name.nospace^4"
+    );
 
-        boolean initialsOnly = qStripped.matches("^[\\u3131-\\u314E]+$");
-        boolean initialsWithSpace = qStripped.matches("^[\\u3131-\\u314E\\s]+$") && !initialsOnly;
-        boolean isChoseongInput = initialsOnly || initialsWithSpace;
+    private static final List<String> INITIALS_WORD_FIELDS = List.of(
+            "title_kr.initial^6",
+            "title_yomi_kr.initial^6",
+            "title_en_kr.initial^6",
+            "artist_kr.initial^6",
+            "anime_name.initial^6"
+    );
 
-        // 2. 검색 대상 필드 결정
-        List<String> krFields;
-        List<String> otherFields;
-
-        switch (target) {
-            case TITLE -> {
-                krFields = KR_TITLE_FIELDS;
-                otherFields = OTHER_TITLE_FIELDS;
-            }
-            case ARTIST -> {
-                krFields = KR_ARTIST_FIELDS;
-                otherFields = OTHER_ARTIST_FIELDS;
-            }
-            case ANIME -> {
-                krFields = List.of("anime_name");
-                otherFields = List.of();
-            }
-            case LYRICS -> {
-                krFields = LYRICS_FIELDS;
-                otherFields = List.of();
-            }
-            default -> { // ALL
-                krFields = Stream.of(KR_TITLE_FIELDS, KR_ARTIST_FIELDS).flatMap(Collection::stream).toList();
-                otherFields = Stream.of(OTHER_TITLE_FIELDS, OTHER_ARTIST_FIELDS).flatMap(Collection::stream).toList();
-            }
-        }
-
-        // 3. Bool 쿼리 구성
-        BoolQuery boolQuery = BoolQuery.of(b -> {
-            if (isChoseongInput) {
-                // 초성 검색일 경우, 전용 쿼리 실행
-                buildChoseongQuery(b, qStripped, krFields, initialsWithSpace);
-            } else {
-                // 일반 검색일 경우, 다단계 점수 전략 실행
-                buildGeneralQuery(b, qStripped, krFields, otherFields, quoted);
-            }
-            b.minimumShouldMatch("1");
-            return b;
-        });
-
-        // 4. 검색 실행
-        SearchResponse<SongDocument> res = elasticsearchClient.search(s -> s
-                        .index(INDEX_NAME)
-                        .from(offset)
-                        .size(pageReq.getSize())
-                        .query(qb -> qb.bool(boolQuery))
-                        .sort(SortOptions.of(so -> so.score(score -> score.order(SortOrder.Desc)))),
-                SongDocument.class);
-
-        // 5. 결과 DTO로 변환 및 반환
-        long total = Optional.ofNullable(res.hits().total()).map(t -> t.value()).orElse(0L);
-        List<SongDTO> dtoList = res.hits().hits().stream()
-                .map(Hit::source)
-                .filter(Objects::nonNull)
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-
-        return PageResponseDTO.<SongDTO>withAll()
-                .dtoList(dtoList)
-                .pageRequestDTO(pageReq)
-                .totalCount(total)
-                .build();
-    }
-
-    /**
-     * 일반 검색을 위한 다단계 점수(boost)
-     */
-    private void buildGeneralQuery(BoolQuery.Builder b, String query, List<String> krFields, List<String> otherFields, boolean isQuoted) {
-        // 단계 1: 완전 일치 (Term) - 가장 높은 점수
-        for (String field : krFields) {
-            b.should(q -> q.term(t -> t.field(field + ".exact").value(query).boost(10.0f)));
-        }
-
-        // 단계 2: 구문 일치 (Match Phrase) - 인용부호 검색 시 매우 높은 점수
-        if (isQuoted) {
-            for (String field : krFields) {
-                b.should(q -> q.matchPhrase(mp -> mp.field(field).query(query).boost(8.0f)));
-            }
-        }
-
-        // 단계 3: 표준 분석기 검색 (Match) - 핵심 검색
-        for (String field : krFields) {
-            b.should(q -> q.match(m -> m.field(field).query(query).boost(5.0f)));
-        }
-        for (String field : otherFields) {
-            b.should(q -> q.match(m -> m.field(field).query(query).boost(3.0f)));
-        }
-
-        // 단계 4: 오타 보정 검색 (NGram) - 약간의 점수
-        for (String field : krFields) {
-            b.should(q -> q.match(m -> m.field(field + ".ngram").query(query).boost(2.0f)));
-        }
-
-        // 단계 5: 공백 무시 검색 (Nospace)
-        for (String field : krFields) {
-            b.should(q -> q.match(m -> m.field(field + ".nospace").query(query).boost(1.5f)));
-        }
-
-        // 단계 6: 한 글자 자동완성 (Autocomplete) - 가장 낮은 점수 (보험용)
-        for (String field : krFields) {
-            b.should(q -> q.match(m -> m.field(field + ".autocomplete").query(query).boost(0.1f)));
-        }
-    }
-
-    /**
-     * 초성 검색 전용 쿼리
-     */
-    private void buildChoseongQuery(BoolQuery.Builder b, String query, List<String> krFields, boolean hasSpace) {
-        String fieldSuffix = hasSpace ? ".initial" : ".initial_joined";
-        for (String field : krFields) {
-            b.should(q -> q.match(m -> m
-                    .field(field + fieldSuffix)
-                    .query(query)
-                    .operator(Operator.And) // 초성은 모든 글자가 일치해야 함
-                    .boost(10.0f)
-            ));
-        }
-    }
+    private static final List<String> INITIALS_JOINED_FIELDS = List.of(
+            "title_kr.initial_joined^6",
+            "title_yomi_kr.initial_joined^6",
+            "title_en_kr.initial_joined^6",
+            "artist_kr.initial_joined^6",
+            "anime_name.initial_joined^6"
+    );
 
     @Override
     public SongDocument save(SongDocument document) {
@@ -187,8 +97,7 @@ public class SongDocumentServiceImpl implements SongDocumentService {
 
     @Override
     public List<SongDocument> saveAll(List<SongDocument> docs) {
-        // 대량 색인을 위해 Bulk API 사용을 권장하지만, 기존 로직을 유지합니다.
-        return docs.stream().map(this::save).collect(Collectors.toList());
+        return docs.stream().map(this::save).toList();
     }
 
     @Override
@@ -253,5 +162,237 @@ public class SongDocumentServiceImpl implements SongDocumentService {
         return findById(id)
                 .map(this::toDTO)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 곡이 없습니다: " + id));
+    }
+
+    @Override
+    public PageResponseDTO<SongDTO> searchByKeyword(String keyword,
+                                                    SearchTarget target,
+                                                    PageRequestDTO pageReq) throws IOException {
+
+        int offset = (pageReq.getPage() - 1) * pageReq.getSize();
+
+        List<String> baseFields = switch (target) {
+            case TITLE  -> TITLE_FIELDS;
+            case ARTIST -> ARTIST_FIELDS;
+            case LYRICS -> LYRICS_FIELDS;
+            case ANIME  -> ANIME_FIELDS;
+            default     -> Stream.of(TITLE_FIELDS, ARTIST_FIELDS, LYRICS_FIELDS, ANIME_FIELDS)
+                    .flatMap(Collection::stream)
+                    .toList();
+        };
+
+        String q = (keyword == null) ? "" : keyword.trim();
+
+        boolean quoted = q.length() > 1 && q.startsWith("\"") && q.endsWith("\"");
+        String qStripped = quoted ? q.substring(1, q.length() - 1) : q;
+
+        String qNoSpace = qStripped.replaceAll("\\s+", "");
+
+        boolean initialsOnly       = qStripped.matches("^[\\u3131-\\u314E]+$");
+        boolean initialsWithSpace  = qStripped.matches("^[\\u3131-\\u314E]+(\\s+[\\u3131-\\u314E]+)+$");
+        boolean isChoseongInput    = initialsOnly || initialsWithSpace;
+
+        int codePoints = qNoSpace.codePointCount(0, qNoSpace.length());
+        boolean useFuzzy = codePoints >= 4 && !isChoseongInput;
+
+        BoolQuery boolQuery = BoolQuery.of(b -> {
+
+            // (A) 정확 매칭: 불용어 영향 없음 (*.exact)
+            switch (target) {
+                case TITLE -> b.should(qb -> qb.term(t -> t
+                        .field("title_kr.exact").value(qStripped).boost(8.0f)));
+                case ARTIST -> b.should(qb -> qb.term(t -> t
+                        .field("artist_kr.exact").value(qStripped).boost(7.0f)));
+                case LYRICS -> { /* 가사는 exact 생략 */ }
+                case ANIME -> b.should(qb -> qb.term(t -> t
+                        .field("anime_name.exact").value(qStripped).boost(7.5f)));
+                default -> {
+                    b.should(qb -> qb.term(t -> t.field("title_kr.exact").value(qStripped).boost(8.0f)));
+                    b.should(qb -> qb.term(t -> t.field("artist_kr.exact").value(qStripped).boost(7.0f)));
+                    b.should(qb -> qb.term(t -> t.field("anime_name.exact").value(qStripped).boost(7.5f)));
+                }
+            }
+
+            // (B) 구절 매칭: 따옴표 검색 시 강화 (search_quote_analyzer)
+            if (quoted) {
+                if (target == SearchTarget.ARTIST) {
+                    b.should(qb -> qb.matchPhrase(mp -> mp
+                            .field("artist_kr")
+                            .query(qStripped)
+                            .slop(0)
+                            .boost(6.0f)
+                    ));
+                } else if (target == SearchTarget.TITLE) {
+                    b.should(qb -> qb.matchPhrase(mp -> mp
+                            .field("title_kr")
+                            .query(qStripped)
+                            .slop(0)
+                            .boost(6.0f)
+                    ));
+                } else if (target == SearchTarget.ANIME) {
+                    b.should(qb -> qb.matchPhrase(mp -> mp
+                            .field("anime_name")
+                            .query(qStripped)
+                            .slop(0)
+                            .boost(6.0f)
+                    ));
+                } else {
+                    b.should(qb -> qb.matchPhrase(mp -> mp
+                            .field("title_kr")
+                            .query(qStripped)
+                            .slop(0)
+                            .boost(6.0f)
+                    ));
+                    b.should(qb -> qb.matchPhrase(mp -> mp
+                            .field("artist_kr")
+                            .query(qStripped)
+                            .slop(0)
+                            .boost(5.0f)
+                    ));
+                    b.should(qb -> qb.matchPhrase(mp -> mp
+                            .field("anime_name")
+                            .query(qStripped)
+                            .slop(0)
+                            .boost(6.0f)
+                    ));
+                }
+            }
+
+            // (C) 일반 멀티 필드 매칭
+            b.should(qb -> qb.multiMatch(mm -> mm
+                    .query(qStripped)
+                    .fields(baseFields)
+                    .type(TextQueryType.BestFields)
+                    .minimumShouldMatch("70%")
+                    .operator(Operator.Or)
+                    .tieBreaker(0.2)
+                    .boost(4.0f)
+            ));
+
+            // (D) 공백 무시 매칭 (nospace)
+            List<String> nospaceFields = switch (target) {
+                case TITLE  -> List.of("title_kr.nospace^5", "title_en_kr.nospace^4", "anime_name.nospace^5");
+                case ARTIST -> List.of("artist_kr.nospace^4");
+                case LYRICS -> List.of();
+                case ANIME  -> List.of("anime_name.nospace^5");
+                default -> List.of("title_kr.nospace^5", "title_en_kr.nospace^4", "artist_kr.nospace^4", "anime_name.nospace^5");
+            };
+            if (!nospaceFields.isEmpty()) {
+                b.should(qb -> qb.multiMatch(mm -> mm
+                        .query(qNoSpace)
+                        .fields(nospaceFields)
+                        .type(TextQueryType.BestFields)
+                        .minimumShouldMatch("70%")
+                        .tieBreaker(0.2)
+                        .boost(3.5f)
+                ));
+            }
+
+            // (E) 오타 허용 (긴 질의에서만)
+            if (useFuzzy) {
+                b.should(qb -> qb.multiMatch(mm -> mm
+                        .query(qStripped)
+                        .fields(baseFields)
+                        .fuzziness("AUTO:1,2")
+                        .type(TextQueryType.BestFields)
+                        .operator(Operator.Or)
+                        .minimumShouldMatch("70%")
+                        .prefixLength(1)
+                        .maxExpansions(50)
+                        .tieBreaker(0.2)
+                        .boost(1.5f)
+                ));
+                if (!nospaceFields.isEmpty()) {
+                    b.should(qb -> qb.multiMatch(mm -> mm
+                            .query(qNoSpace)
+                            .fields(nospaceFields)
+                            .fuzziness("AUTO:1,2")
+                            .type(TextQueryType.BestFields)
+                            .minimumShouldMatch("70%")
+                            .prefixLength(1)
+                            .maxExpansions(50)
+                            .tieBreaker(0.2)
+                            .boost(2.0f)
+                    ));
+                }
+            }
+
+            // (F) 초성 — 붙여쓴 입력
+            if (initialsOnly) {
+                List<String> initialsFields = switch (target) {
+                    case TITLE -> List.of(
+                            "title_kr.initial_joined^6",
+                            "title_yomi_kr.initial_joined^6",
+                            "title_en_kr.initial_joined^6",
+                            "anime_name.initial_joined^6"
+                    );
+                    case ARTIST -> List.of("artist_kr.initial_joined^6");
+                    case LYRICS -> List.of();
+                    case ANIME  -> List.of("anime_name.initial_joined^6");
+                    default -> INITIALS_JOINED_FIELDS;
+                };
+                if (!initialsFields.isEmpty()) {
+                    b.should(qb -> qb.multiMatch(mm -> mm
+                            .query(qStripped)
+                            .fields(initialsFields)
+                            .type(TextQueryType.BestFields)
+                            .operator(Operator.And)
+                            .boost(4.0f)
+                    ));
+                }
+            }
+
+            // (G) 초성 — 띄어쓴 입력
+            if (initialsWithSpace) {
+                List<String> initialsWordFields = switch (target) {
+                    case TITLE -> List.of(
+                            "title_kr.initial^6",
+                            "title_yomi_kr.initial^6",
+                            "title_en_kr.initial^6",
+                            "anime_name.initial^6"
+                    );
+                    case ARTIST -> List.of("artist_kr.initial^6");
+                    case LYRICS -> List.of();
+                    case ANIME  -> List.of("anime_name.initial^6");
+                    default -> INITIALS_WORD_FIELDS;
+                };
+                if (!initialsWordFields.isEmpty()) {
+                    b.should(qb -> qb.multiMatch(mm -> mm
+                            .query(qStripped)
+                            .fields(initialsWordFields)
+                            .type(TextQueryType.BestFields)
+                            .operator(Operator.And)
+                            .boost(4.0f)
+                    ));
+                }
+            }
+
+            b.minimumShouldMatch("1");
+            return b;
+        });
+
+        SearchResponse<SongDocument> res = elasticsearchClient.search(s -> s
+                        .index(INDEX_NAME)
+                        .from(offset)
+                        .size(pageReq.getSize())
+                        .query(qb -> qb.bool(boolQuery))
+                        .sort(SortOptions.of(so -> so.score(_s -> _s.order(SortOrder.Desc)))),
+                SongDocument.class);
+
+        long total = Optional.ofNullable(res.hits().total())
+                .map(t -> t.value())
+                .orElse(0L);
+
+        List<SongDTO> dtoList = res.hits().hits()
+                .stream().map(Hit::source)
+                .filter(Objects::nonNull)
+                .map(this::toDTO)
+                .toList();
+
+        return PageResponseDTO.<SongDTO>withAll()
+                .dtoList(dtoList)
+                .pageRequestDTO(pageReq)
+                .totalCount(total)
+                .build();
     }
 }
