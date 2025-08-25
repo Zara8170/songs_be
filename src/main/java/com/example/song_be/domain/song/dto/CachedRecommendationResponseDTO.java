@@ -23,6 +23,8 @@ public class CachedRecommendationResponseDTO {
     @JsonProperty("generated_date")
     private String generatedDate;
     
+    private Boolean cached;
+    
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -56,10 +58,10 @@ public class CachedRecommendationResponseDTO {
         private String artistKr;
         
         @JsonProperty("tj_number")
-        private Integer tjNumber;
+        private String tjNumber;
         
         @JsonProperty("ky_number")
-        private Integer kyNumber;
+        private String kyNumber;
     }
     
     @Data
@@ -91,10 +93,10 @@ public class CachedRecommendationResponseDTO {
         private String mood;
         
         @JsonProperty("tj_number")
-        private Integer tjNumber;
+        private String tjNumber;
         
         @JsonProperty("ky_number")
-        private Integer kyNumber;
+        private String kyNumber;
         
         @JsonProperty("recommendation_type")
         private String recommendationType;
