@@ -70,6 +70,22 @@ spring:
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
 
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+
   flyway:
     enabled: false
     locations: classpath:db/migration
@@ -91,6 +107,9 @@ app:
       secret-key: ${AES_SECRET_KEY}
   rabbitmq:
     prefetch: ${RABBITMQ_PREFETCH:16}
+  suggestion:
+    admin-email: ${SUGGESTION_ADMIN_EMAIL:${MAIL_USERNAME}}
+    max-retry: ${SUGGESTION_MAX_RETRY:3}
 
 ---
 spring:

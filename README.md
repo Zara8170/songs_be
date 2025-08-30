@@ -27,6 +27,7 @@ Song Backend는 음악 스트리밍 서비스를 위한 RESTful API를 제공합
 - 🎌 **애니메이션 관련 음악 카테고리**
 - 🔍 **Elasticsearch 기반 검색**
 - 📊 **실시간 메시징** (RabbitMQ)
+- 💌 **건의사항 시스템** (이메일 알림)
 
 ## 🛠 기술 스택
 
@@ -89,6 +90,50 @@ Song Backend는 음악 스트리밍 서비스를 위한 RESTful API를 제공합
                                       │   RabbitMQ      │
                                       │ (Port 5672)     │
                                       └─────────────────┘
+```
+
+## 💌 건의사항 시스템
+
+새롭게 추가된 건의사항 시스템을 통해 사용자들이 서비스 개선 사항을 제안할 수 있습니다.
+
+### 주요 특징
+
+- **비동기 처리**: RabbitMQ를 통한 안정적인 메시지 처리
+- **이메일 알림**: 관리자에게 즉시 이메일 알림 전송
+- **재시도 메커니즘**: 전송 실패 시 자동 재시도 (최대 3회)
+- **사용자 인증**: 로그인한 사용자만 건의사항 제출 가능
+
+### API 엔드포인트
+
+```
+POST /api/suggestions
+```
+
+### 요청 예시
+
+```json
+{
+  "title": "새로운 기능 제안",
+  "content": "플레이리스트 공유 기능을 추가해주세요."
+}
+```
+
+### 환경 설정
+
+건의사항 기능을 사용하려면 다음 환경변수를 설정해야 합니다:
+
+```bash
+# 메일 서버 설정 (Gmail 예시)
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+
+# 건의사항 관리자 이메일 (선택사항, 기본값: MAIL_USERNAME)
+SUGGESTION_ADMIN_EMAIL=admin@yourcompany.com
+
+# 최대 재시도 횟수 (선택사항, 기본값: 3)
+SUGGESTION_MAX_RETRY=3
 ```
 
 ## 🚀 시작하기

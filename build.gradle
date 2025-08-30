@@ -78,6 +78,9 @@ dependencies {
     // rabbitmq
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
+    // mail
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
     // actuator + prometheus
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'

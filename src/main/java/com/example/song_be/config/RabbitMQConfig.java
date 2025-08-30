@@ -15,6 +15,7 @@ import java.util.Map;
 @org.springframework.amqp.rabbit.annotation.EnableRabbit
 public class RabbitMQConfig {
 
+    // Recommendation System Constants
     public static final String REC_EXCHANGE = "rec.exchange";
     public static final String DLX_EXCHANGE = "rec.dlx";
 
@@ -29,6 +30,18 @@ public class RabbitMQConfig {
     public static final String QUEUE_RETRY_30S = "rec.recommendation.retry.30s.q";
     public static final String QUEUE_RETRY_120S = "rec.recommendation.retry.120s.q";
     public static final String QUEUE_DLQ = "rec.recommendation.dlq";
+
+    // Suggestion System Constants
+    public static final String SUGGESTION_EXCHANGE = "suggestion.exchange";
+    public static final String SUGGESTION_DLX = "suggestion.dlx";
+
+    public static final String ROUTING_SUGGESTION = "suggestion.send";
+    public static final String ROUTING_SUGGESTION_RETRY = "suggestion.send.retry";
+    public static final String ROUTING_SUGGESTION_DLQ = "suggestion.send.dlq";
+
+    public static final String QUEUE_SUGGESTION = "suggestion.email.q";
+    public static final String QUEUE_SUGGESTION_RETRY = "suggestion.email.retry.q";
+    public static final String QUEUE_SUGGESTION_DLQ = "suggestion.email.dlq";
 
     @Value("${app.rabbitmq.prefetch:16}")
     private int prefetchCount;
@@ -141,6 +154,63 @@ public class RabbitMQConfig {
     @Bean
     public org.springframework.amqp.support.converter.Jackson2JsonMessageConverter jackson2Converter() {
         return new org.springframework.amqp.support.converter.Jackson2JsonMessageConverter();
+    }
+
+    // ============ Suggestion System Configuration ============
+
+    // Suggestion Exchanges
+    @Bean
+    public DirectExchange suggestionExchange() {
+        return new DirectExchange(SUGGESTION_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public DirectExchange suggestionDlx() {
+        return new DirectExchange(SUGGESTION_DLX, true, false);
+    }
+
+    // Suggestion Main Queue
+    @Bean
+    public Queue suggestionQueue() {
+        return QueueBuilder.durable(QUEUE_SUGGESTION)
+                .build();
+    }
+
+    @Bean
+    public Binding bindSuggestionQueue() {
+        return BindingBuilder.bind(suggestionQueue())
+                .to(suggestionExchange())
+                .with(ROUTING_SUGGESTION);
+    }
+
+    // Suggestion Retry Queue (30s TTL)
+    @Bean
+    public Queue suggestionRetryQueue() {
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-message-ttl", 30000); // 30초 후 재시도
+        args.put("x-dead-letter-exchange", SUGGESTION_EXCHANGE);
+        args.put("x-dead-letter-routing-key", ROUTING_SUGGESTION);
+        return new Queue(QUEUE_SUGGESTION_RETRY, true, false, false, args);
+    }
+
+    @Bean
+    public Binding bindSuggestionRetryQueue() {
+        return BindingBuilder.bind(suggestionRetryQueue())
+                .to(suggestionDlx())
+                .with(ROUTING_SUGGESTION_RETRY);
+    }
+
+    // Suggestion Dead Letter Queue
+    @Bean
+    public Queue suggestionDlq() {
+        return QueueBuilder.durable(QUEUE_SUGGESTION_DLQ).build();
+    }
+
+    @Bean
+    public Binding bindSuggestionDlq() {
+        return BindingBuilder.bind(suggestionDlq())
+                .to(suggestionDlx())
+                .with(ROUTING_SUGGESTION_DLQ);
     }
 }
 
