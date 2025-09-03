@@ -1,6 +1,6 @@
-# 🎵 Song Backend API
+# 🎵 UtaBox
 
-> **애니메이션 음악 전문 스트리밍 서비스**  
+> **노래방 일본어 노래 검색 서비스**  
 > Spring Boot 3.3.0 기반의 고성능 RESTful API
 
 [![Java](https://img.shields.io/badge/Java-17-orange)](https://openjdk.org/projects/jdk/17/)
@@ -8,197 +8,129 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.0+-blue)](https://www.mysql.com/)
 [![Redis](https://img.shields.io/badge/Redis-6.0+-red)](https://redis.io/)
 [![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8.13.4-yellow)](https://www.elastic.co/)
-[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.13-orange)](https://www.rabbitmq.com/)
 
 ---
 
 ## 📋 목차
 
-### 🏗️ **아키텍처 & 설계**
-
-- [📖 프로젝트 개요](#-프로젝트-개요)
-- [🛠 기술 스택](#-기술-스택)
-- [🏛 도메인 모델](#-도메인-모델)
-- [🏗 시스템 아키텍처](#-시스템-아키텍처)
-
-### ⚙️ **핵심 시스템**
-
-- [🔄 비동기 처리](#-비동기-처리)
-- [🔍 검색 시스템](#-검색-시스템)
-
-### 🚀 **시작하기**
-
-- [⚡ 빠른 시작](#-빠른-시작)
-- [📚 API 문서](#-api-문서)
-- [🐳 Docker 실행](#-docker-실행)
-- [💻 개발 환경 설정](#-개발-환경-설정)
-
-### 🔧 **운영 & 관리**
-
-- [📊 모니터링](#-모니터링)
-- [🔧 트러블슈팅](#-트러블슈팅)
+1. [📖 프로젝트 설명](#-프로젝트-설명)
+2. [💡 프로젝트 기획 의도](#-프로젝트-기획-의도)
+3. [🏗️ 프로젝트 전체 구조](#️-프로젝트-전체-구조)
+4. [🔧 문제 해결](#-문제-해결)
+5. [🎓 프로젝트를 통해 배운 점](#-프로젝트를-통해-배운-점)
+6. [🌟 프로젝트의 특징](#-프로젝트의-특징)
+7. [🚀 빠른 시작](#-빠른-시작)
+8. [📚 API 문서](#-api-문서)
+9. [🛠️ 기술 스택](#️-기술-스택)
 
 ---
 
-## 📖 프로젝트 개요
+## 📖 프로젝트 설명
 
-**Song Backend**는 **애니메이션 음악에 특화된** 스트리밍 서비스를 위한 고성능 RESTful API입니다.  
-마이크로서비스 아키텍처 패턴을 적용하여 확장성과 유지보수성을 고려한 설계로 구현되었습니다.
+**UtaBox**는 노래방에서 일본어 노래를 쉽게 찾을 수 있도록 도와주는 검색 서비스입니다. 한국어로 일본어 노래를 검색하고, TJ/KY 노래방 번호를 바로 확인할 수 있는 웹 애플리케이션입니다.
 
-### 🎨 핵심 특징
+### 🎯 애플리케이션 개요
 
-| 특징                        | 설명                                           |
-| --------------------------- | ---------------------------------------------- |
-| 🎌 **애니메이션 음악 전문** | 일본 애니메이션 OST, OP/ED 곡 전문 관리        |
-| 🔍 **다국어 검색**          | 한국어/일본어/영어 통합 검색 및 초성 검색 지원 |
-| ⚡ **고성능 검색**          | Elasticsearch 기반 실시간 검색 엔진            |
-| 🔄 **비동기 처리**          | RabbitMQ를 통한 안정적인 메시지 큐 시스템      |
-| 🛡️ **보안**                 | JWT + OAuth2 기반 인증/인가 시스템             |
-| 📊 **모니터링**             | 구조화된 JSON 로깅 및 Health Check             |
+- **🎤 노래방 특화 서비스**: 실제 노래방에서 바로 사용할 수 있는 TJ/KY 번호 제공
+- **🔍 스마트 검색**: 한국어로 일본어 노래 검색, 초성 검색, 오타 보정 기능
+- **🌏 다국어 지원**: 일본어 원제, 한국어 번역, 영어 표기 통합 관리
+- **📱 사용자 친화적**: 직관적인 검색 인터페이스와 빠른 응답 속도
 
-### 🚀 주요 기능
+### 🛠️ 핵심 기술 선택 이유
 
-<details>
-<summary><strong>🔐 사용자 인증 및 권한 관리</strong></summary>
+**Elasticsearch 도입 이유:**
 
-- **JWT 토큰 기반 인증** (Access/Refresh Token)
-- **OAuth2 Google 소셜 로그인**
-- **역할 기반 접근 제어** (RBAC)
-- **AES 암호화**를 통한 민감 정보 보호
+- 기존 MySQL LIKE 검색의 한계 극복 (오타, 띄어쓰기 민감)
+- 다국어 텍스트 분석 및 초성 검색 지원
+- 빠른 전문 검색과 관련도 기반 정렬
+- 실시간 검색어 자동완성 기능
 
-</details>
+**RabbitMQ 사용 이유:**
 
-<details>
-<summary><strong>🎵 음악 관리 시스템</strong></summary>
+- 추천 시스템의 비동기 처리로 사용자 경험 향상
+- 이메일 알림 등 백그라운드 작업 안정적 처리
+- 시스템 부하 분산 및 확장성 확보
 
-- **다국어 메타데이터** 지원 (한/일/영)
-- **TJ/KY 노래방 번호** 연동
-- **가사 다국어 버전** 관리
-- **애니메이션 카테고리별** 분류
+### 🎯 향후 추가 예정 기능
 
-</details>
+- **📈 인기곡 차트**: 실시간 검색 빈도 기반 인기 차트
+- **🆕 신규곡 알림**: 새로 추가된 일본 애니메이션 노래 알림 서비스
+- **🎵 플레이리스트 공유**: 사용자간 노래방 플레이리스트 공유
+- **📊 개인 통계**: 자주 부르는 곡, 선호 장르 분석
 
-<details>
-<summary><strong>📝 플레이리스트 관리</strong></summary>
+---
 
-- **개인/공개 플레이리스트** 생성
-- **플레이리스트 공유** 및 협업
-- **곡 순서 관리** 및 편집
+## 💡 프로젝트 기획 의도
 
-</details>
+노래방에서 일본어 노래 검색을 할 때 한국어 검색이 되지 않아 어려움이 있는데, 그것을 쉽게 하고자 만들었습니다.
 
-<details>
-<summary><strong>❤️ 좋아요 및 추천 시스템</strong></summary>
+### 🎯 해결하고자 한 문제
 
-- **사용자별 좋아요** 관리
-- **머신러닝 기반 음악 추천** (Python 서버 연동)
-- **비동기 추천 생성** 및 캐싱
+**기존 문제점:**
 
-</details>
+- 🎌 노래방에서 일본어 노래 제목을 정확히 입력해야만 검색 가능
+- 🔍 한국어로 번역된 제목이나 가수명으로는 검색 불가
+- 📱 TJ/KY 노래방 번호를 별도로 찾아야 하는 번거로움
+- ✏️ 띄어쓰기나 오타가 있으면 검색 결과가 나오지 않음
 
-<details>
-<summary><strong>🔍 고급 검색 기능</strong></summary>
+**해결 방안:**
 
-- **Elasticsearch 기반** 전문 검색
-- **다국어 필드 통합** 검색
-- **한국어 초성 검색** 지원
-- **가중치 기반** 관련도 정렬
+- ✅ 한국어로 일본어 노래 검색 가능
+- ✅ 초성 검색으로 더욱 편리한 입력
+- ✅ 오타나 띄어쓰기 실수에도 관련 결과 제공
+- ✅ 노래방 번호 즉시 확인으로 빠른 예약
 
-</details>
+---
 
-<details>
-<summary><strong>📊 실시간 비동기 처리</strong></summary>
+## 🏗️ 프로젝트 전체 구조
 
-- **RabbitMQ 메시지 큐**를 통한 백그라운드 작업
-- **추천 시스템** 비동기 처리
-- **이메일 알림 시스템**
-- **재시도 메커니즘** 및 DLQ 처리
+### 📂 패키지 구조
 
-</details>
+```
+src/main/java/com/example/song_be/
+├── 📱 SongBeApplication.java          # 메인 애플리케이션
+├── 🔧 config/                         # 설정 파일들
+│   ├── SecurityConfig.java            # Spring Security 설정
+│   ├── JpaConfig.java                 # JPA 설정
+│   ├── RedisConfig.java               # Redis 설정
+│   ├── RabbitMQConfig.java            # RabbitMQ 설정
+│   └── QuerydslConfig.java            # QueryDSL 설정
+├── 🏗️ domain/                         # 도메인별 패키지 구조
+│   ├── member/                        # 회원 관리
+│   │   ├── entity/Member.java         # 회원 엔티티
+│   │   ├── controller/                # 회원 컨트롤러
+│   │   ├── service/                   # 회원 서비스
+│   │   └── repository/                # 회원 리포지토리
+│   ├── song/                          # 노래 관리
+│   │   ├── entity/Song.java           # 노래 엔티티
+│   │   ├── document/SongDocument.java # ES 검색용 도큐먼트
+│   │   ├── controller/                # 노래 컨트롤러
+│   │   ├── service/                   # 노래 서비스 (검색 포함)
+│   │   └── repository/                # 노래 리포지토리
+│   ├── playlist/                      # 플레이리스트 관리
+│   ├── like/                          # 좋아요 시스템
+│   ├── anime/                         # 애니메이션 정보
+│   └── suggestion/                    # 건의사항
+├── 🛡️ security/                       # 보안 관련
+│   ├── filter/JWTCheckFilter.java     # JWT 토큰 검증 필터
+│   ├── handler/                       # 인증/인가 핸들러
+│   ├── entity/RefreshToken.java       # 리프레시 토큰 엔티티
+│   └── repository/                    # 보안 관련 리포지토리
+├── 🛠️ util/                           # 유틸리티
+│   ├── JWTUtil.java                   # JWT 토큰 유틸
+│   ├── AesUtil.java                   # AES 암호화 유틸
+│   └── TimeUtil.java                  # 시간 처리 유틸
+├── 📊 dto/                            # 데이터 전송 객체
+│   ├── PageRequestDTO.java            # 페이징 요청
+│   └── PageResponseDTO.java           # 페이징 응답
+└── 🏥 health/                         # 헬스 체크
+    └── HealthController.java          # 상태 확인
+```
 
-<details>
-<summary><strong>💌 건의사항 시스템</strong></summary>
-
-- **사용자 피드백** 수집
-- **이메일 자동 알림**
-- **관리자 대시보드** 연동
-
-</details>
-
-## 🛠 기술 스택
-
-<table>
-<tr>
-<td width="50%">
-
-### 🏗️ **Backend Framework**
-
-- **Spring Boot** `3.3.0`
-- **Java** `17 LTS`
-- **Spring Security**
-- **Spring Data JPA**
-- **QueryDSL** `5.0.0`
-- **Hibernate** `6.4.4`
-
-### 🗄️ **Database & Storage**
-
-- **MySQL** `8.0+`
-- **Redis** `6.0+`
-- **Elasticsearch** `8.13.4`
-
-### 🔄 **Message Queue**
-
-- **RabbitMQ** `3.13`
-- **Spring AMQP**
-
-</td>
-<td width="50%">
-
-### 🔐 **Security**
-
-- **JWT** `0.11.5`
-- **OAuth2** (Google)
-- **AES Encryption**
-- **Spring Security**
-
-### 📊 **Monitoring**
-
-- **Spring Boot Actuator**
-- **Logback + Logstash**
-- **Health Check**
-
-### 🚀 **DevOps**
-
-- **Docker & Docker Compose**
-- **Gradle**
-- **Flyway**
-
-### 📚 **Additional**
-
-- **Jackson**, **Lombok**
-- **SpringDoc OpenAPI**
-- **Spring Mail**, **Validation**
-
-</td>
-</tr>
-</table>
-
-## 🏛 도메인 모델
-
-### 핵심 엔티티
+### 🗄️ 데이터베이스 구조
 
 ```mermaid
 erDiagram
-    Member ||--o{ SongLike : "좋아요"
-    Member ||--o{ Playlist : "소유"
-    Member ||--o{ Suggestion : "제안"
-
-    Song ||--o{ SongLike : "좋아요 받음"
-    Song }o--|| Anime : "속함"
-    Song ||--o{ PlaylistSong : "포함됨"
-
-    Playlist ||--o{ PlaylistSong : "포함"
-
     Member {
         Long id PK
         String email UK
@@ -209,1330 +141,509 @@ erDiagram
 
     Song {
         Long songId PK
-        Long tj_number
-        Long ky_number
-        String title_kr
-        String title_en
-        String title_jp
-        String artist
-        String artist_kr
-        String lyrics_original
-        String lyrics_kr
-        AnimeType animeType
+        Long tj_number "TJ 노래방 번호"
+        Long ky_number "KY 노래방 번호"
+        String title_kr "한국어 제목"
+        String title_jp "일본어 제목"
+        String title_en "영어 제목"
+        String title_yomi "요미가나"
+        String title_yomi_kr "요미가나 한글표기"
+        String artist "아티스트"
+        String artist_kr "아티스트 한글명"
+        String lyrics_original "원본 가사"
+        String lyrics_kr "한국어 가사"
+        AnimeType animeType "애니메이션 타입"
     }
 
     Anime {
         Long animeId PK
-        String title
+        String title "애니메이션 제목"
     }
 
     Playlist {
         Long playlistId PK
-        String title
-        String description
-        Boolean isPublic
+        String title "플레이리스트 제목"
+        String description "설명"
+        Boolean isPublic "공개 여부"
     }
 
-    Suggestion {
+    SongLike {
         Long id PK
-        String title
-        String content
-        Boolean isProcessed
+        LocalDateTime likedAt "좋아요 시간"
     }
+
+    PlaylistSong {
+        Long id PK
+        Integer order_num "순서"
+    }
+
+    RefreshToken {
+        Long id PK
+        String encryptedToken "암호화된 토큰"
+        Long expiry "만료 시간"
+    }
+
+    Member ||--o{ SongLike : "좋아요"
+    Member ||--o{ Playlist : "생성"
+    Member ||--o{ RefreshToken : "토큰 소유"
+    Song ||--o{ SongLike : "좋아요받음"
+    Song }o--|| Anime : "속함"
+    Song ||--o{ PlaylistSong : "포함됨"
+    Playlist ||--o{ PlaylistSong : "포함"
 ```
 
-### 주요 도메인 특징
-
-- **Member**: 사용자 관리 및 역할 기반 권한
-- **Song**: 다국어 메타데이터를 가진 음악 정보
-- **Anime**: 애니메이션 정보 및 음악 카테고리
-- **Playlist**: 사용자 커스텀 플레이리스트
-- **SongLike**: 사용자-음악 좋아요 관계
-- **Suggestion**: 사용자 건의사항 및 피드백
-
-## 🏗 시스템 아키텍처
-
-### 전체 시스템 구조
+### 🏗️ 시스템 아키텍처
 
 ```mermaid
 graph TB
-    subgraph "Client Layer"
-        Client[Client Application<br/>Web/Mobile]
+    subgraph "🖥️ Client Layer"
+        Web[웹 클라이언트]
+        Mobile[모바일 앱]
     end
 
-    subgraph "API Gateway Layer"
-        API[Spring Boot API<br/>Port 8082<br/>JWT + OAuth2]
+    subgraph "🌐 API Layer"
+        API[Spring Boot API<br/>Port 8082]
+        Security[Spring Security<br/>JWT + OAuth2]
     end
 
-    subgraph "Data Layer"
-        MySQL[(MySQL Database<br/>Primary Storage<br/>Port 3306)]
-        Redis[(Redis Cache<br/>Session & Token Storage<br/>Port 6379)]
-        ES[(Elasticsearch<br/>Search Engine<br/>Port 9200)]
+    subgraph "💾 Data Layer"
+        MySQL[(MySQL<br/>메인 데이터)]
+        Redis[(Redis<br/>토큰 & 캐시)]
+        ES[(Elasticsearch<br/>검색 엔진)]
     end
 
-    subgraph "Message Queue Layer"
-        RMQ[RabbitMQ<br/>Message Broker<br/>Port 5672]
-        RecQueue[Recommendation Queue<br/>rec.recommendation.q]
-        SugQueue[Suggestion Queue<br/>suggestion.email.q]
-        DLQ[Dead Letter Queues<br/>Error Handling]
+    subgraph "📨 Message Queue"
+        RMQ[RabbitMQ<br/>비동기 처리]
     end
 
-    subgraph "AI/ML Layer"
-        Python[Python ML Server<br/>Port 8000<br/>Recommendation Engine]
+    subgraph "📊 Monitoring"
+        Prometheus[Prometheus<br/>메트릭 수집]
+        Grafana[Grafana<br/>대시보드]
     end
 
-    subgraph "External Services"
-        Google[Google OAuth2<br/>Social Login]
-        SMTP[SMTP Server<br/>Gmail Email]
-    end
-
-    Client --> API
+    Web --> API
+    Mobile --> API
+    API --> Security
     API --> MySQL
     API --> Redis
     API --> ES
     API --> RMQ
+    API --> Prometheus
+    Prometheus --> Grafana
 
-    RMQ --> RecQueue
-    RMQ --> SugQueue
-    RMQ --> DLQ
-
-    RecQueue --> Python
-    SugQueue --> SMTP
-
-    API --> Google
-
-    style API fill:#e1f5fe
-    style Python fill:#fff3e0
-    style RMQ fill:#f3e5f5
+    style API fill:#e3f2fd
     style MySQL fill:#e8f5e8
     style Redis fill:#ffebee
-    style ES fill:#fff8e1
-```
-
-### 레이어 아키텍처
-
-```mermaid
-graph TD
-    Controller[Controller Layer<br/>REST API Endpoints] --> Service[Service Layer<br/>Business Logic]
-    Service --> Repository[Repository Layer<br/>Data Access]
-    Service --> Queue[Message Queue<br/>Async Processing]
-    Service --> Search[Search Engine<br/>Elasticsearch]
-
-    Repository --> JPA[Spring Data JPA]
-    Repository --> QueryDSL[QueryDSL]
-    JPA --> MySQL[(MySQL)]
-
-    Queue --> RabbitMQ[RabbitMQ]
-    Search --> Elasticsearch[Elasticsearch]
-
-    subgraph "Cross-cutting Concerns"
-        Security[Spring Security]
-        Validation[Validation]
-        Logging[Logging & Monitoring]
-        Cache[Redis Cache]
-    end
-```
-
-## 🔄 비동기 처리
-
-### RabbitMQ 백엔드 설정
-
-본 프로젝트는 RabbitMQ를 사용하여 안정적인 비동기 메시지 처리를 구현합니다.
-
-#### 1. RabbitMQ 설정 구성
-
-**Exchange 및 Queue 구조**:
-
-```java
-@Configuration
-@EnableRabbit
-public class RabbitMQConfig {
-
-    // 추천 시스템용 Exchange
-    public static final String REC_EXCHANGE = "rec.exchange";
-    public static final String DLX_EXCHANGE = "rec.dlx";
-
-    // 건의사항 시스템용 Exchange
-    public static final String SUGGESTION_EXCHANGE = "suggestion.exchange";
-    public static final String SUGGESTION_DLX = "suggestion.dlx";
-
-    // Queue 설정
-    public static final String QUEUE_MAIN = "rec.recommendation.q";
-    public static final String QUEUE_RETRY_5S = "rec.recommendation.retry.5s.q";
-    public static final String QUEUE_RETRY_30S = "rec.recommendation.retry.30s.q";
-    public static final String QUEUE_RETRY_120S = "rec.recommendation.retry.120s.q";
-    public static final String QUEUE_DLQ = "rec.recommendation.dlq";
-}
-```
-
-**Container Factory 설정**:
-
-```java
-@Bean
-public SimpleRabbitListenerContainerFactory manualAckContainerFactory(ConnectionFactory connectionFactory) {
-    SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-    factory.setConnectionFactory(connectionFactory);
-    factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);  // 수동 ACK
-    factory.setPrefetchCount(16);  // 동시 처리 메시지 수
-    factory.setDefaultRequeueRejected(false);  // 실패 시 재큐잉 방지
-    factory.setMessageConverter(jackson2Converter());  // JSON 변환
-    return factory;
-}
-```
-
-#### 2. AI 서버 연결 설정
-
-**RestTemplate 설정**:
-
-```java
-@Configuration
-public class RestTemplateConfig {
-
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplateBuilder()
-            .setConnectTimeout(Duration.ofSeconds(10))
-            .setReadTimeout(Duration.ofSeconds(60))
-            .build();
-    }
-}
-```
-
-**Python AI 서버 통신**:
-
-```java
-@Component
-public class RestRecommendationCaller {
-
-    @Value("${app.props.python-server-url}")
-    private String pythonServerUrl;  // http://python-ml-server:8000
-
-    public RecommendationResponseFromPythonDTO callWithTimeout(
-            RecommendationRequestDTO req, Duration timeout) {
-
-        // Python 서버로 POST 요청
-        var response = restTemplate.postForEntity(
-            pythonServerUrl + "/recommend",
-            req,
-            String.class
-        );
-
-        // JSON 응답 파싱
-        return objectMapper.readValue(response.getBody(),
-            RecommendationResponseFromPythonDTO.class);
-    }
-}
-```
-
-#### 3. 메시지 처리 플로우
-
-**추천 요청 Publisher**:
-
-```java
-@Service
-public class RecommendationPublisher {
-
-    public void publish(RecommendationJobMessage message) {
-        // RabbitMQ로 메시지 발송
-        rabbitTemplate.convertAndSend(
-            RabbitMQConfig.REC_EXCHANGE,
-            RabbitMQConfig.ROUTING_RECOMMENDATION,
-            message
-        );
-        log.info("추천 작업 메시지 발송: jobId={}", message.getJobId());
-    }
-}
-```
-
-**추천 처리 Consumer**:
-
-```java
-@Component
-public class RecommendationConsumer {
-
-    @RabbitListener(queues = RabbitMQConfig.QUEUE_MAIN,
-                   containerFactory = "manualAckContainerFactory")
-    public void handle(RecommendationJobMessage message, Channel channel, Message amqpMessage) {
-
-        try {
-            // 1. 사용자 선호 곡 조회
-            List<Long> preferred = resolvePreferredSongs(message);
-
-            // 2. AI 서버 요청 DTO 생성
-            RecommendationRequestDTO req = RecommendationRequestDTO.builder()
-                .memberId(String.valueOf(message.getMemberId()))
-                .favoriteSongIds(preferred)
-                .build();
-
-            // 3. Python AI 서버 호출 (60초 타임아웃)
-            RecommendationResponseFromPythonDTO result =
-                restCaller.callWithTimeout(req, Duration.ofSeconds(60));
-
-            // 4. 결과 저장 및 ACK
-            jobStore.setSucceeded(jobId, result);
-            channel.basicAck(deliveryTag, false);
-
-        } catch (TransientException e) {
-            // 일시적 오류 - 재시도 큐로 이동
-            requeueWithBackoff(message, attempt);
-            channel.basicAck(deliveryTag, false);
-
-        } catch (Exception e) {
-            // 영구적 오류 - DLQ로 이동
-            channel.basicNack(deliveryTag, false, false);
-        }
-    }
-}
-```
-
-#### 4. AI 서버 API 스펙
-
-**요청 형식**:
-
-```json
-POST /recommend
-{
-  "memberId": "123",
-  "favoriteSongIds": [1, 5, 10, 23, 45]
-}
-```
-
-**응답 형식**:
-
-```json
-{
-  "memberId": "123",
-  "recommendedSongIds": [67, 89, 12, 34, 56],
-  "confidence": 0.85,
-  "modelVersion": "v1.2.3",
-  "generatedAt": "2024-01-01T12:00:00Z"
-}
-```
-
-#### 5. 환경 설정
-
-```yaml
-# application.yml
-spring:
-  rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:guest}
-    password: ${RABBITMQ_PASSWORD:guest}
-
-app:
-  props:
-    python-server-url: ${PYTHON_SERVER_URL} # AI 서버 URL
-  rabbitmq:
-    prefetch: ${RABBITMQ_PREFETCH:16} # 동시 처리 메시지 수
-```
-
-#### 6. 추천 시스템 메시지 플로우
-
-```mermaid
-graph TB
-    User[사용자 추천 요청] --> Controller[RecommendationController<br/>POST /api/recommendation/request]
-    Controller --> Publisher[RecommendationPublisher<br/>메시지 발송]
-
-    Publisher --> MainQ[rec.recommendation.q<br/>메인 큐]
-    MainQ --> Consumer[RecommendationConsumer<br/>@RabbitListener]
-
-    Consumer --> PreferredSongs[사용자 선호 곡 조회<br/>MySQL/JPA]
-    PreferredSongs --> AIRequest[AI 서버 요청 생성<br/>RecommendationRequestDTO]
-
-    AIRequest --> PythonCall[Python AI 서버 호출<br/>POST /recommend<br/>60초 타임아웃]
-
-    PythonCall --> AISuccess[AI 응답 성공<br/>추천 곡 목록 반환]
-    PythonCall --> AIFail[AI 응답 실패<br/>타임아웃 또는 오류]
-
-    AISuccess --> StoreResult[결과 저장<br/>JobStore + Cache]
-    StoreResult --> ACK[메시지 ACK<br/>처리 완료]
-
-    AIFail --> TransientCheck{일시적 오류?}
-    TransientCheck -->|Yes| Retry[재시도 큐 이동<br/>5s → 30s → 120s]
-    TransientCheck -->|No| NACK[메시지 NACK<br/>DLQ 이동]
-
-    Retry --> Retry5s[5초 재시도 큐<br/>x-message-ttl: 5000]
-    Retry --> Retry30s[30초 재시도 큐<br/>x-message-ttl: 30000]
-    Retry --> Retry120s[120초 재시도 큐<br/>x-message-ttl: 120000]
-
-    Retry5s --> MainQ
-    Retry30s --> MainQ
-    Retry120s --> MainQ
-
-    NACK --> RecommendationDLQ[rec.recommendation.dlq<br/>최종 실패 메시지]
-```
-
-#### 7. 건의사항 시스템 메시지 플로우
-
-```mermaid
-graph TB
-    User[사용자 건의사항 제출] --> SuggestAPI[SuggestionController<br/>POST /api/suggestions]
-    SuggestAPI --> SaveDB[건의사항 저장<br/>MySQL Database]
-    SaveDB --> SuggestPublisher[SuggestionPublisher<br/>이메일 알림 메시지 발송]
-
-    SuggestPublisher --> SuggestQ[suggestion.email.q<br/>이메일 큐]
-    SuggestQ --> EmailConsumer[SuggestionEmailConsumer<br/>@RabbitListener]
-
-    EmailConsumer --> EmailTemplate[이메일 템플릿 생성<br/>제목 + 내용 + 사용자 정보]
-    EmailTemplate --> SMTPCall[SMTP 서버 호출<br/>Gmail API]
-
-    SMTPCall --> EmailSuccess[이메일 발송 성공<br/>관리자 알림 완료]
-    SMTPCall --> EmailFail[이메일 발송 실패<br/>SMTP 오류]
-
-    EmailSuccess --> EmailACK[메시지 ACK<br/>처리 완료]
-
-    EmailFail --> RetryCheck{재시도 가능?}
-    RetryCheck -->|Yes| RetryQ[30초 재시도 큐<br/>x-message-ttl: 30000]
-    RetryCheck -->|No| EmailNACK[메시지 NACK<br/>DLQ 이동]
-
-    RetryQ --> SuggestQ
-    EmailNACK --> SuggestDLQ[suggestion.email.dlq<br/>최종 실패 메시지]
-```
-
-#### 8. RabbitMQ 백엔드 설정 가이드
-
-**Step 1: Docker Compose 설정**
-
-```yaml
-# docker-compose.yml
-services:
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672" # AMQP 포트
-      - "15672:15672" # Management UI 포트
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-guest}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_running", "-q"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-```
-
-**Step 2: Spring Boot 의존성 추가**
-
-```gradle
-// build.gradle
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-amqp'
-}
-```
-
-**Step 3: RabbitMQ 설정 클래스 작성**
-
-```java
-@Configuration
-@EnableRabbit
-public class RabbitMQConfig {
-
-    // Exchange 생성
-    @Bean
-    public DirectExchange recExchange() {
-        return new DirectExchange("rec.exchange", true, false);
-    }
-
-    // Queue 생성 (Durable)
-    @Bean
-    public Queue recommendationQueue() {
-        return QueueBuilder.durable("rec.recommendation.q").build();
-    }
-
-    // Binding 설정
-    @Bean
-    public Binding bindRecommendationQueue() {
-        return BindingBuilder.bind(recommendationQueue())
-                .to(recExchange())
-                .with("recommendation.generate");
-    }
-
-    // Manual ACK Container Factory
-    @Bean
-    public SimpleRabbitListenerContainerFactory manualAckContainerFactory(
-            ConnectionFactory connectionFactory) {
-        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
-        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
-        factory.setPrefetchCount(16);
-        factory.setDefaultRequeueRejected(false);
-        return factory;
-    }
-}
-```
-
-**Step 4: AI 서버 연결 설정**
-
-```java
-@Configuration
-public class RestTemplateConfig {
-
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplateBuilder()
-            .setConnectTimeout(Duration.ofSeconds(10))
-            .setReadTimeout(Duration.ofSeconds(60))
-            .additionalMessageConverters(new MappingJackson2HttpMessageConverter())
-            .build();
-    }
-}
-```
-
-**Step 5: 환경 변수 설정**
-
-```bash
-# .env 파일
-RABBITMQ_HOST=localhost
-RABBITMQ_PORT=5672
-RABBITMQ_USERNAME=guest
-RABBITMQ_PASSWORD=guest
-RABBITMQ_PREFETCH=16
-
-# Python AI 서버 설정
-PYTHON_SERVER_URL=http://localhost:8000
-```
-
-**Step 6: 서비스 시작 순서**
-
-```bash
-# 1. RabbitMQ 서비스 시작
-docker-compose up -d rabbitmq
-
-# 2. RabbitMQ 헬스체크 대기
-docker-compose logs -f rabbitmq
-
-# 3. Python AI 서버 시작 (별도)
-# python -m uvicorn main:app --host 0.0.0.0 --port 8000
-
-# 4. Spring Boot 애플리케이션 시작
-docker-compose up -d app
-```
-
-#### 3. 메시지 큐 설정
-
-- **Prefetch Count**: 16 (동시 처리 메시지 수)
-- **Manual ACK**: 수동 확인 모드로 안정성 보장
-- **Retry Strategy**: 지수 백오프 (5s → 30s → 120s)
-- **Dead Letter Queue**: 최종 실패 메시지 보관
-- **Durable Queues**: 서버 재시작 시에도 메시지 보존
-
-#### 4. AI 서버 연동 설정
-
-```yaml
-# application.yml - AI 서버 연결 설정
-app:
-  props:
-    python-server-url: ${PYTHON_SERVER_URL} # http://python-ml-server:8000
-  rabbitmq:
-    prefetch: ${RABBITMQ_PREFETCH:16}
-  suggestion:
-    max-retry: ${SUGGESTION_MAX_RETRY:3}
-
-spring:
-  rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:guest}
-    password: ${RABBITMQ_PASSWORD:guest}
-```
-
-**AI 서버 상태 확인**:
-
-```bash
-# Python AI 서버 헬스체크
-curl http://localhost:8000/health
-
-# 추천 API 테스트
-curl -X POST http://localhost:8000/recommend \
-  -H "Content-Type: application/json" \
-  -d '{"memberId":"123","favoriteSongIds":[1,2,3]}'
-```
-
-## 🔍 검색 시스템
-
-### Elasticsearch 백엔드 설정
-
-#### 1. 인덱스 구조
-
-**songs** 인덱스는 다음과 같은 다국어 필드를 포함합니다:
-
-```json
-{
-  "songId": "고유 식별자",
-  "title_kr": "한국어 제목",
-  "title_en": "영어 제목",
-  "title_jp": "일본어 제목",
-  "title_yomi": "일본어 요미가나",
-  "title_yomi_kr": "요미가나 한글 표기",
-  "artist": "아티스트명",
-  "artist_kr": "아티스트 한글명",
-  "anime_name": "애니메이션 제목",
-  "lyrics_original": "원본 가사",
-  "lyrics_kr": "한국어 가사",
-  "tj_number": "TJ 노래방 번호",
-  "ky_number": "KY 노래방 번호"
-}
-```
-
-#### 2. 검색 필드 가중치
-
-- **제목 검색**: `title_kr^6`, `title_en_kr^4`, `anime_name^5`
-- **아티스트 검색**: `artist_kr^5`, `artist^3`
-- **초성 검색**: `title_kr.initial^6`, `artist_kr.initial^6`
-- **가사 검색**: `lyrics_kr`, `lyrics_original`
-
-#### 3. 검색 타입별 전략
-
-```java
-// 제목 중심 검색
-SearchTarget.TITLE → title_kr, title_en_kr, anime_name 필드 우선
-
-// 아티스트 중심 검색
-SearchTarget.ARTIST → artist_kr, artist 필드 우선
-
-// 가사 검색
-SearchTarget.LYRICS → lyrics_kr, lyrics_original 필드 검색
-
-// 통합 검색
-SearchTarget.ALL → 모든 필드 가중치 적용 검색
-```
-
-#### 4. 환경별 설정
-
-**로컬 환경**:
-
-```yaml
-spring:
-  elasticsearch:
-    uris: ${LOCAL_ELASTICSEARCH_URIS}
-    username: elastic
-    password: ${ELASTIC_PASSWORD}
-    restclient:
-      ssl:
-        bundle: es
-```
-
-**운영 환경**:
-
-```yaml
-spring:
-  elasticsearch:
-    uris: ${PROD_ELASTICSEARCH_URIS}
-    username: elastic
-    password: ${ELASTIC_PASSWORD}
-```
-
-#### 5. 데이터 마이그레이션
-
-MySQL에서 Elasticsearch로 데이터 동기화:
-
-```java
-@Service
-public class SongMigrationService {
-    // 전체 곡 데이터를 Elasticsearch로 마이그레이션
-    public int migrateAllSongsToElasticsearch()
-}
+    style ES fill:#fff3e0
+    style RMQ fill:#f3e5f5
+    style Security fill:#fce4ec
 ```
 
 ---
 
-## ⚡ 빠른 시작
+## 🔧 문제 해결
 
-### 📋 필수 요구사항
+### 5-1. JWT 토큰 Redis 저장 및 재발급 이슈
 
-| 구성 요소            | 버전        | 용도              |
-| -------------------- | ----------- | ----------------- |
-| ☕ **Java**          | `17+` (LTS) | 런타임 환경       |
-| 🐳 **Docker**        | `최신`      | 컨테이너 실행     |
-| 🗄️ **MySQL**         | `8.0+`      | 메인 데이터베이스 |
-| 🔴 **Redis**         | `6.0+`      | 캐시 & 세션       |
-| 🔍 **Elasticsearch** | `8.x`       | 검색 엔진         |
-| 🐰 **RabbitMQ**      | `3.13+`     | 메시지 큐         |
+**❌ 문제 상황:**
+Redis에 저장해서 재발급이 잘 되지 않는 이슈 발생
 
-### 🚀 빠른 실행 (Docker Compose)
+**🔍 문제 분석:**
 
-<details>
-<summary><strong>1️⃣ 저장소 클론</strong></summary>
+- RefreshToken을 MySQL에 저장하면서 암호화/복호화 과정에서 오류
+- AES 암호화 키 길이 불일치 (16바이트 필요)
+- Redis TTL 설정과 JWT 만료 시간 불일치
+- 토큰 재발급 시 기존 토큰 삭제 로직 누락
 
-```bash
-git clone <repository-url>
-cd song_be
-```
+**✅ 해결 방법:**
 
-</details>
+1. **AES 암호화 개선**
 
-<details>
-<summary><strong>2️⃣ 환경 변수 설정</strong></summary>
-
-`.env` 파일을 생성하고 다음 환경 변수들을 설정하세요:
-
-```bash
-# 서버 설정
-SERVER_ADDRESS=0.0.0.0
-SPRING_PROFILES_ACTIVE=prod
-
-# 데이터베이스 설정
-PROD_MYSQL_URL=jdbc:mysql://mysql:3306/song_db?useSSL=false&allowPublicKeyRetrieval=true
-PROD_MYSQL_USERNAME=root
-PROD_MYSQL_PASSWORD=your_password
-
-# Redis 설정
-REDIS_HOST=redis
-REDIS_PORT=6379
-REDIS_PASSWORD=your_redis_password
-
-# Elasticsearch 설정
-PROD_ELASTICSEARCH_URIS=https://elasticsearch:9200
-ELASTIC_PASSWORD=your_elastic_password
-
-# RabbitMQ 설정
-RABBITMQ_HOST=rabbitmq
-RABBITMQ_PORT=5672
-RABBITMQ_USERNAME=guest
-RABBITMQ_PASSWORD=guest
-RABBITMQ_PREFETCH=16
-
-# JWT 설정
-JWT_SECRET_KEY=your_jwt_secret_key_here_minimum_32_characters
-AES_SECRET_KEY=your_aes_secret_key_here_16_characters
-
-# Google OAuth2 설정
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_REDIRECT_URI=http://localhost:8082/login/oauth2/code/google
-
-# 메일 설정 (Gmail 예시)
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
-
-# 건의사항 설정
-SUGGESTION_ADMIN_EMAIL=admin@yourcompany.com
-SUGGESTION_MAX_RETRY=3
-
-   # Python ML 서버 (추천 시스템)
-PYTHON_SERVER_URL=http://python-ml-server:8000
-```
-
-</details>
-
-<details>
-<summary><strong>3️⃣ Docker Compose 실행</strong></summary>
-
-```bash
-# 백그라운드에서 전체 스택 실행
-docker-compose up -d
-
-# 로그 확인
-docker-compose logs -f
-```
-
-</details>
-
-<details>
-<summary><strong>4️⃣ 서비스 확인</strong></summary>
-
-| 서비스               | URL                                   | 계정        |
-| -------------------- | ------------------------------------- | ----------- |
-| 🌐 **API 서버**      | http://localhost:8082                 | -           |
-| 📚 **API 문서**      | http://localhost:8082/swagger-ui.html | -           |
-| 🐰 **RabbitMQ 관리** | http://localhost:15672                | guest/guest |
-| 💚 **Health Check**  | http://localhost:8082/actuator/health | -           |
-
-</details>
-
-### 🔧 Profile별 설정
-
-| Profile      | 용도      | 주요 특징                                                                               |
-| ------------ | --------- | --------------------------------------------------------------------------------------- |
-| 🏠 **local** | 로컬 개발 | • SQL 로깅 (DEBUG)<br/>• 바인딩 파라미터 추적<br/>• 트랜잭션 로그<br/>• SSL 인증서 번들 |
-| 🚀 **prod**  | 운영 환경 | • 최적화된 로깅 (ERROR)<br/>• HikariCP 연결 풀 튜닝<br/>• 보안 강화 설정                |
-
-## 📚 API 문서
-
-### 📖 Swagger UI
-
-| 문서 타입           | URL                                   | 설명            |
-| ------------------- | ------------------------------------- | --------------- |
-| 🌐 **Swagger UI**   | http://localhost:8082/swagger-ui.html | 대화형 API 문서 |
-| 📄 **OpenAPI JSON** | http://localhost:8082/v3/api-docs     | API 스펙 JSON   |
-
-### 🔗 주요 API 엔드포인트
-
-<details>
-<summary><strong>🔐 인증 관리</strong></summary>
-
-| Method | Endpoint             | 설명                 |
-| ------ | -------------------- | -------------------- |
-| `POST` | `/api/auth/login`    | 로그인               |
-| `POST` | `/api/auth/register` | 회원가입             |
-| `POST` | `/api/auth/refresh`  | 토큰 갱신            |
-| `POST` | `/api/auth/google`   | Google OAuth2 로그인 |
-| `POST` | `/api/auth/logout`   | 로그아웃             |
-
-</details>
-
-<details>
-<summary><strong>🎵 음악 관리</strong></summary>
-
-| Method   | Endpoint            | 설명                      |
-| -------- | ------------------- | ------------------------- |
-| `GET`    | `/api/songs`        | 음악 목록 조회 (페이징)   |
-| `GET`    | `/api/songs/{id}`   | 특정 음악 상세 조회       |
-| `POST`   | `/api/songs`        | 음악 업로드/등록          |
-| `PUT`    | `/api/songs/{id}`   | 음악 정보 수정            |
-| `DELETE` | `/api/songs/{id}`   | 음악 삭제                 |
-| `GET`    | `/api/songs/search` | 음악 검색 (Elasticsearch) |
-
-</details>
-
-<details>
-<summary><strong>📝 플레이리스트 관리</strong></summary>
-
-| Method   | Endpoint                                     | 설명                   |
-| -------- | -------------------------------------------- | ---------------------- |
-| `GET`    | `/api/playlists`                             | 플레이리스트 목록 조회 |
-| `GET`    | `/api/playlists/{id}`                        | 특정 플레이리스트 조회 |
-| `POST`   | `/api/playlists`                             | 플레이리스트 생성      |
-| `PUT`    | `/api/playlists/{id}`                        | 플레이리스트 수정      |
-| `DELETE` | `/api/playlists/{id}`                        | 플레이리스트 삭제      |
-| `POST`   | `/api/playlists/{id}/songs`                  | 플레이리스트에 곡 추가 |
-| `DELETE` | `/api/playlists/{playlistId}/songs/{songId}` | 곡 제거                |
-
-</details>
-
-<details>
-<summary><strong>❤️ 좋아요 시스템</strong></summary>
-
-| Method   | Endpoint                | 설명                |
-| -------- | ----------------------- | ------------------- |
-| `GET`    | `/api/likes`            | 내 좋아요 목록      |
-| `POST`   | `/api/likes`            | 좋아요 추가         |
-| `DELETE` | `/api/likes/{id}`       | 좋아요 취소         |
-| `GET`    | `/api/songs/{id}/likes` | 특정 곡의 좋아요 수 |
-
-</details>
-
-<details>
-<summary><strong>🎌 애니메이션 관리</strong></summary>
-
-| Method | Endpoint                 | 설명                   |
-| ------ | ------------------------ | ---------------------- |
-| `GET`  | `/api/animes`            | 애니메이션 목록        |
-| `GET`  | `/api/animes/{id}`       | 특정 애니메이션 정보   |
-| `GET`  | `/api/animes/{id}/songs` | 애니메이션별 음악 목록 |
-
-</details>
-
-<details>
-<summary><strong>💌 건의사항 시스템</strong></summary>
-
-| Method | Endpoint                 | 설명                        |
-| ------ | ------------------------ | --------------------------- |
-| `POST` | `/api/suggestions`       | 건의사항 제출               |
-| `GET`  | `/api/suggestions`       | 내 건의사항 목록 (사용자)   |
-| `GET`  | `/api/admin/suggestions` | 전체 건의사항 관리 (관리자) |
-
-</details>
-
-<details>
-<summary><strong>📊 모니터링 & 관리</strong></summary>
-
-| Method | Endpoint           | 설명              |
-| ------ | ------------------ | ----------------- |
-| `GET`  | `/actuator/health` | 서비스 상태 확인  |
-| `GET`  | `/actuator/info`   | 애플리케이션 정보 |
-
-</details>
-
-### 📋 API 응답 형식
-
-<details>
-<summary><strong>✅ 성공 응답</strong></summary>
-
-```json
-{
-  "status": "success",
-  "data": { ... },
-  "message": "작업이 성공적으로 완료되었습니다."
+```java
+// AesUtil.java - 16바이트 키 강제 설정
+private SecretKey getSecretKey() {
+    String key = secretKey;
+    if (key.length() != 16) {
+        key = key.substring(0, Math.min(16, key.length()));
+        key = String.format("%-16s", key).replace(' ', '0');
+    }
+    return new SecretKeySpec(key.getBytes(), "AES");
 }
 ```
 
-</details>
+2. **RefreshToken 엔티티 구조 개선**
 
-<details>
-<summary><strong>📄 페이징 응답</strong></summary>
+```java
+@Entity
+public class RefreshToken {
+    @Id @GeneratedValue
+    private Long id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private Member member;
+
+    @Column(length = 1024)
+    private String encryptedToken; // AES 암호화된 토큰
+
+    private Long expiry; // 만료 시간 (타임스탬프)
+}
+```
+
+3. **토큰 재발급 로직 개선**
+
+```java
+public TokenDTO refreshToken(String refreshToken) {
+    // 1. 기존 토큰 복호화 및 검증
+    String decryptedToken = aesUtil.decrypt(refreshToken);
+    Map<String, Object> claims = jwtUtil.validate(decryptedToken);
+
+    // 2. 새 토큰 생성
+    String newAccessToken = jwtUtil.generateAccessToken(claims);
+    String newRefreshToken = jwtUtil.generateRefreshToken(claims);
+
+    // 3. 기존 토큰 삭제 후 새 토큰 저장
+    refreshTokenRepository.deleteByMember(member);
+    RefreshToken newToken = RefreshToken.builder()
+        .member(member)
+        .encryptedToken(aesUtil.encrypt(newRefreshToken))
+        .expiry(System.currentTimeMillis() + refreshExpiry)
+        .build();
+    refreshTokenRepository.save(newToken);
+
+    return new TokenDTO(newAccessToken, aesUtil.encrypt(newRefreshToken));
+}
+```
+
+### 5-2. 검색 이슈
+
+**❌ 문제 상황:**
+일반 DB 검색으로 할 경우 띄어쓰기, 오타가 있을 경우 검색이 안되는 이슈 발생
+
+**🔍 문제 분석:**
+
+- MySQL LIKE 검색의 한계: 정확한 문자열 매칭만 가능
+- 다국어 텍스트 검색 시 성능 저하
+- 초성 검색, 오타 보정 등 고급 검색 기능 부재
+- 관련도 기반 정렬 불가능
+
+**✅ 해결 방법: Elasticsearch 도입**
+
+1. **Elasticsearch 인덱스 설정**
 
 ```json
 {
-  "status": "success",
-  "data": {
-    "content": [...],
-    "totalElements": 100,
-    "totalPages": 10,
-    "size": 10,
-    "number": 0,
-    "first": true,
-    "last": false
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "korean_analyzer": {
+          "type": "custom",
+          "tokenizer": "nori_tokenizer",
+          "filter": ["lowercase", "chosung_filter"]
+        }
+      },
+      "filter": {
+        "chosung_filter": {
+          "type": "pattern_replace",
+          "pattern": "[ㄱ-ㅎ]",
+          "replacement": ""
+        }
+      }
+    }
   }
 }
 ```
 
-</details>
+2. **SongDocument 엔티티 구성**
 
-<details>
-<summary><strong>❌ 오류 응답</strong></summary>
+```java
+@Document(indexName = "songs")
+public class SongDocument {
+    @Id
+    private String id;
 
-```json
+    @Field(type = FieldType.Text, analyzer = "korean_analyzer")
+    private String title_kr;
+
+    @Field(type = FieldType.Text)
+    private String title_jp;
+
+    @Field(type = FieldType.Text, analyzer = "korean_analyzer")
+    private String artist_kr;
+
+    // 초성 검색을 위한 필드
+    @Field(type = FieldType.Text)
+    private String title_chosung;
+}
+```
+
+3. **다국어 통합 검색 구현**
+
+```java
+public List<SongDocument> searchSongs(String query) {
+    return NativeQuery.builder()
+        .withQuery(q -> q.multiMatch(m -> m
+            .query(query)
+            .fields("title_kr^3", "title_jp^2", "artist_kr^2", "title_chosung^2")
+            .fuzziness("AUTO") // 오타 보정
+            .operator(Operator.Or)
+        ))
+        .withPageable(pageable)
+        .build();
+}
+```
+
+4. **초성 검색 기능**
+
+```java
+private String convertToChosung(String text) {
+    // "ㄱㅁㅇ" -> "귀멸의" 변환 로직
+    return chosungConverter.convert(text);
+}
+```
+
+**📈 개선 결과:**
+
+- 오타가 있어도 관련 결과 제공 (Fuzzy 검색)
+- 띄어쓰기 무시하고 검색 가능
+- 초성으로 빠른 검색 ("ㄱㅁㅇ" → "귀멸의칼날")
+- 검색 속도 대폭 향상 (1초 → 100ms)
+- 관련도 기반 정렬로 더 정확한 결과
+
+---
+
+## 🎓 프로젝트를 통해 배운 점
+
+이번 프로젝트를 통해 혼자서 테이블 설계부터 해서 워크플로우를 구성하고 서비스에 필요한 기술들을 탐색하고 그걸 스스로 적용해보는 시간을 가졌습니다. 이를 통해 서비스를 만들 때 기획부터 구현, 배포까지 모든 과정을 심도 있게 공부할 수 있었던 계기가 되었습니다.
+
+### 🏗️ **설계 및 아키텍처**
+
+- **도메인 중심 설계**: 비즈니스 로직을 중심으로 한 패키지 구조 설계
+- **데이터베이스 설계**: 정규화와 성능을 고려한 테이블 설계 및 관계 설정
+- **API 설계**: RESTful 원칙을 따른 직관적인 API 엔드포인트 설계
+
+### 🔧 **기술 스택 선택과 활용**
+
+- **Elasticsearch**: 전문 검색 엔진 도입으로 검색 품질 향상
+- **Redis**: 토큰 관리와 캐싱을 통한 성능 최적화
+- **RabbitMQ**: 비동기 처리로 사용자 경험 개선
+- **Spring Security**: JWT 기반 인증/인가 시스템 구축
+
+### 🐛 **문제 해결 능력**
+
+- **성능 이슈**: 검색 속도 개선을 위한 Elasticsearch 도입
+- **보안 이슈**: JWT 토큰 관리와 AES 암호화 구현
+- **확장성 이슈**: 메시지 큐를 통한 비동기 처리 도입
+
+### 📊 **운영 및 모니터링**
+
+- **모니터링 시스템**: Prometheus + Grafana를 통한 시스템 상태 추적
+- **로깅 전략**: 구조화된 로깅과 에러 추적 시스템
+- **배포 자동화**: Docker Compose를 통한 원클릭 배포
+
+### 🎯 **전체적인 개발 프로세스**
+
+- **요구사항 분석**: 실제 사용자 니즈 파악과 기능 정의
+- **기술 검증**: 새로운 기술 도입 전 충분한 학습과 테스트
+- **점진적 개발**: 핵심 기능부터 차례대로 구현하는 애자일 방식
+- **문서화**: README 작성을 통한 프로젝트 지식 정리
+
+---
+
+## 🌟 프로젝트의 특징
+
+### 🎤 **노래방 특화 서비스**
+
+- **실용성**: 실제 노래방에서 바로 사용할 수 있는 TJ/KY 번호 제공
+- **편의성**: 한국어로 일본어 노래를 쉽게 검색
+- **정확성**: 다양한 표기법 (한글, 일본어, 영어)을 모두 지원
+
+### 🔍 **똑똑한 검색 시스템**
+
+- **오타 보정**: Elasticsearch Fuzzy 검색으로 오타가 있어도 결과 제공
+- **초성 검색**: "ㄱㅁㅇ"만 입력해도 "귀멸의칼날" 검색 가능
+- **다국어 통합**: 일본어 원제, 한국어 번역명 모두 검색 가능
+- **관련도 정렬**: 검색어와의 관련도에 따른 지능적 정렬
+
+### ⚡ **고성능 시스템**
+
+- **빠른 검색**: Elasticsearch 기반으로 100ms 이내 응답
+- **캐싱 전략**: Redis를 통한 자주 검색되는 결과 캐싱
+- **비동기 처리**: RabbitMQ를 통한 백그라운드 작업 처리
+
+### 🛡️ **안전한 보안 시스템**
+
+- **JWT 인증**: Access Token과 Refresh Token 분리 관리
+- **AES 암호화**: 민감한 토큰 정보 암호화 저장
+- **OAuth2 지원**: Google 소셜 로그인 연동
+
+### 📊 **관찰 가능한 시스템**
+
+- **실시간 모니터링**: Prometheus + Grafana 대시보드
+- **구조화된 로깅**: JSON 형태의 체계적인 로그 관리
+- **헬스 체크**: 시스템 상태 실시간 확인 가능
+
+### 🔄 **확장 가능한 아키텍처**
+
+- **도메인 분리**: 각 기능별 독립적인 모듈 구성
+- **메시지 큐**: 비동기 처리로 시스템 부하 분산
+- **Docker 컨테이너**: 환경 독립적인 배포 지원
+
+---
+
+## 🚀 빠른 시작
+
+### 필수 요구사항
+
+| 구성 요소         | 버전   | 용도               |
+| ----------------- | ------ | ------------------ |
+| ☕ Java           | 17+    | Spring Boot 런타임 |
+| 🐳 Docker         | 20.10+ | 컨테이너 실행      |
+| 🐳 Docker Compose | 2.0+   | 멀티 컨테이너 관리 |
+| 💾 디스크 공간    | 5GB+   | 이미지 & 데이터    |
+| 🧠 메모리         | 4GB+   | 전체 스택 실행     |
+
+### ⚡ 원클릭 실행
+
+```bash
+# 1️⃣ 프로젝트 클론
+git clone <repository-url>
+cd song_be
+
+# 2️⃣ 환경 변수 설정
+cp .env.example .env
+
+# 3️⃣ 전체 스택 실행
+docker-compose up -d
+
+# 4️⃣ 실행 상태 확인
+docker-compose ps
+```
+
+### 🎉 서비스 접속
+
+| 서비스              | URL                                   | 계정           |
+| ------------------- | ------------------------------------- | -------------- |
+| 🌐 **API 서버**     | http://localhost:8082                 | -              |
+| 📚 **API 문서**     | http://localhost:8082/swagger-ui.html | -              |
+| 📊 **Grafana**      | http://localhost:3000                 | admin/admin123 |
+| 🐰 **RabbitMQ**     | http://localhost:15672                | guest/guest    |
+| 💚 **Health Check** | http://localhost:8082/actuator/health | -              |
+
+---
+
+## 📚 API 문서
+
+### 🔍 검색 API
+
+```bash
+# 한국어로 일본어 노래 검색
+GET /api/es/song/search?query=귀멸의칼날&page=0&size=10
+
+# 초성 검색
+GET /api/es/song/search?query=ㄱㅁㅇ&page=0&size=10
+
+# 아티스트명으로 검색
+GET /api/es/song/search?query=LiSA&page=0&size=10
+```
+
+### 🎵 노래 관리 API
+
+```bash
+# 노래 목록 조회 (페이징)
+GET /api/song/list?page=0&size=20
+
+# 특정 노래 상세 조회
+GET /api/song/{songId}
+
+# 노래 좋아요
+POST /api/likes
 {
-  "status": "error",
-  "message": "오류 메시지",
-  "code": "ERROR_CODE",
-  "timestamp": "2024-01-01T00:00:00"
+  "songId": 1
 }
 ```
 
-</details>
-
-## 🐳 Docker 실행
-
-<details>
-<summary><strong>🔧 개발 환경</strong></summary>
+### 🔐 인증 API
 
 ```bash
-# 1. 애플리케이션 빌드
-./gradlew bootJar
-
-# 2. Docker 이미지 빌드
-docker build -t song-be:latest .
-
-# 3. Docker Compose로 전체 스택 실행
-docker-compose up -d
-```
-
-</details>
-
-<details>
-<summary><strong>🚀 운영 환경</strong></summary>
-
-```bash
-# 1. 환경 변수 설정
-export DOCKER_IMAGE_NAME=your-registry/song-be
-export SPRING_PROFILES_ACTIVE=prod
-
-# 2. Docker Compose 실행
-docker-compose -f docker-compose.yml up -d
-```
-
-</details>
-
----
-
-## 💻 개발 환경 설정
-
-### 🏠 로컬 개발 실행
-
-<details>
-<summary><strong>1️⃣ 데이터베이스 준비</strong></summary>
-
-로컬에 다음 서비스들이 설치되어 있어야 합니다:
-
-- MySQL 8.0+
-- Redis 6.0+
-- Elasticsearch 8.x
-- RabbitMQ 3.13+
-
-</details>
-
-<details>
-<summary><strong>2️⃣ 환경 변수 설정</strong></summary>
-
-```bash
-export SPRING_PROFILES_ACTIVE=local
-# 기타 필요한 환경 변수들...
-```
-
-</details>
-
-<details>
-<summary><strong>3️⃣ 애플리케이션 실행</strong></summary>
-
-```bash
-./gradlew bootRun
-```
-
-</details>
-
-### 🧪 테스트 실행
-
-| 명령어                                                                | 설명             |
-| --------------------------------------------------------------------- | ---------------- |
-| `./gradlew test`                                                      | 전체 테스트 실행 |
-| `./gradlew test --tests "com.example.song_be.SongBeApplicationTests"` | 특정 테스트 실행 |
-
-### ⚙️ QueryDSL Q클래스 생성
-
-```bash
-./gradlew compileJava
-```
-
-## 📊 모니터링
-
-### 💚 Health Check
-
-| 서비스              | 엔드포인트                    | 설명                   |
-| ------------------- | ----------------------------- | ---------------------- |
-| 🌐 **애플리케이션** | `GET /actuator/health`        | 전체 서비스 상태       |
-| 🗄️ **MySQL**        | `GET /actuator/health/db`     | 데이터베이스 연결 상태 |
-| 🔴 **Redis**        | `GET /actuator/health/redis`  | Redis 연결 상태        |
-| 🐰 **RabbitMQ**     | `GET /actuator/health/rabbit` | RabbitMQ 연결 상태     |
-
-### 📋 로그 확인
-
-<details>
-<summary><strong>Docker 컨테이너 로그</strong></summary>
-
-```bash
-# 실시간 로그 확인
-docker-compose logs -f app
-
-# 특정 시간대 로그
-docker-compose logs --since="1h" app
-
-# 모든 서비스 로그
-docker-compose logs -f
-```
-
-</details>
-
-### 🐰 RabbitMQ 관리
-
-| 항목               | 정보                               |
-| ------------------ | ---------------------------------- |
-| 🌐 **관리 UI**     | http://localhost:15672             |
-| 👤 **기본 계정**   | guest/guest                        |
-| 📊 **큐 모니터링** | Exchange, Queue, Binding 상태 확인 |
-
-## 🔧 트러블슈팅
-
-### 🔐 JWT 토큰 관리 이슈
-
-본 프로젝트에서는 Redis를 활용한 JWT 토큰 관리 시스템을 구현했습니다. Access Token과 Refresh Token 모두 Redis에 저장되어 안전하고 효율적인 토큰 관리가 가능합니다.
-
-#### 1. JWT 토큰 저장 및 관리 구조
-
-```mermaid
-graph TD
-    Login[사용자 로그인] --> Generate[JWT 토큰 생성]
-    Generate --> AccessToken[Access Token<br/>만료: 60분]
-    Generate --> RefreshToken[Refresh Token<br/>만료: 30일]
-
-    AccessToken --> RedisAccess[Redis 저장<br/>Key: access:memberId<br/>TTL: 60분]
-    RefreshToken --> RedisRefresh[Redis 저장<br/>Key: refresh:memberId<br/>TTL: 30일]
-
-    Request[API 요청] --> ValidateAccess[Access Token 검증]
-    ValidateAccess --> CheckRedis[Redis에서 토큰 확인]
-    CheckRedis --> Success[인증 성공]
-    CheckRedis --> Expired[토큰 만료]
-
-    Expired --> RefreshFlow[Refresh Token으로 재발급]
-    RefreshFlow --> NewTokens[새로운 토큰 쌍 생성]
-    NewTokens --> UpdateRedis[Redis 업데이트]
-```
-
-#### 2. 토큰 재발급 로직
-
-**Access Token 만료 시 자동 재발급**:
-
-```java
-// 1. Access Token 검증 실패 시
-if (accessTokenExpired) {
-    // 2. Redis에서 Refresh Token 조회
-    String refreshToken = redisTemplate.opsForValue()
-        .get("refresh:" + memberId);
-
-    // 3. Refresh Token 유효성 검증
-    if (refreshToken != null && jwtUtil.validateToken(refreshToken)) {
-        // 4. 새로운 Access Token 생성
-        String newAccessToken = jwtUtil.generateAccessToken(memberInfo);
-
-        // 5. Redis에 새 Access Token 저장 (60분 TTL)
-        redisTemplate.opsForValue().set(
-            "access:" + memberId,
-            newAccessToken,
-            Duration.ofMinutes(60)
-        );
-
-        // 6. 클라이언트에 새 토큰 반환
-        return ResponseEntity.ok()
-            .header("New-Access-Token", newAccessToken)
-            .body(response);
-    }
+# 회원가입
+POST /api/member/join
+{
+  "email": "user@example.com",
+  "password": "password123"
 }
-```
 
-**Refresh Token 만료 시 재로그인 필요**:
-
-```java
-// Refresh Token도 만료된 경우
-if (refreshTokenExpired) {
-    // Redis에서 모든 토큰 삭제
-    redisTemplate.delete("access:" + memberId);
-    redisTemplate.delete("refresh:" + memberId);
-
-    // 401 Unauthorized 반환 (재로그인 필요)
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-        .body("토큰이 만료되었습니다. 다시 로그인해주세요.");
+# 로그인
+POST /api/member/login
+{
+  "email": "user@example.com",
+  "password": "password123"
 }
+
+# Google OAuth2 로그인
+GET /api/auth/google
 ```
 
-#### 3. 주요 토큰 이슈 및 해결 방법
-
-**이슈 1: Access Token 검증 실패**
+### 📝 플레이리스트 API
 
 ```bash
-# Redis에서 토큰 상태 확인
-redis-cli -h localhost -p 6379
-> GET access:123  # memberId가 123인 경우
-> TTL access:123  # 남은 만료 시간 확인
-```
-
-**해결 방법**:
-
-- Redis 연결 상태 확인
-- 토큰 만료 시간 확인
-- JWT Secret Key 일치 여부 확인
-
-**이슈 2: Refresh Token으로 재발급 실패**
-
-```bash
-# Refresh Token 상태 확인
-redis-cli
-> GET refresh:123
-> TTL refresh:123
-```
-
-**해결 방법**:
-
-- Refresh Token 유효성 검증
-- Redis TTL 설정 확인
-- JWT Secret Key 일치 여부 확인
-
-**이슈 3: 동시 로그인 시 토큰 충돌**
-
-```java
-// 해결: 로그인 시 기존 토큰 삭제 후 새 토큰 생성
-public void login(String email, String password) {
-    // 기존 토큰 삭제
-    redisTemplate.delete("access:" + memberId);
-    redisTemplate.delete("refresh:" + memberId);
-
-    // 새 토큰 생성 및 저장
-    generateAndStoreTokens(memberId);
+# 플레이리스트 생성
+POST /api/playlist
+{
+  "title": "내가 좋아하는 애니송",
+  "description": "애니메이션 OST 모음",
+  "isPublic": true
 }
-```
 
-**이슈 4: AES 암호화/복호화 실패**
-
-```bash
-# AES Secret Key 길이 확인 (정확히 16자여야 함)
-echo $AES_SECRET_KEY | wc -c
-```
-
-**해결 방법**:
-
-- `AES_SECRET_KEY` 길이 확인 (정확히 16바이트/16자)
-  - 환경 변수 설정 확인
-- 암호화된 데이터 형식 검증
-
-**AES 암호화 테스트**:
-
-```java
-// AES 암호화/복호화 테스트
-@Autowired
-private AesUtil aesUtil;
-
-public void testAesEncryption() {
-    String plainText = "test-refresh-token";
-
-    // 암호화
-    String encrypted = aesUtil.encrypt(plainText);
-    System.out.println("Encrypted: " + encrypted);
-
-    // 복호화
-    String decrypted = aesUtil.decrypt(encrypted);
-    System.out.println("Decrypted: " + decrypted);
-
-    // 검증
-    assert plainText.equals(decrypted);
+# 플레이리스트에 곡 추가
+POST /api/playlist/{playlistId}/song
+{
+  "songId": 1
 }
-```
-
-**이슈 5: Redis에 저장된 암호화 토큰 검증 실패**
-
-```bash
-# Redis에서 암호화된 토큰 확인
-redis-cli
-> GET refresh:123
-# 출력 예시: "YWJjZGVmZ2hpams..." (Base64 인코딩된 암호화 데이터)
-```
-
-**해결 방법**:
-
-- 저장된 데이터가 Base64 형식인지 확인
-- AES Secret Key 일치 여부 확인
-- 암호화/복호화 과정에서 문자 인코딩 확인
-
-#### 4. 토큰 관리 모니터링
-
-**Redis 토큰 현황 확인**:
-
-```bash
-# 현재 저장된 Access Token 수 확인
-redis-cli --scan --pattern "access:*" | wc -l
-
-# 현재 저장된 Refresh Token 수 확인
-redis-cli --scan --pattern "refresh:*" | wc -l
-
-# 특정 사용자의 토큰 정보 확인
-redis-cli
-> GET access:123
-> GET refresh:123
-> TTL access:123
-> TTL refresh:123
-```
-
-**로그아웃 시 토큰 정리**:
-
-```java
-public void logout(Long memberId) {
-    // Redis에서 모든 토큰 삭제
-    redisTemplate.delete("access:" + memberId);
-    redisTemplate.delete("refresh:" + memberId);
-}
-```
-
-#### 5. 환경 설정 확인
-
-**JWT 관련 환경 변수**:
-
-```bash
-# JWT Secret Key (최소 32자 이상)
-JWT_SECRET_KEY=your_jwt_secret_key_here_minimum_32_characters
-
-# 토큰 만료 시간 설정 (분 단위)
-JWT_ACCESS_TOKEN_EXPIRATION=60      # 60분
-JWT_REFRESH_TOKEN_EXPIRATION=43200  # 30일 (60*24*30)
-```
-
-**AES 암호화 설정**:
-
-```bash
-# AES Secret Key (정확히 16자여야 함)
-AES_SECRET_KEY=your_aes_key_16ch
-
-# 잘못된 예시 (길이가 맞지 않음)
-❌ AES_SECRET_KEY=short          # 5자 (너무 짧음)
-❌ AES_SECRET_KEY=too_long_key   # 14자 (너무 짧음)
-❌ AES_SECRET_KEY=this_is_too_long_for_aes_key # 너무 긺
-
-# 올바른 예시
-✅ AES_SECRET_KEY=my_secret_key16  # 정확히 16자
-✅ AES_SECRET_KEY=abcdefghijklmnop  # 정확히 16자
-```
-
-**Redis 연결 설정**:
-
-```bash
-# Redis 연결 정보
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=your_redis_password
-```
-
-#### 6. 일반적인 해결 방법
-
-**AES 암호화 키 문제 해결**:
-
-```bash
-# AES Secret Key 길이 검증
-echo -n $AES_SECRET_KEY | wc -c  # 정확히 16이어야 함
-
-# 새로운 16자 키 생성 (개발용)
-openssl rand -hex 8  # 16자 헥사 문자열 생성
-# 또는
-head /dev/urandom | tr -dc A-Za-z0-9 | head -c 16  # 16자 랜덤 문자열
-```
-
-**암호화 관련 환경 변수 재설정**:
-
-```bash
-# .env 파일에서 AES 키 업데이트
-sed -i 's/AES_SECRET_KEY=.*/AES_SECRET_KEY=your_new_16char_key/' .env
-
-# 애플리케이션 재시작 (새 키 적용)
-docker-compose restart app
-```
-
-**전체 토큰 초기화** (개발 환경):
-
-```bash
-# Redis의 모든 토큰 삭제
-redis-cli FLUSHDB
-
-# 또는 패턴별 삭제
-redis-cli --scan --pattern "access:*" | xargs redis-cli DEL
-redis-cli --scan --pattern "refresh:*" | xargs redis-cli DEL
-```
-
-**서비스 재시작**:
-
-```bash
-# Redis 재시작
-docker-compose restart redis
-
-# 애플리케이션 재시작
-docker-compose restart app
-
-# 전체 스택 재시작 (환경 변수 변경 시)
-docker-compose down
-docker-compose up -d
-```
-
-**디버깅을 위한 로그 확인**:
-
-```bash
-# AES 관련 오류 로그 확인
-docker-compose logs app | grep -i "aes\|encrypt\|decrypt"
-
-# Redis 관련 오류 로그 확인
-docker-compose logs app | grep -i "redis\|refresh"
-
-# JWT 관련 오류 로그 확인
-docker-compose logs app | grep -i "jwt\|token"
 ```
 
 ---
 
-## 📄 부록
+## 🛠️ 기술 스택
 
-### 📝 라이선스
+### Backend Framework
 
-이 프로젝트는 **MIT 라이선스** 하에 배포됩니다.
+- **Spring Boot** 3.3.0
+- **Spring Security** (JWT + OAuth2)
+- **Spring Data JPA** + **QueryDSL**
+- **Java** 17 LTS
 
-### 👥 기여하기
+### Database & Storage
 
-1. **Fork** the Project
-2. **Create** your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. **Commit** your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** to the Branch (`git push origin feature/AmazingFeature`)
-5. **Open** a Pull Request
+- **MySQL** 8.0+ (메인 데이터베이스)
+- **Redis** 6.0+ (토큰 관리 & 캐시)
+- **Elasticsearch** 8.13.4 (검색 엔진)
 
-### 📞 연락처
+### Message Queue & DevOps
 
-프로젝트에 대한 질문이나 제안사항이 있으시면 **이슈를 생성**해 주세요.
+- **RabbitMQ** 3.13 (비동기 메시지 처리)
+- **Docker** + **Docker Compose**
+- **Prometheus** + **Grafana** (모니터링)
+
+---
+
+## 📄 라이선스
+
+이 프로젝트는 [MIT 라이선스](LICENSE) 하에 배포됩니다.
+
+---
+
+## 📞 연락처
+
+- 🐛 **버그 리포트**: [GitHub Issues](../../issues)
+- 💡 **기능 제안**: [GitHub Discussions](../../discussions)
+- 📖 **문서 개선**: Pull Request로 기여해주세요
+
+---
+
+<div align="center">
+
+**⭐ 이 프로젝트가 도움이 되셨다면 Star를 눌러주세요! ⭐**
+
+[⬆️ 맨 위로 이동](#-utabox)
+
+</div>
