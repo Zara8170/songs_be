@@ -98,61 +98,56 @@ UtaBox 프로젝트는 마이크로서비스 아키텍처를 기반으로 여러
 ### 🏗️ 서비스 간 통신 구조
 
 ```mermaid
-graph TB
-    subgraph "📱 Frontend"
-        FE[React Native App<br/>song_fe]
+graph LR
+    subgraph "📱 Client"
+        FE[React Native<br/>song_fe]
     end
 
-    subgraph "🌐 Backend Services"
-        BE[Spring Boot API<br/>song_be:8082]
+    subgraph "🌐 Services"
+        BE[Backend API<br/>song_be:8082]
         AI[AI Service<br/>song_ai:8000]
-        ES[Elasticsearch<br/>song_elasticsearch:9200]
+        ES[Elasticsearch<br/>:9200]
     end
 
-    subgraph "💾 Data Storage"
-        MySQL[(MySQL<br/>Primary DB)]
-        Redis[(Redis<br/>Cache/Session)]
-        ESIndex[(ES Index<br/>Search Data)]
+    subgraph "💾 Storage"
+        MySQL[(MySQL)]
+        Redis[(Redis)]
+        ESIdx[(ES Index)]
     end
 
-    subgraph "📊 Monitoring & Queue"
+    subgraph "🔧 Infrastructure"
         RMQ[RabbitMQ<br/>:5672]
-        PROM[Prometheus<br/>:9090]
-        GRAF[Grafana<br/>:3000]
+        MON[Prometheus<br/>+ Grafana]
     end
 
-    %% Client requests
+    %% Main flow
     FE --> BE
-
-    %% Backend data access
     BE --> MySQL
     BE --> Redis
     BE --> ES
+    ES --> ESIdx
 
-    %% AI service communication
-    BE --> RMQ
-    RMQ --> AI
+    %% AI communication
+    BE -.-> RMQ
+    RMQ -.-> AI
     AI --> MySQL
+    AI --> Redis
 
-    %% Search engine data flow
-    ES --> ESIndex
+    %% Monitoring
+    BE -.-> MON
+    AI -.-> MON
+    ES -.-> MON
 
-    %% Monitoring (all services)
-    BE --> PROM
-    AI --> PROM
-    ES --> PROM
-    MySQL --> PROM
-    PROM --> GRAF
+    %% Styling
+    classDef frontend fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    classDef service fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    classDef storage fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    classDef infra fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
 
-    style FE fill:#e8f5e8
-    style BE fill:#e3f2fd
-    style AI fill:#f3e5f5
-    style ES fill:#fff3e0
-    style MySQL fill:#e1f5fe
-    style Redis fill:#ffebee
-    style RMQ fill:#fce4ec
-    style PROM fill:#f1f8e9
-    style GRAF fill:#e8eaf6
+    class FE frontend
+    class BE,AI,ES service
+    class MySQL,Redis,ESIdx storage
+    class RMQ,MON infra
 ```
 
 ### 📂 패키지 구조
