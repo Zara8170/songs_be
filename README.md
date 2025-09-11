@@ -112,48 +112,47 @@ graph TB
     subgraph "💾 Data Storage"
         MySQL[(MySQL<br/>Primary DB)]
         Redis[(Redis<br/>Cache/Session)]
-        ESData[(ES Index<br/>Search Data)]
+        ESIndex[(ES Index<br/>Search Data)]
     end
 
-    subgraph "📊 Infrastructure"
-        RMQ[RabbitMQ<br/>Message Queue]
+    subgraph "📊 Monitoring & Queue"
+        RMQ[RabbitMQ<br/>:5672]
         PROM[Prometheus<br/>:9090]
         GRAF[Grafana<br/>:3000]
-        DB_SERVER[DB Server<br/>MySQL + PostgreSQL]
     end
 
-    %% Frontend to Backend
+    %% Client requests
     FE --> BE
 
-    %% Backend to Storage
+    %% Backend data access
     BE --> MySQL
     BE --> Redis
     BE --> ES
 
-    %% Async communication via RabbitMQ
+    %% AI service communication
     BE --> RMQ
     RMQ --> AI
-    AI --> RMQ
-    RMQ --> BE
+    AI --> MySQL
 
-    %% Search data flow
-    AI --> ESData
-    ES --> ESData
+    %% Search engine data flow
+    ES --> ESIndex
 
-    %% Monitoring connections
+    %% Monitoring (all services)
     BE --> PROM
     AI --> PROM
     ES --> PROM
-    DB_SERVER --> PROM
+    MySQL --> PROM
     PROM --> GRAF
 
+    style FE fill:#e8f5e8
     style BE fill:#e3f2fd
     style AI fill:#f3e5f5
     style ES fill:#fff3e0
-    style FE fill:#e8f5e8
+    style MySQL fill:#e1f5fe
+    style Redis fill:#ffebee
     style RMQ fill:#fce4ec
-    style PROM fill:#e8f5e8
-    style GRAF fill:#e3f2fd
+    style PROM fill:#f1f8e9
+    style GRAF fill:#e8eaf6
 ```
 
 ### 📂 패키지 구조
