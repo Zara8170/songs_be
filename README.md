@@ -84,6 +84,59 @@
 
 ## 🏗️ 프로젝트 전체 구조
 
+### 📁 레포지토리 구조
+
+UtaBox 프로젝트는 마이크로서비스 아키텍처를 기반으로 여러 레포지토리로 구성되어 있습니다.
+
+| 레포지토리                                                                  | 역할          | 기술 스택                 | 설명                                |
+| --------------------------------------------------------------------------- | ------------- | ------------------------- | ----------------------------------- |
+| 🎵 **[song_be](https://github.com/Zara8170/song_be)**                       | Backend API   | Spring Boot, MySQL, Redis | 메인 백엔드 서버, 인증, 데이터 관리 |
+| 📱 **[song_fe](https://github.com/Zara8170/song_fe)**                       | Frontend      | React Native              | 모바일 앱 클라이언트                |
+| 🤖 **[song_ai](https://github.com/Zara8170/song_ai)**                       | AI Service    | Python, FastAPI           | 추천 시스템, ML 모델 서빙           |
+| 🔍 **[song_elasticsearch](https://github.com/Zara8170/song_elasticsearch)** | Search Engine | Elasticsearch, Logstash   | 검색 엔진, 로그 수집 및 분석        |
+
+### 🏗️ 서비스 간 통신 구조
+
+```mermaid
+graph TB
+    subgraph "📱 Frontend"
+        FE[React Native App<br/>song_fe]
+    end
+
+    subgraph "🌐 Backend Services"
+        BE[Spring Boot API<br/>song_be:8082]
+        AI[AI Service<br/>song_ai:8000]
+        ES[Elasticsearch<br/>song_elasticsearch:9200]
+    end
+
+    subgraph "💾 Data Storage"
+        MySQL[(MySQL<br/>Primary DB)]
+        Redis[(Redis<br/>Cache/Session)]
+        ESData[(ES Index<br/>Search Data)]
+    end
+
+    subgraph "📊 Infrastructure"
+        RMQ[RabbitMQ<br/>Message Queue]
+        Monitoring[Prometheus<br/>+ Grafana]
+    end
+
+    FE --> BE
+    BE --> MySQL
+    BE --> Redis
+    BE --> ES
+    BE --> AI
+    BE --> RMQ
+    AI --> ESData
+    ES --> ESData
+    BE --> Monitoring
+    AI --> Monitoring
+
+    style BE fill:#e3f2fd
+    style AI fill:#f3e5f5
+    style ES fill:#fff3e0
+    style FE fill:#e8f5e8
+```
+
 ### 📂 패키지 구조
 
 ```
