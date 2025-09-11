@@ -117,24 +117,43 @@ graph TB
 
     subgraph "📊 Infrastructure"
         RMQ[RabbitMQ<br/>Message Queue]
-        Monitoring[Prometheus<br/>+ Grafana]
+        PROM[Prometheus<br/>:9090]
+        GRAF[Grafana<br/>:3000]
+        DB_SERVER[DB Server<br/>MySQL + PostgreSQL]
     end
 
+    %% Frontend to Backend
     FE --> BE
+
+    %% Backend to Storage
     BE --> MySQL
     BE --> Redis
     BE --> ES
-    BE --> AI
+
+    %% Async communication via RabbitMQ
     BE --> RMQ
+    RMQ --> AI
+    AI --> RMQ
+    RMQ --> BE
+
+    %% Search data flow
     AI --> ESData
     ES --> ESData
-    BE --> Monitoring
-    AI --> Monitoring
+
+    %% Monitoring connections
+    BE --> PROM
+    AI --> PROM
+    ES --> PROM
+    DB_SERVER --> PROM
+    PROM --> GRAF
 
     style BE fill:#e3f2fd
     style AI fill:#f3e5f5
     style ES fill:#fff3e0
     style FE fill:#e8f5e8
+    style RMQ fill:#fce4ec
+    style PROM fill:#e8f5e8
+    style GRAF fill:#e3f2fd
 ```
 
 ### 📂 패키지 구조
