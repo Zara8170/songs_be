@@ -3,6 +3,7 @@ package com.example.song_be.config;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -50,6 +51,8 @@ public class RabbitMQConfig {
     @Bean
     public Queue recommendationQueue() {
         return QueueBuilder.durable(QUEUE_MAIN)
+                .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", ROUTING_DLQ)
                 .build();
     }
 
@@ -141,8 +144,25 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        return new RabbitAdmin(connectionFactory);
+    }
+
+    @Bean
     public org.springframework.amqp.support.converter.Jackson2JsonMessageConverter jackson2Converter() {
         return new org.springframework.amqp.support.converter.Jackson2JsonMessageConverter();
+    }
+
+    // DLQ Consumer Container Factory (별도 설정으로 DLQ 메시지 처리)
+    @Bean
+    public SimpleRabbitListenerContainerFactory dlqContainerFactory(ConnectionFactory connectionFactory) {
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+        factory.setPrefetchCount(1); // DLQ는 천천히 처리
+        factory.setDefaultRequeueRejected(false);
+        factory.setMessageConverter(jackson2Converter());
+        return factory;
     }
 
 }

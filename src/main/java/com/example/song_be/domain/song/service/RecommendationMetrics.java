@@ -33,6 +33,10 @@ public class RecommendationMetrics {
         Timer.builder("rec_job_latency_ms").register(meterRegistry).record(d);
     }
 
+    public void incrementDeadLetter() {
+        Counter.builder("rec_jobs_dead_letter").register(meterRegistry).increment();
+    }
+
     private String nullToNA(String v) { return v == null || v.isEmpty() ? "NA" : v; }
 }
 

@@ -110,6 +110,17 @@ public class RecommendationJobStore {
         }
         return (minuteCount != null && minuteCount > perMinuteLimit) || (dayCount != null && dayCount > perDayLimit);
     }
+
+    /**
+     * 주어진 jobId의 작업이 완료되었는지 확인 (성공 또는 실패)
+     */
+    public boolean isJobFinished(String jobId) {
+        Optional<Map<Object, Object>> status = getStatus(jobId);
+        if (status.isEmpty()) return false;
+        
+        String statusValue = (String) status.get().get("status");
+        return "succeeded".equals(statusValue) || "failed".equals(statusValue);
+    }
 }
 
 

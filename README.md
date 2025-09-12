@@ -666,6 +666,35 @@ POST /api/playlist/{playlistId}/song
 }
 ```
 
+### 🔄 Dead Letter Queue (DLQ) 관리
+
+추천 시스템의 실패한 메시지를 관리하기 위한 DLQ API:
+
+```bash
+# DLQ 상태 조회
+GET /api/v1/admin/dlq/status
+
+# DLQ 헬스 체크
+GET /api/v1/admin/dlq/health
+
+# 모든 큐 상태 조회
+GET /api/v1/admin/dlq/queues/all
+
+# DLQ 메시지 수 조회
+GET /api/v1/admin/dlq/count
+
+# DLQ 메시지 모두 삭제 (주의!)
+DELETE /api/v1/admin/dlq/purge
+```
+
+**큐 구조:**
+
+- `rec.recommendation.q` - 메인 처리 큐
+- `rec.recommendation.retry.5s.q` - 5초 후 재시도
+- `rec.recommendation.retry.30s.q` - 30초 후 재시도
+- `rec.recommendation.retry.120s.q` - 120초 후 재시도
+- `rec.recommendation.dlq` - 최종 실패 메시지 큐
+
 ---
 
 ## 🛠️ 기술 스택
@@ -685,7 +714,7 @@ POST /api/playlist/{playlistId}/song
 
 ### Message Queue & DevOps
 
-- **RabbitMQ** 3.13 (비동기 메시지 처리)
+- **RabbitMQ** 3.13 (비동기 메시지 처리 + Dead Letter Queue)
 - **Docker** + **Docker Compose**
 - **Prometheus** + **Grafana** (모니터링)
 
