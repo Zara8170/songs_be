@@ -150,47 +150,115 @@ graph LR
     class RMQ,MON infra
 ```
 
-### 📂 패키지 구조
+### 🚀 CI/CD 배포 아키텍처
 
+```mermaid
+graph LR
+    subgraph "💻 Development"
+        DEV[IntelliJ IDEA<br/>개발환경]
+        VCS[GitHub<br/>버전관리]
+    end
+
+    subgraph "🔄 CI/CD Pipeline"
+        GRADLE[Gradle<br/>빌드도구]
+        DOCKER[Docker<br/>컨테이너화]
+        UNICORN[unicorn<br/>배포툴]
+    end
+
+    subgraph "☁️ Google Cloud Platform"
+        VPC[VPC Network]
+
+        subgraph "🎛️ Monitoring & Management"
+            CE1[Compute Engine<br/>모니터링 서버]
+            NGINX1[NGINX<br/>리버스 프록시]
+            GRAFANA[Grafana<br/>대시보드]
+            PROMETHEUS[Prometheus<br/>메트릭 수집]
+        end
+
+        subgraph "🏗️ Backend Services"
+            CE2[Compute Engine<br/>백엔드 서버]
+            NGINX2[NGINX<br/>웹서버]
+            DOCKER2[Docker<br/>컨테이너]
+            SPRING[Spring Boot<br/>애플리케이션]
+            RABBITMQ[RabbitMQ<br/>메시지큐]
+        end
+
+        subgraph "🤖 AI Services"
+            CE3[Compute Engine<br/>AI 서버]
+            NGINX3[NGINX<br/>로드밸런서]
+            DOCKER3[Docker<br/>컨테이너]
+            FASTAPI[FastAPI<br/>AI 서비스]
+            REDIS[Redis<br/>캐시]
+        end
+    end
+
+    %% Development Flow
+    DEV --> VCS
+    VCS --> GRADLE
+    GRADLE --> DOCKER
+    DOCKER --> UNICORN
+
+    %% Deployment Flow
+    UNICORN --> VPC
+    VPC --> CE1
+    VPC --> CE2
+    VPC --> CE3
+
+    %% Service Connections
+    CE1 --> NGINX1
+    NGINX1 --> GRAFANA
+    NGINX1 --> PROMETHEUS
+
+    CE2 --> NGINX2
+    NGINX2 --> DOCKER2
+    DOCKER2 --> SPRING
+    DOCKER2 --> RABBITMQ
+
+    CE3 --> NGINX3
+    NGINX3 --> DOCKER3
+    DOCKER3 --> FASTAPI
+    DOCKER3 --> REDIS
+
+    %% Inter-service Communication
+    SPRING -.-> RABBITMQ
+    RABBITMQ -.-> FASTAPI
+    SPRING -.-> REDIS
+    PROMETHEUS -.-> SPRING
+    PROMETHEUS -.-> FASTAPI
+    GRAFANA -.-> PROMETHEUS
+
+    %% Styling
+    classDef dev fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    classDef cicd fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    classDef compute fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    classDef service fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+
+    class DEV,VCS dev
+    class GRADLE,DOCKER,UNICORN cicd
+    class CE1,CE2,CE3,VPC compute
+    class NGINX1,NGINX2,NGINX3,GRAFANA,PROMETHEUS,SPRING,FASTAPI,RABBITMQ,REDIS service
 ```
-src/main/java/com/example/song_be/
-├── 📱 SongBeApplication.java          # 메인 애플리케이션
-├── 🔧 config/                         # 설정 파일들
-│   ├── SecurityConfig.java            # Spring Security 설정
-│   ├── JpaConfig.java                 # JPA 설정
-│   ├── RedisConfig.java               # Redis 설정
-│   ├── RabbitMQConfig.java            # RabbitMQ 설정
-│   └── QuerydslConfig.java            # QueryDSL 설정
-├── 🏗️ domain/                         # 도메인별 패키지 구조
-│   ├── member/                        # 회원 관리
-│   │   ├── entity/Member.java         # 회원 엔티티
-│   │   ├── controller/                # 회원 컨트롤러
-│   │   ├── service/                   # 회원 서비스
-│   │   └── repository/                # 회원 리포지토리
-│   ├── song/                          # 노래 관리
-│   │   ├── entity/Song.java           # 노래 엔티티
-│   │   ├── document/SongDocument.java # ES 검색용 도큐먼트
-│   │   ├── controller/                # 노래 컨트롤러
-│   │   ├── service/                   # 노래 서비스 (검색 포함)
-│   │   └── repository/                # 노래 리포지토리
-│   ├── playlist/                      # 플레이리스트 관리
-│   ├── like/                          # 좋아요 시스템
-│   └── anime/                         # 애니메이션 정보
-├── 🛡️ security/                       # 보안 관련
-│   ├── filter/JWTCheckFilter.java     # JWT 토큰 검증 필터
-│   ├── handler/                       # 인증/인가 핸들러
-│   ├── entity/RefreshToken.java       # 리프레시 토큰 엔티티
-│   └── repository/                    # 보안 관련 리포지토리
-├── 🛠️ util/                           # 유틸리티
-│   ├── JWTUtil.java                   # JWT 토큰 유틸
-│   ├── AesUtil.java                   # AES 암호화 유틸
-│   └── TimeUtil.java                  # 시간 처리 유틸
-├── 📊 dto/                            # 데이터 전송 객체
-│   ├── PageRequestDTO.java            # 페이징 요청
-│   └── PageResponseDTO.java           # 페이징 응답
-└── 🏥 health/                         # 헬스 체크
-    └── HealthController.java          # 상태 확인
-```
+
+### 📋 배포 파이프라인 단계
+
+| 단계              | 도구          | 설명                            | 자동화 |
+| ----------------- | ------------- | ------------------------------- | ------ |
+| 1️⃣ **개발**       | IntelliJ IDEA | 로컬 개발 환경에서 코드 작성    | ❌     |
+| 2️⃣ **버전관리**   | GitHub        | 소스 코드 버전 관리 및 협업     | ✅     |
+| 3️⃣ **빌드**       | Gradle        | JAR 파일 빌드 및 테스트 실행    | ✅     |
+| 4️⃣ **컨테이너화** | Docker        | 애플리케이션 Docker 이미지 생성 | ✅     |
+| 5️⃣ **배포**       | Unicorn       | GCP 인스턴스로 자동 배포        | ✅     |
+
+### 🏗️ 인프라 구성
+
+**Google Cloud Platform 리소스:**
+
+- **3개 Compute Engine 인스턴스**
+  - 모니터링 서버: Grafana + Prometheus
+  - 백엔드 서버: Spring Boot + RabbitMQ
+  - AI 서버: FastAPI + Redis
+- **VPC 네트워크**: 보안 그룹 및 방화벽 규칙 적용
+- **로드 밸런서**: NGINX 기반 트래픽 분산
 
 ### 🗄️ 데이터베이스 구조
 
