@@ -101,62 +101,64 @@ UtaBox 프로젝트는 마이크로서비스 아키텍처를 기반으로 여러
 %%{init: {'theme':'dark', 'themeVariables': { 'primaryColor': '#2D3748', 'primaryTextColor': '#E2E8F0', 'primaryBorderColor': '#4A5568', 'lineColor': '#718096', 'sectionBkgColor': '#1A202C', 'altSectionBkgColor': '#2D3748', 'gridColor': '#4A5568', 'tertiaryColor': '#2D3748'}}}%%
 graph TB
     subgraph clients [" "]
-        UserApp["사용자 앱"]
+        ReactNative["React Native<br/>song_fe"]
         AdminWeb["관리자 웹"]
     end
 
-    Gateway["API Gateway"]
-
     subgraph services [" "]
-        MainAPI["메인 API 서버"]
-        AIAPI["AI API 서버"]
+        SpringBoot["Spring Boot API<br/>song_be:8082"]
+        FastAPI["FastAPI<br/>song_ai:8000"]
+        ElasticService["Elasticsearch<br/>song_elasticsearch:9200"]
     end
 
     subgraph databases [" "]
-        MySQL[("MySQL")]
-        Redis[("Redis")]
-        MongoDB[("MongoDB")]
-        PGVector[("PGVector")]
+        MySQL[("MySQL<br/>메인 데이터")]
+        Redis[("Redis<br/>토큰 & 캐시")]
+        ESIndex[("ES Index<br/>검색 데이터")]
     end
 
     subgraph middleware [" "]
-        Kafka["Kafka"]
-        Elasticsearch["Elasticsearch"]
-        OpenAI["OpenAI API"]
+        RabbitMQ["RabbitMQ<br/>:5672"]
+        Prometheus["Prometheus<br/>메트릭 수집"]
+        Grafana["Grafana<br/>모니터링"]
     end
 
     %% Client connections
-    UserApp --> Gateway
-    AdminWeb --> Gateway
+    ReactNative --> SpringBoot
+    AdminWeb --> SpringBoot
 
-    %% Gateway to services
-    Gateway --> MainAPI
-    Gateway --> AIAPI
+    %% Main service connections
+    SpringBoot --> MySQL
+    SpringBoot --> Redis
+    SpringBoot --> ElasticService
+    SpringBoot --> RabbitMQ
 
-    %% Main API connections
-    MainAPI --> MySQL
-    MainAPI --> Redis
-    MainAPI --> MongoDB
-    MainAPI --> Kafka
-    MainAPI --> Elasticsearch
+    %% Search service
+    ElasticService --> ESIndex
 
-    %% AI API connections
-    AIAPI --> PGVector
-    AIAPI --> OpenAI
+    %% AI service connections
+    SpringBoot -.-> RabbitMQ
+    RabbitMQ -.-> FastAPI
+    FastAPI --> MySQL
+    FastAPI --> Redis
+
+    %% Monitoring connections
+    SpringBoot -.-> Prometheus
+    FastAPI -.-> Prometheus
+    ElasticService -.-> Prometheus
+    Prometheus --> Grafana
 
     %% Styling
     classDef client fill:#2D3748,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
-    classDef gateway fill:#4A5568,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
     classDef service fill:#2D3748,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
     classDef database fill:#2D3748,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
     classDef middle fill:#2D3748,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
     classDef subgraphStyle fill:#1A202C,stroke:#4A5568,stroke-width:1px
 
-    class UserApp,AdminWeb client
-    class Gateway gateway
-    class MainAPI,AIAPI service
-    class MySQL,Redis,MongoDB,PGVector database
-    class Kafka,Elasticsearch,OpenAI middle
+    class ReactNative,AdminWeb client
+    class SpringBoot,FastAPI,ElasticService service
+    class MySQL,Redis,ESIndex database
+    class RabbitMQ,Prometheus,Grafana middle
     class clients,services,databases,middleware subgraphStyle
 ```
 
