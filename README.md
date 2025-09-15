@@ -98,56 +98,66 @@ UtaBox 프로젝트는 마이크로서비스 아키텍처를 기반으로 여러
 ### 🏗️ 서비스 간 통신 구조
 
 ```mermaid
-graph LR
-    subgraph "📱 Client"
-        FE[React Native<br/>song_fe]
+%%{init: {'theme':'dark', 'themeVariables': { 'primaryColor': '#2D3748', 'primaryTextColor': '#E2E8F0', 'primaryBorderColor': '#4A5568', 'lineColor': '#718096', 'sectionBkgColor': '#1A202C', 'altSectionBkgColor': '#2D3748', 'gridColor': '#4A5568', 'tertiaryColor': '#2D3748'}}}%%
+graph TB
+    subgraph clients [" "]
+        UserApp["사용자 앱"]
+        AdminWeb["관리자 웹"]
     end
 
-    subgraph "🌐 Services"
-        BE[Backend API<br/>song_be:8082]
-        AI[AI Service<br/>song_ai:8000]
-        ES[Elasticsearch<br/>:9200]
+    Gateway["API Gateway"]
+
+    subgraph services [" "]
+        MainAPI["메인 API 서버"]
+        AIAPI["AI API 서버"]
     end
 
-    subgraph "💾 Storage"
-        MySQL[(MySQL)]
-        Redis[(Redis)]
-        ESIdx[(ES Index)]
+    subgraph databases [" "]
+        MySQL[("MySQL")]
+        Redis[("Redis")]
+        MongoDB[("MongoDB")]
+        PGVector[("PGVector")]
     end
 
-    subgraph "🔧 Infrastructure"
-        RMQ[RabbitMQ<br/>:5672]
-        MON[Prometheus<br/>+ Grafana]
+    subgraph middleware [" "]
+        Kafka["Kafka"]
+        Elasticsearch["Elasticsearch"]
+        OpenAI["OpenAI API"]
     end
 
-    %% Main flow
-    FE --> BE
-    BE --> MySQL
-    BE --> Redis
-    BE --> ES
-    ES --> ESIdx
+    %% Client connections
+    UserApp --> Gateway
+    AdminWeb --> Gateway
 
-    %% AI communication
-    BE -.-> RMQ
-    RMQ -.-> AI
-    AI --> MySQL
-    AI --> Redis
+    %% Gateway to services
+    Gateway --> MainAPI
+    Gateway --> AIAPI
 
-    %% Monitoring
-    BE -.-> MON
-    AI -.-> MON
-    ES -.-> MON
+    %% Main API connections
+    MainAPI --> MySQL
+    MainAPI --> Redis
+    MainAPI --> MongoDB
+    MainAPI --> Kafka
+    MainAPI --> Elasticsearch
+
+    %% AI API connections
+    AIAPI --> PGVector
+    AIAPI --> OpenAI
 
     %% Styling
-    classDef frontend fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
-    classDef service fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
-    classDef storage fill:#fff3e0,stroke:#ff9800,stroke-width:2px
-    classDef infra fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    classDef client fill:#2D3748,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
+    classDef gateway fill:#4A5568,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
+    classDef service fill:#2D3748,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
+    classDef database fill:#2D3748,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
+    classDef middle fill:#2D3748,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
+    classDef subgraphStyle fill:#1A202C,stroke:#4A5568,stroke-width:1px
 
-    class FE frontend
-    class BE,AI,ES service
-    class MySQL,Redis,ESIdx storage
-    class RMQ,MON infra
+    class UserApp,AdminWeb client
+    class Gateway gateway
+    class MainAPI,AIAPI service
+    class MySQL,Redis,MongoDB,PGVector database
+    class Kafka,Elasticsearch,OpenAI middle
+    class clients,services,databases,middleware subgraphStyle
 ```
 
 ### 🚀 CI/CD 배포 아키텍처
