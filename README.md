@@ -152,6 +152,12 @@ graph LR
 
 ### 🚀 CI/CD 배포 아키텍처
 
+<!-- 실제 아키텍처 이미지 -->
+
+![CI/CD 배포 아키텍처](./docs/images/cicd-architecture.png)
+
+_또는 아래 다이어그램으로 확인하세요:_
+
 ```mermaid
 graph LR
     subgraph "💻 Development"
