@@ -95,71 +95,56 @@ UtaBox 프로젝트는 마이크로서비스 아키텍처를 기반으로 여러
 | 🤖 **[song_ai](https://github.com/Zara8170/song_ai)**                       | AI Service    | Python, FastAPI           | 추천 시스템, ML 모델 서빙           |
 | 🔍 **[song_elasticsearch](https://github.com/Zara8170/song_elasticsearch)** | Search Engine | Elasticsearch, Logstash   | 검색 엔진, 로그 수집 및 분석        |
 
-### 🏗️ 서비스 간 통신 구조
+### 🏗️ 서비스간 연동 구조
 
 ```mermaid
-%%{init: {'theme':'dark', 'themeVariables': { 'primaryColor': '#2D3748', 'primaryTextColor': '#E2E8F0', 'primaryBorderColor': '#4A5568', 'lineColor': '#718096', 'sectionBkgColor': '#1A202C', 'altSectionBkgColor': '#2D3748', 'gridColor': '#4A5568', 'tertiaryColor': '#2D3748'}}}%%
 graph TB
-    subgraph clients [" "]
-        ReactNative["React Native<br/>song_fe"]
-        AdminWeb["관리자 웹"]
+    subgraph "Frontend Layer"
+        FE["🎨 song_fe<br/>React Frontend"]
     end
 
-    subgraph services [" "]
-        SpringBoot["Spring Boot API<br/>song_be:8082"]
-        FastAPI["FastAPI<br/>song_ai:8000"]
-        ElasticService["Elasticsearch<br/>song_elasticsearch:9200"]
+    subgraph "Backend Services"
+        BE["🎵 songs_be<br/>Spring Boot API"]
+        AI["🤖 songs_ai<br/>AI Recommendation Engine"]
+        ES["🔍 song_elasticsearch<br/>Search Engine"]
     end
 
-    subgraph databases [" "]
-        MySQL[("MySQL<br/>메인 데이터")]
-        Redis[("Redis<br/>토큰 & 캐시")]
-        ESIndex[("ES Index<br/>검색 데이터")]
+    subgraph "Message Queue"
+        RMQ["🐰 RabbitMQ<br/>Message Broker"]
     end
 
-    subgraph middleware [" "]
-        RabbitMQ["RabbitMQ<br/>:5672"]
-        Prometheus["Prometheus<br/>메트릭 수집"]
-        Grafana["Grafana<br/>모니터링"]
+    subgraph "Data Layer"
+        DB[("MySQL Database")]
+        REDIS[("Redis Cache")]
+        ES_DATA[("Elasticsearch Index")]
     end
 
-    %% Client connections
-    ReactNative --> SpringBoot
-    AdminWeb --> SpringBoot
+    FE -->|"REST API Request"| BE
+    FE -->|"AI Recommendation Request<br/>(Async)"| BE
 
-    %% Main service connections
-    SpringBoot --> MySQL
-    SpringBoot --> Redis
-    SpringBoot --> ElasticService
-    SpringBoot --> RabbitMQ
+    BE -->|"Queue Recommendation Task"| RMQ
+    RMQ -->|"Async Processing"| AI
 
-    %% Search service
-    ElasticService --> ESIndex
+    AI -->|"Cache Results"| REDIS
+    AI -->|"Metadata Query"| BE
 
-    %% AI service connections
-    SpringBoot -.-> RabbitMQ
-    RabbitMQ -.-> FastAPI
-    FastAPI --> MySQL
-    FastAPI --> Redis
+    BE -->|"Get Cached Results"| REDIS
 
-    %% Monitoring connections
-    SpringBoot -.-> Prometheus
-    FastAPI -.-> Prometheus
-    ElasticService -.-> Prometheus
-    Prometheus --> Grafana
+    BE -->|"Search Query"| ES
+    BE -->|"User/Song Data"| DB
+    ES -->|"Index Management"| ES_DATA
 
-    %% Styling
-    classDef client fill:#2D3748,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
-    classDef service fill:#2D3748,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
-    classDef database fill:#2D3748,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
-    classDef middle fill:#2D3748,stroke:#E2E8F0,stroke-width:2px,color:#E2E8F0
-    classDef subgraphStyle fill:#1A202C,stroke:#4A5568,stroke-width:1px
+    classDef frontend fill:#e1f5fe
+    classDef backend fill:#f3e5f5
+    classDef ai fill:#e8f5e8
+    classDef data fill:#fff3e0
+    classDef queue fill:#fce4ec
 
-    class ReactNative,AdminWeb client
-    class SpringBoot,FastAPI,ElasticService service
-    class MySQL,Redis,ESIndex database
-    class RabbitMQ,Prometheus,Grafana middle
-    class clients,services,databases,middleware subgraphStyle
+    class FE frontend
+    class BE,ES backend
+    class AI ai
+    class DB,REDIS,ES_DATA data
+    class RMQ queue
 ```
 
 ### 🚀 CI/CD 배포 아키텍처
