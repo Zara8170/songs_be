@@ -7,19 +7,36 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * 페이징 응답 데이터 전송 객체
+ * 
+ * @param <E> 응답 데이터 타입
+ */
 @Data
 public class PageResponseDTO<E> {
 
+    /** 현재 페이지의 데이터 목록 */
     private List<E> dtoList;
 
+    /** 페이지 번호 목록 */
     private List<Integer> pageNumList;
 
+    /** 페이징 요청 정보 */
     private PageRequestDTO pageRequestDTO;
 
+    /** 이전/다음 페이지 존재 여부 */
     private boolean prev, next;
 
+    /** 전체 개수, 이전/다음 페이지 번호, 전체 페이지 수, 현재 페이지 */
     private int totalCount, prevPage, nextPage, totalPage, current;
 
+    /**
+     * 페이징 응답 객체 생성자
+     * 
+     * @param dtoList 현재 페이지 데이터 목록
+     * @param pageRequestDTO 페이징 요청 정보
+     * @param totalCount 전체 데이터 개수
+     */
     @Builder(builderMethodName = "withAll")
     public PageResponseDTO(List<E> dtoList, PageRequestDTO pageRequestDTO, long totalCount) {
 

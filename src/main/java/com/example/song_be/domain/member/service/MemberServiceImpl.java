@@ -14,6 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
+/**
+ * 회원 관련 비즈니스 로직을 처리하는 서비스 구현체
+ * 회원 인증, 토큰 관리, 회원 탈퇴 등의 핵심 기능을 담당합니다.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,11 @@ public class MemberServiceImpl implements MemberService {
     private final JWTUtil jwtUtil;
     private final EntityManager entityManager;
 
+    /**
+     * 임시 비밀번호 생성
+     * 
+     * @return 랜덤 생성된 10자리 임시 비밀번호
+     */
     @Override
     public String makeTempPassword() {
         StringBuffer buffer = new StringBuffer();
@@ -35,6 +44,12 @@ public class MemberServiceImpl implements MemberService {
         return buffer.toString();
     }
 
+    /**
+     * 소셜 로그인용 JWT 토큰 생성
+     * 
+     * @param dto 회원 정보 DTO
+     * @return Access/Refresh 토큰이 포함된 클레임 맵
+     */
     @Override
     public Map<String, Object> getSocialClaims(MemberDTO dto) {
         Map<String,Object> claims = dto.getClaims();
@@ -43,6 +58,14 @@ public class MemberServiceImpl implements MemberService {
         return claims;
     }
 
+    /**
+     * 회원 탈퇴 처리
+     * 관련 데이터(플레이리스트, 좋아요, 권한) 대상 자동 삭제 및 검증
+     * 
+     * @param email 탈퇴할 회원의 이메일
+     * @throws EntityNotFoundException 회원이 존재하지 않는 경우
+     * @throws RuntimeException 데이터 삭제 검증 실패 시
+     */
     @Override
     @Transactional
     public void deleteMember(String email) {
@@ -114,11 +137,25 @@ public class MemberServiceImpl implements MemberService {
         log.info("회원 삭제 검증 완료 - 모든 관련 데이터가 정상적으로 삭제되었습니다. ID: {}", memberId);
     }
 
+    /**
+     * 이메일 중복 확인
+     * 
+     * @param email 확인할 이메일 주소
+     * @return 중복 여부 (true: 중복됨, false: 사용가능)
+     */
     @Override
     public boolean checkEmail(String email) {
         return memberRepository.existsByEmail(email);
     }
 
+    /**
+     * 액세스 토큰 갱신
+     * 만료된 액세스 토큰을 리프레시 토큰으로 갱신하는 기능
+     * 리프레시 토큰 만료 임박 시 자동 재발급
+     * 
+     * @param accessToken 만료된 액세스 토큰
+     * @return 새로운 액세스 토큰이 포함된 맵
+     */
     @Override
     public Map<String, Object> refreshTokens(String accessToken) {
         log.info("[MemberService] Starting token refresh process...");

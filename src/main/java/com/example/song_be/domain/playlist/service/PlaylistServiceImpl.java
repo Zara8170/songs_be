@@ -21,6 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 플레이리스트 관련 비즈니스 로직을 처리하는 서비스 구현체
+ * 플레이리스트 CRUD, 곡 관리, 권한 검증, 순서 변경 등을 담당합니다.
+ */
 @Slf4j
 @Transactional
 @RequiredArgsConstructor
@@ -32,6 +36,14 @@ public class PlaylistServiceImpl implements PlaylistService {
     private final MemberRepository memberRepository;
     private final SongRepository songRepository;
 
+    /**
+     * 새 플레이리스트 생성
+     * 
+     * @param playlistCreateDTO 생성할 플레이리스트 정보
+     * @param memberId 플레이리스트를 생성할 회원 ID
+     * @return 생성된 플레이리스트 정보 (곡 목록 제외)
+     * @throws IllegalArgumentException 회원이 존재하지 않는 경우
+     */
     @Override
     public PlaylistDTO createPlaylist(PlaylistCreateDTO playlistCreateDTO, Long memberId) {
         log.info("Creating playlist for member: {}", memberId);
@@ -45,6 +57,14 @@ public class PlaylistServiceImpl implements PlaylistService {
         return PlaylistDTO.fromWithoutSongs(savedPlaylist);
     }
 
+    /**
+     * 플레이리스트 상세 조회 (권한 검증 포함)
+     * 
+     * @param playlistId 조회할 플레이리스트 ID
+     * @param memberId 요청하는 회원 ID
+     * @return 플레이리스트 상세 정보 (곡 목록 포함)
+     * @throws IllegalArgumentException 플레이리스트가 존재하지 않거나 접근 권한이 없는 경우
+     */
     @Override
     @Transactional(readOnly = true)
     public PlaylistDTO getPlaylistById(Long playlistId, Long memberId) {
@@ -60,6 +80,15 @@ public class PlaylistServiceImpl implements PlaylistService {
         return PlaylistDTO.from(playlist);
     }
 
+    /**
+     * 플레이리스트 정보 수정
+     * 
+     * @param playlistId 수정할 플레이리스트 ID
+     * @param playlistUpdateDTO 수정할 정보
+     * @param memberId 요청하는 회원 ID
+     * @return 수정된 플레이리스트 정보
+     * @throws IllegalArgumentException 플레이리스트가 존재하지 않거나 수정 권한이 없는 경우
+     */
     @Override
     public PlaylistDTO updatePlaylist(Long playlistId, PlaylistUpdateDTO playlistUpdateDTO, Long memberId) {
         log.info("Updating playlist: {} for member: {}", playlistId, memberId);
@@ -85,6 +114,13 @@ public class PlaylistServiceImpl implements PlaylistService {
         return PlaylistDTO.fromWithoutSongs(savedPlaylist);
     }
 
+    /**
+     * 플레이리스트 삭제
+     * 
+     * @param playlistId 삭제할 플레이리스트 ID
+     * @param memberId 요청하는 회원 ID
+     * @throws IllegalArgumentException 플레이리스트가 존재하지 않거나 삭제 권한이 없는 경우
+     */
     @Override
     public void deletePlaylist(Long playlistId, Long memberId) {
         log.info("Deleting playlist: {} for member: {}", playlistId, memberId);

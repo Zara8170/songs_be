@@ -21,6 +21,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * 곡 추천 작업 관리 API 컨트롤러
+ * 비동기 곡 추천 작업의 생성, 상태 조회, 결과 조회 기능을 제공합니다.
+ */
 @RestController
 @RequestMapping("/api/recommendation")
 @RequiredArgsConstructor
@@ -31,6 +35,14 @@ public class RecommendationJobController {
     private final RecommendationJobStore jobStore;
     // No direct template usage here; publishing goes through RecommendationPublisher
 
+    /**
+     * 새로운 곡 추천 작업 생성
+     * 
+     * @param idemKey 멱등성 키 (동일한 요청 중복 방지)
+     * @param body 추천 작업 생성 요청 정보
+     * @param member 인증된 회원 정보
+     * @return 작업 ID 및 상태 URL
+     */
     @PostMapping("/jobs")
     public ResponseEntity<?> createJob(@RequestHeader(value = "Idempotency-Key", required = false) String idemKey,
                                        @RequestBody(required = false) RecommendationJobCreateRequest body,
@@ -88,6 +100,13 @@ public class RecommendationJobController {
                 .body(response);
     }
 
+    /**
+     * 특정 추천 작업의 상태 및 결과 조회
+     * 
+     * @param jobId 조회할 작업 ID
+     * @param member 인증된 회원 정보
+     * @return 작업 상태, 진행률, 결과 또는 오류 정보
+     */
     @GetMapping("/jobs/{jobId}")
     public ResponseEntity<?> getJob(@PathVariable String jobId,
                                     @AuthenticationPrincipal MemberDTO member) {
@@ -120,6 +139,13 @@ public class RecommendationJobController {
         return ResponseEntity.ok(resp);
     }
 
+    /**
+     * 회원의 최신 추천 결과 조회 (캐싱 지원)
+     * 
+     * @param member 인증된 회원 정보
+     * @param headers HTTP 헤더 (ETag 캐시 검증용)
+     * @return 최신 추천 결과 또는 304 Not Modified
+     */
     @GetMapping("/latest")
     public ResponseEntity<?> getLatest(@AuthenticationPrincipal MemberDTO member, @RequestHeader HttpHeaders headers) {
         if (member == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

@@ -7,6 +7,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * 페이징 요청 데이터 전송 객체
+ * API 요청 시 페이지 번호, 크기, 정렬 정보를 포함합니다.
+ */
 @Data
 @SuperBuilder
 @AllArgsConstructor

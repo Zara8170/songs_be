@@ -9,36 +9,66 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/**
+ * 곡 정보 데이터 전송 객체
+ * 곡의 기본 정보, 제목(다국어), 가사, 좋아요 정보, 애니메이션 정보를 포함합니다.
+ */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"lyrics_original", "lyrics_yomi", "lyrics_kr"})
 public class SongDTO {
+    /** 곡 고유 ID */
     private Long songId;
+    /** TJ 노래방 번호 */
     private Long tj_number;
+    /** KY 노래방 번호 */
     private Long ky_number;
+    /** 한국어 제목 */
     private String title_kr;
+    /** 영어 제목 */
     private String title_en;
+    /** 영어 제목 한국어 표기 */
     private String title_en_kr;
+    /** 일본어 제목 */
     private String title_jp;
+    /** 일본어 제목 요미가나 */
     private String title_yomi;
+    /** 일본어 제목 요미가나 한국어 표기 */
     private String title_yomi_kr;
+    /** 언어 코드 */
     private String lang;
+    /** 장르 */
     private String genre;
+    /** 분위기/무드 */
     private String mood;
+    /** 아티스트명 */
     private String artist;
+    /** 아티스트명 한국어 표기 */
     private String artist_kr;
+    /** 원본 가사 */
     private String lyrics_original;
+    /** 일본어 가사 요미가나 */
     private String lyrics_yomi;
+    /** 한국어 번역 가사 */
     private String lyrics_kr;
+    /** 좋아요 개수 */
     private Long likeCount;
+    /** 현재 사용자의 좋아요 여부 */
     private Boolean likedByMe;
     
-    // 애니메이션 관련 필드
+    /** 애니메이션 제목 */
     private String animeTitle;
+    /** 애니메이션 타입 (OP/ED 등) */
     private AnimeType animeType;
 
+    /**
+     * Song 엔티티로부터 SongDTO 생성
+     * 
+     * @param song Song 엔티티
+     * @return SongDTO 객체
+     */
     public static SongDTO from(Song song) {
         return SongDTO.builder()
                 .songId(song.getSongId())
@@ -63,6 +93,11 @@ public class SongDTO {
                 .build();
     }
 
+    /**
+     * SongDTO를 Song 엔티티로 변환
+     * 
+     * @return Song 엔티티
+     */
     public Song toEntity() {
         return Song.builder()
                 .songId(this.songId)
@@ -85,6 +120,11 @@ public class SongDTO {
                 .build();
     }
 
+    /**
+     * SongDTO를 Elasticsearch SongDocument로 변환
+     * 
+     * @return SongDocument 객체
+     */
     public SongDocument toDocument() {
         return SongDocument.builder()
                 .songId(this.songId)

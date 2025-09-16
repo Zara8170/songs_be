@@ -24,6 +24,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 회원 관리 API 컨트롤러
+ * 회원 인증, 토큰 관리, 회원 정보 관리 기능을 제공합니다.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/member")
@@ -32,6 +36,12 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    /**
+     * 회원 로그아웃
+     * 
+     * @param response HTTP 응답 (쿠키 제거용)
+     * @return 로그아웃 성공 메시지
+     */
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response) {
         log.info("logout");
@@ -72,12 +82,24 @@ public class MemberController {
         return ResponseEntity.ok(newTokens);
     }
 
+    /**
+     * 회원 탈퇴
+     * 
+     * @param member 인증된 회원 정보
+     * @return 탈퇴 완료 메시지
+     */
     @DeleteMapping
     public ResponseEntity<String> deleteMember(@AuthenticationPrincipal MemberDTO member) {
         memberService.deleteMember(member.getEmail());
         return ResponseEntity.ok("회원 탈퇴 완료");
     }
 
+    /**
+     * 이메일 중복 확인
+     * 
+     * @param email 확인할 이메일 주소
+     * @return 중복 여부 (true: 중복됨, false: 사용가능)
+     */
     @GetMapping("/check-email/{email}")
     public ResponseEntity<Boolean> checkEmail(@PathVariable String email) {
         log.info("checkEmail email: {}", email);

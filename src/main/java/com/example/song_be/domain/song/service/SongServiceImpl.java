@@ -20,6 +20,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * 곡 관련 비즈니스 로직을 처리하는 서비스 구현체
+ * 곡의 CRUD, 좋아요 정보 포함 조회, 애니메이션 연동 등을 담당합니다.
+ */
 @Slf4j
 @Transactional
 @RequiredArgsConstructor
@@ -31,6 +35,13 @@ public class SongServiceImpl implements SongService {
     private final SongLikeRepository songLikeRepository;
     private final AnimeRepository animeRepository;
 
+    /**
+     * 곡 목록 조회 (페이징 지원, 회원별 좋아요 정보 포함)
+     * 
+     * @param requestDTO 페이징 요청 정보
+     * @param memberId 회원 ID (nullable, 비로그인 사용자 지원)
+     * @return 페이징된 곡 목록과 좋아요 정보
+     */
     @Override
     @Transactional(readOnly = true)
     public PageResponseDTO<SongDTO> getSongList(PageRequestDTO requestDTO, Long memberId) {
@@ -62,6 +73,13 @@ public class SongServiceImpl implements SongService {
                 .build();
     }
 
+    /**
+     * 특정 곡 상세 조회
+     * 
+     * @param id 곡 ID
+     * @return 곡 상세 정보
+     * @throws IllegalArgumentException 곡이 존재하지 않는 경우
+     */
     @Override
     @Transactional(readOnly = true)
     public SongDTO getSongById(Long id) {
@@ -72,6 +90,12 @@ public class SongServiceImpl implements SongService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 곡이 없습니다: " + id));
     }
 
+    /**
+     * 여러 곡 ID로 곡 목록 조회
+     * 
+     * @param songIds 곡 ID 목록
+     * @return 곡 목록
+     */
     @Override
     public List<SongDTO> findSongsByIds(List<Long> songIds) {
         if (songIds == null || songIds.isEmpty()) {
@@ -84,6 +108,14 @@ public class SongServiceImpl implements SongService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 새 곡 등록
+     * 노래방 번호 중복 검사, 애니메이션 자동 생성/연결 처리
+     * 
+     * @param songDTO 등록할 곡 정보
+     * @return 등록된 곡 정보
+     * @throws IllegalArgumentException 중복된 노래방 번호가 있는 경우
+     */
     @Override
     public SongDTO createSong(SongDTO songDTO) {
         log.info("createSong start...");
@@ -126,6 +158,14 @@ public class SongServiceImpl implements SongService {
         return SongDTO.from(saved);
     }
 
+    /**
+     * 곡 정보 수정
+     * 
+     * @param id 수정할 곡 ID
+     * @param songDTO 수정할 곡 정보
+     * @return 수정된 곡 정보
+     * @throws IllegalArgumentException 곡이 존재하지 않는 경우
+     */
     @Override
     public SongDTO updateSong(Long id, SongDTO songDTO) {
         log.info("updateSong start...");
@@ -146,6 +186,11 @@ public class SongServiceImpl implements SongService {
         return SongDTO.from(song);
     }
 
+    /**
+     * 곡 삭제
+     * 
+     * @param id 삭제할 곡 ID
+     */
     @Override
     public void deleteSong(Long id) {
         songRepository.deleteById(id);
