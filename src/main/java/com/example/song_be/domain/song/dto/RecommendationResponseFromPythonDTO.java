@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RecommendationResponseFromPythonDTO {
     
     private List<RecommendationGroup> groups;
@@ -22,6 +23,7 @@ public class RecommendationResponseFromPythonDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RecommendationGroup {
         private String label;
         private String tagline;
@@ -32,6 +34,7 @@ public class RecommendationResponseFromPythonDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class GroupSong {
         @JsonProperty("title_jp")
         private String titleJp;
