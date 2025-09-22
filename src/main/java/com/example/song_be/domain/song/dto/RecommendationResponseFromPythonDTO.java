@@ -16,6 +16,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RecommendationResponseFromPythonDTO {
     
+    private String status;
     private List<RecommendationGroup> groups;
     private List<CandidateSong> candidates;
     

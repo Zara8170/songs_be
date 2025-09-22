@@ -123,7 +123,7 @@ public class RecommendationConsumer {
     @RequiredArgsConstructor
     public static class RestRecommendationCaller {
         private final org.springframework.web.client.RestTemplate restTemplate;
-        private final ObjectMapper objectMapper = new ObjectMapper();
+        private final ObjectMapper objectMapper;
         @org.springframework.beans.factory.annotation.Value("${app.props.python-server-url}")
         private String pythonServerUrl;
 
