@@ -88,9 +88,6 @@ dependencies {
     // structured logging (JSON)
     implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 
-    // aws s3
-//    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.0.4'
-
     // 날짜/시간 타입 읽기 위한 솔루션
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 

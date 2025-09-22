@@ -160,9 +160,9 @@ spring:
     password: ${ELASTIC_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
   flyway:
-    enabled: false
+    enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
     baseline-version: 1
