@@ -21,6 +21,9 @@ spring:
     jdbc:
       repositories:
         enabled: false
+    redis:
+      repositories:
+        enabled: false
   config:
     import: optional:file:.env[.properties] # 환경변수 파일 로드
   output:
@@ -177,6 +180,9 @@ spring:
       mode: never # SQL 초기화 모드 (always, never, embedded, embedded-always)
   data:
     jdbc:
+      repositories:
+        enabled: false
+    redis:
       repositories:
         enabled: false
 
