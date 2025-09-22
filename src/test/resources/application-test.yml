@@ -1,0 +1,46 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: false
+        show_sql: false
+    show-sql: false
+
+  h2:
+    console:
+      enabled: true
+
+  data:
+    jdbc:
+      repositories:
+        enabled: false
+
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    timeout: 2000ms
+
+logging:
+  level:
+    com.example.song_be: DEBUG
+    org.springframework.data: WARN
+    org.springframework.data.repository.config: WARN
+    org.hibernate: WARN
+    org.hibernate.SQL: WARN
+
+# 테스트용 더미 환경변수 설정
+app:
+  props:
+    social:
+      google:
+        redirect-uri: http://localhost:8080/test
