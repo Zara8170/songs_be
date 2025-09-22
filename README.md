@@ -47,8 +47,9 @@
 
 **RabbitMQ 사용 이유:**
 
-- 추천 시스템의 비동기 처리로 사용자 경험 향상
-- 이메일 알림 등 백그라운드 작업 안정적 처리
+- 추천 시스템의 비동기 처리로 사용자 경험 향상 (Python ML 서버 호출)
+- 견고한 재시도 메커니즘으로 일시적 장애 대응 (5초→30초→120초 백오프)
+- Dead Letter Queue를 통한 실패 메시지 관리 및 모니터링
 - 시스템 부하 분산 및 확장성 확보
 
 ### 🎯 향후 추가 예정 기능
@@ -122,12 +123,11 @@ graph TB
     FE -->|"REST API Request"| BE
     FE -->|"AI Recommendation Request<br/>(Async)"| BE
 
-    BE -->|"Queue Recommendation Task"| RMQ
-    RMQ -->|"Async Processing"| AI
+    BE -->|"Publish Recommendation Job"| RMQ
+    RMQ -->|"Consumer → HTTP Call"| AI
 
-    AI -->|"Cache Results"| REDIS
-    AI -->|"Metadata Query"| BE
-
+    AI -->|"Return ML Results"| BE
+    BE -->|"Cache Results"| REDIS
     BE -->|"Get Cached Results"| REDIS
 
     BE -->|"Search Query"| ES
@@ -258,7 +258,7 @@ graph TB
     end
 
     subgraph "📨 Message Queue"
-        RMQ[RabbitMQ<br/>비동기 처리]
+        RMQ[RabbitMQ<br/>추천 시스템 큐<br/>재시도 & DLQ]
     end
 
     subgraph "📊 Monitoring"
@@ -470,7 +470,7 @@ private String convertToChosung(String text) {
 
 - **Elasticsearch**: 전문 검색 엔진 도입으로 검색 품질 향상
 - **Redis**: 토큰 관리와 캐싱을 통한 성능 최적화
-- **RabbitMQ**: 비동기 처리로 사용자 경험 개선
+- **RabbitMQ**: 추천 시스템 비동기 처리 및 견고한 재시도 메커니즘
 - **Spring Security**: JWT 기반 인증/인가 시스템 구축
 
 ### 🐛 **문제 해결 능력**
@@ -513,7 +513,7 @@ private String convertToChosung(String text) {
 
 - **빠른 검색**: Elasticsearch 기반으로 100ms 이내 응답
 - **캐싱 전략**: Redis를 통한 자주 검색되는 결과 캐싱
-- **비동기 처리**: RabbitMQ를 통한 백그라운드 작업 처리
+- **비동기 처리**: RabbitMQ를 통한 추천 시스템 및 재시도 메커니즘
 
 ### 🛡️ **안전한 보안 시스템**
 
@@ -530,7 +530,7 @@ private String convertToChosung(String text) {
 ### 🔄 **확장 가능한 아키텍처**
 
 - **도메인 분리**: 각 기능별 독립적인 모듈 구성
-- **메시지 큐**: 비동기 처리로 시스템 부하 분산
+- **메시지 큐**: 추천 시스템 큐잉 및 장애 복구 메커니즘
 - **Docker 컨테이너**: 환경 독립적인 배포 지원
 
 ---
@@ -669,11 +669,16 @@ DELETE /api/v1/admin/dlq/purge
 
 **큐 구조:**
 
-- `rec.recommendation.q` - 메인 처리 큐
-- `rec.recommendation.retry.5s.q` - 5초 후 재시도
-- `rec.recommendation.retry.30s.q` - 30초 후 재시도
-- `rec.recommendation.retry.120s.q` - 120초 후 재시도
-- `rec.recommendation.dlq` - 최종 실패 메시지 큐
+- `rec.recommendation.q` - 메인 처리 큐 (Python ML 서버 호출)
+- `rec.recommendation.retry.5s.q` - 5초 TTL 재시도 큐
+- `rec.recommendation.retry.30s.q` - 30초 TTL 재시도 큐
+- `rec.recommendation.retry.120s.q` - 120초 TTL 재시도 큐
+- `rec.recommendation.dlq` - Dead Letter Queue (최종 실패)
+
+**Exchange 구조:**
+
+- `rec.exchange` - 메인 Exchange (Direct)
+- `rec.dlx` - Dead Letter Exchange (재시도 및 DLQ 라우팅)
 
 ---
 
@@ -694,7 +699,7 @@ DELETE /api/v1/admin/dlq/purge
 
 ### Message Queue & DevOps
 
-- **RabbitMQ** 3.13 (비동기 메시지 처리 + Dead Letter Queue)
+- **RabbitMQ** 3.13 (추천 시스템 큐잉 + 재시도 메커니즘 + Dead Letter Queue)
 - **Docker** + **Docker Compose**
 - **Prometheus** + **Grafana** (모니터링)
 
