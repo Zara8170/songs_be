@@ -171,6 +171,10 @@ spring:
       platform: mysql # SQL 초기화 플랫폼 (mysql, h2, postgresql, oracle, sqlserver)
       data-locations: classpath:sql/data.sql # ddl-auto가 create, create-drop, update일 경우에만 해당, validate/none일 경우 무시됨
       mode: never # SQL 초기화 모드 (always, never, embedded, embedded-always)
+  data:
+    jdbc:
+      repositories:
+        enabled: false
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
