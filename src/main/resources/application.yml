@@ -17,6 +17,10 @@ server:
 spring:
   profiles:
     active: local
+  data:
+    jdbc:
+      repositories:
+        enabled: false
   config:
     import: optional:file:.env[.properties] # 환경변수 파일 로드
   output:
