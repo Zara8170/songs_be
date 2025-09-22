@@ -17,6 +17,11 @@ import java.util.List;
 public class RecommendationResponseFromPythonDTO {
     
     private String status;
+    private String message;
+    
+    @JsonProperty("generated_date")
+    private String generatedDate;
+    
     private List<RecommendationGroup> groups;
     private List<CandidateSong> candidates;
     
