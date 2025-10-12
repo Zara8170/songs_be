@@ -1,8 +1,10 @@
-package com.example.song_be.domain.song.service;
+package com.example.song_be.domain.song.messaging;
 
 import com.example.song_be.config.LogbackJsonConfig;
 import com.example.song_be.config.RabbitMQConfig;
 import com.example.song_be.domain.song.dto.RecommendationJobMessage;
+import com.example.song_be.domain.song.service.RecommendationJobStore;
+import com.example.song_be.domain.song.service.RecommendationMetrics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;

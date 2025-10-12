@@ -3,7 +3,7 @@ package com.example.song_be.domain.song.controller;
 import com.example.song_be.domain.song.dto.*;
 import com.example.song_be.domain.song.service.JsonUtils;
 import com.example.song_be.domain.song.service.RecommendationJobStore;
-import com.example.song_be.domain.song.service.RecommendationPublisher;
+import com.example.song_be.domain.song.messaging.RecommendationPublisher;
 import com.example.song_be.security.MemberDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

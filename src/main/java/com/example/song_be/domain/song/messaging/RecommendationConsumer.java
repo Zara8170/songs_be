@@ -1,4 +1,4 @@
-package com.example.song_be.domain.song.service;
+package com.example.song_be.domain.song.messaging;
 
 import com.example.song_be.config.RabbitMQConfig;
 import com.example.song_be.domain.like.service.SongLikeService;
@@ -7,6 +7,8 @@ import com.example.song_be.domain.song.dto.RecommendationJobError;
 import com.example.song_be.domain.song.dto.RecommendationJobMessage;
 import com.example.song_be.domain.song.dto.RecommendationRequestDTO;
 import com.example.song_be.domain.song.dto.RecommendationResponseFromPythonDTO;
+import com.example.song_be.domain.song.service.RecommendationJobStore;
+import com.example.song_be.domain.song.service.RecommendationMetrics;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

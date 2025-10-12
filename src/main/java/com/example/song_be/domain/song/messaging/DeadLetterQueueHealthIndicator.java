@@ -1,4 +1,4 @@
-package com.example.song_be.domain.song.service;
+package com.example.song_be.domain.song.messaging;
 
 import com.example.song_be.config.RabbitMQConfig;
 import lombok.RequiredArgsConstructor;

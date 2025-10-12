@@ -1,8 +1,9 @@
-package com.example.song_be.domain.song.service;
+package com.example.song_be.domain.song.messaging;
 
 import com.example.song_be.config.RabbitMQConfig;
 import com.example.song_be.config.LogbackJsonConfig;
 import com.example.song_be.domain.song.dto.RecommendationJobMessage;
+import com.example.song_be.domain.song.service.RecommendationMetrics;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;

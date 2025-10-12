@@ -1,7 +1,7 @@
 package com.example.song_be.domain.song.controller;
 
 import com.example.song_be.config.RabbitMQConfig;
-import com.example.song_be.domain.song.service.DeadLetterQueueHealthIndicator;
+import com.example.song_be.domain.song.messaging.DeadLetterQueueHealthIndicator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
